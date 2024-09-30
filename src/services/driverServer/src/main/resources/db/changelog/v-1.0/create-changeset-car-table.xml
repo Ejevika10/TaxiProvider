@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+    <changeSet id="2" author="ejevika10">
+        <createTable tableName="car">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_car"/>
+            </column>
+            <column name="color" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="model" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="brand" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="driver_id" type="BIGINT"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="3" author="ejevika">
+        <addUniqueConstraint columnNames="number" constraintName="uc_car_number" tableName="car"/>
+    </changeSet>
+    <changeSet id="4" author="ejevika">
+        <addForeignKeyConstraint baseColumnNames="driver_id" baseTableName="car" constraintName="FK_CAR_ON_DRIVER"
+                                 referencedColumnNames="id" referencedTableName="driver"/>
+    </changeSet>
+
+</databaseChangeLog>
+
