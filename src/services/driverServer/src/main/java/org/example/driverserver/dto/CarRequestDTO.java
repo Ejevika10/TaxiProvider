@@ -1,4 +1,4 @@
-package org.example.driverserver.DTO;
+package org.example.driverserver.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

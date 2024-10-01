@@ -1,4 +1,4 @@
-package org.example.driverserver.DTO;
+package org.example.driverserver.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DriverResponseDTO {
+public class DriverRequestDTO {
     private Long id;
 
     @NotBlank(message = "Name is mandatory")
