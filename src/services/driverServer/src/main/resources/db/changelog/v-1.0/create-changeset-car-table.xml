@@ -21,6 +21,9 @@
                 <constraints nullable="false"/>
             </column>
             <column name="driver_id" type="BIGINT"/>
+            <column name="deleted" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
     <changeSet id="3" author="ejevika">

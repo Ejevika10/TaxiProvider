@@ -1,7 +1,9 @@
 package org.example.driverserver.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -9,6 +11,8 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Driver {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +30,6 @@ public class Driver {
     @OneToMany(mappedBy = "driver")
     private List<Car> cars;
 
+    @Column(nullable = false)
+    private boolean deleted = Boolean.FALSE;
 }
