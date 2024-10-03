@@ -8,6 +8,8 @@ import java.util.List;
 public interface CarService {
     List<CarResponseDTO> getAllCars();
 
+    List<CarResponseDTO> getAllCarsByDriverId(Long driverId);
+
     CarResponseDTO getCarById(Long id);
 
     CarResponseDTO addCar(CarRequestDTO carRequestDTO);

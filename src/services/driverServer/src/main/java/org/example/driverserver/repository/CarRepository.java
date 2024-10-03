@@ -13,4 +13,5 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     boolean existsByNumberAndDeletedIsFalse(String number);
     Optional<Car> findByIdAndDeletedIsFalse(Long id);
     List<Car> findAllByDeletedIsFalse();
+    List<Car> findAllByDriverIdAndDeletedIsFalse(Long id);
 }

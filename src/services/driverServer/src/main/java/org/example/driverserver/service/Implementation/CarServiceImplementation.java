@@ -31,6 +31,12 @@ public class CarServiceImplementation implements CarService {
     }
 
     @Override
+    public List<CarResponseDTO> getAllCarsByDriverId(Long driverId) {
+        List<Car> cars = carRepository.findAllByDriverIdAndDeletedIsFalse(driverId);
+        return carListMapper.toCarResponseDTOList(cars);
+    }
+
+    @Override
     public CarResponseDTO getCarById(Long id) {
         Car car = carRepository.findByIdAndDeletedIsFalse(id).orElseThrow(() -> new NotFoundException("Car not found", 404L));
         return carMapper.toCarResponseDTO(car);
@@ -38,7 +44,7 @@ public class CarServiceImplementation implements CarService {
 
     @Override
     public CarResponseDTO addCar(CarRequestDTO carRequestDTO) {
-        if(carRepository.existsByNumberAndDeletedIsFalse(carRequestDTO.getNumber())) {
+        if (carRepository.existsByNumberAndDeletedIsFalse(carRequestDTO.getNumber())) {
             throw new DuplicateFieldException("Car with this number already exist", 400L);
         }
         Car car = carRepository.save(carMapper.toCar(carRequestDTO));
@@ -47,7 +53,7 @@ public class CarServiceImplementation implements CarService {
 
     @Override
     public CarResponseDTO updateCar(CarRequestDTO carRequestDTO) {
-        if(carRepository.existsByIdAndDeletedIsFalse(carRequestDTO.getId())) {
+        if (carRepository.existsByIdAndDeletedIsFalse(carRequestDTO.getId())) {
             Car car = carRepository.save(carMapper.toCar(carRequestDTO));
             return carMapper.toCarResponseDTO(car);
         }
