@@ -31,5 +31,5 @@ public class Driver {
     private List<Car> cars;
 
     @Column(nullable = false)
-    private boolean deleted = Boolean.FALSE;
+    private boolean deleted;
 }

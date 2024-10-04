@@ -2,8 +2,9 @@ package com.modsen.driverservice.controller;
 
 import com.modsen.driverservice.dto.CarRequestDTO;
 import com.modsen.driverservice.dto.CarResponseDTO;
+import com.modsen.driverservice.dto.PageDTO;
 import com.modsen.driverservice.service.CarService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,13 +13,19 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cars")
+@RequiredArgsConstructor
 public class CarController {
-    @Autowired
-    CarService carService;
+    private final CarService carService;
 
     @GetMapping
     public ResponseEntity<List<CarResponseDTO>> getCars() {
         List<CarResponseDTO> cars = carService.getAllCars();
+        return new ResponseEntity<>(cars, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<PageDTO<CarResponseDTO>> getCars(@RequestParam Integer limit, @RequestParam Integer offset) {
+        PageDTO<CarResponseDTO> cars = carService.getPageCars(limit, offset);
         return new ResponseEntity<>(cars, HttpStatus.OK);
     }
 

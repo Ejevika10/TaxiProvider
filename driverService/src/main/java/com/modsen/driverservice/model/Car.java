@@ -12,10 +12,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Car {
-    @ManyToOne
-    @JoinColumn(name = "driver_id")
-    Driver driver;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
@@ -34,5 +30,9 @@ public class Car {
     private String number;
 
     @Column(nullable = false)
-    private boolean deleted = Boolean.FALSE;
+    private boolean deleted;
+
+    @ManyToOne
+    @JoinColumn(name = "driver_id")
+    private Driver driver;
 }
