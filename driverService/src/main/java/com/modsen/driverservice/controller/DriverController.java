@@ -1,12 +1,10 @@
 package com.modsen.driverservice.controller;
 
-import com.modsen.driverservice.dto.CarResponseDTO;
 import com.modsen.driverservice.dto.DriverRequestDTO;
 import com.modsen.driverservice.dto.DriverResponseDTO;
 import com.modsen.driverservice.dto.PageDTO;
 import com.modsen.driverservice.service.DriverService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,15 +17,15 @@ import java.util.List;
 public class DriverController {
     private final DriverService driverService;
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<DriverResponseDTO>> getDrivers() {
         List<DriverResponseDTO> drivers = driverService.getAllDrivers();
         return new ResponseEntity<>(drivers, HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<PageDTO<DriverResponseDTO>> getCars(@RequestParam Integer limit, @RequestParam Integer offset) {
-        PageDTO<DriverResponseDTO> drivers = driverService.getPageDrivers(limit, offset);
+    public ResponseEntity<?> getPageDrivers(@RequestParam Integer offset, @RequestParam Integer limit) {
+        PageDTO<DriverResponseDTO> drivers = driverService.getPageDrivers(offset, limit);
         return new ResponseEntity<>(drivers, HttpStatus.OK);
     }
 

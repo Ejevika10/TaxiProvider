@@ -17,15 +17,15 @@ import java.util.List;
 public class CarController {
     private final CarService carService;
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<CarResponseDTO>> getCars() {
         List<CarResponseDTO> cars = carService.getAllCars();
         return new ResponseEntity<>(cars, HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<PageDTO<CarResponseDTO>> getCars(@RequestParam Integer limit, @RequestParam Integer offset) {
-        PageDTO<CarResponseDTO> cars = carService.getPageCars(limit, offset);
+    public ResponseEntity<PageDTO<CarResponseDTO>> getPageCars(@RequestParam Integer offset, @RequestParam Integer limit) {
+        PageDTO<CarResponseDTO> cars = carService.getPageCars(offset, limit);
         return new ResponseEntity<>(cars, HttpStatus.OK);
     }
 

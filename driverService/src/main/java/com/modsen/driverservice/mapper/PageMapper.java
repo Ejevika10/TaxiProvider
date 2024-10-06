@@ -2,15 +2,17 @@ package com.modsen.driverservice.mapper;
 
 import com.modsen.driverservice.dto.PageDTO;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.springframework.data.domain.Page;
 
-@Mapper
+@Mapper(componentModel = "spring", uses = {CarMapper.class, DriverMapper.class})
 public interface PageMapper {
-    @Mapping(target = "content", expression = "java(page.getContent())")
-    @Mapping(target = "pageNumber", expression = "java(page.getPageable().getPageNumber())")
-    @Mapping(target = "pageSize", expression = "java(page.getPageable().getPageSize())")
-    @Mapping(target = "totalPages", expression = "java(page.getPageable().getTotalPages())")
-    @Mapping(target = "totalElements", expression = "java(page.getTotalElements())")
-    <T> PageDTO<T> pageToDto (Page<T> page);
+    default <T> PageDTO<T> pageToDto(Page<T> page) {
+        PageDTO<T> dto = new PageDTO<T>();
+        dto.setContent(page.getContent());
+        dto.setPageNumber(page.getPageable().getPageNumber());
+        dto.setPageSize(page.getPageable().getPageSize());
+        dto.setTotalPages(page.getTotalPages());
+        dto.setTotalElements(page.getTotalElements());
+        return dto;
+    }
 }

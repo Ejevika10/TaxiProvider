@@ -12,10 +12,10 @@ import com.modsen.driverservice.model.Car;
 import com.modsen.driverservice.repository.CarRepository;
 import com.modsen.driverservice.service.CarService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,7 +37,7 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public PageDTO<CarResponseDTO> getPageCars(Integer limit, Integer offset) {
+    public PageDTO<CarResponseDTO> getPageCars(Integer offset, Integer limit) {
         Page<CarResponseDTO> pageCars = carRepository.findAllByDeletedIsFalse(PageRequest.of(offset, limit)).map(carMapper::toCarResponseDTO);
         return pageMapper.pageToDto(pageCars);
     }
@@ -55,6 +55,7 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
+    @Transactional
     public CarResponseDTO addCar(CarRequestDTO carRequestDTO) {
         if (carRepository.existsByNumberAndDeletedIsFalse(carRequestDTO.getNumber())) {
             throw new DuplicateFieldException("Car with this number already exist", 400L);
@@ -64,6 +65,7 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
+    @Transactional
     public CarResponseDTO updateCar(CarRequestDTO carRequestDTO) {
         if (carRepository.existsByIdAndDeletedIsFalse(carRequestDTO.getId())) {
             Car car = carRepository.save(carMapper.toCar(carRequestDTO));
@@ -73,6 +75,7 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
+    @Transactional
     public void deleteCar(Long id) {
         Car car = carRepository.findByIdAndDeletedIsFalse(id).orElseThrow(() -> new NotFoundException("Car not found", 404L));
         car.setDeleted(true);
