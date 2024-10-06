@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +51,12 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    public DriverResponseDTO getDriverByEmail(String email) {
+        Driver driver = driverRepository.findByEmailAndDeletedIsFalse(email).orElseThrow(() -> new NotFoundException("Driver not found", 404L));
+        return driverMapper.toDriverResponseDTO(driver);
+    }
+
+    @Override
     @Transactional
     public DriverResponseDTO createDriver(DriverRequestDTO driverRequestDTO) {
         if (driverRepository.existsByEmailAndDeletedIsFalse(driverRequestDTO.getEmail())) {
@@ -63,6 +70,10 @@ public class DriverServiceImpl implements DriverService {
     @Transactional
     public DriverResponseDTO updateDriver(DriverRequestDTO driverRequestDTO) {
         if (driverRepository.existsByIdAndDeletedIsFalse(driverRequestDTO.getId())) {
+            Optional<Driver> existingDriver = driverRepository.findByEmailAndDeletedIsFalse(driverRequestDTO.getEmail());
+            if(existingDriver.isPresent() && !existingDriver.get().getId().equals(driverRequestDTO.getId())) {
+                throw new DuplicateFieldException("Driver with this email already exists", 400L);
+            }
             Driver driver = driverRepository.save(driverMapper.toDriver(driverRequestDTO));
             return driverMapper.toDriverResponseDTO(driver);
         }

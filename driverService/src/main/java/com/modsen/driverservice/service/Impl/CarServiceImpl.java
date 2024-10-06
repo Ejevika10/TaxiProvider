@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +56,12 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
+    public CarResponseDTO getCarByNumber(String number) {
+        Car car = carRepository.findByNumberAndDeletedIsFalse(number).orElseThrow(() -> new NotFoundException("Car not found", 404L));
+        return carMapper.toCarResponseDTO(car);
+    }
+
+    @Override
     @Transactional
     public CarResponseDTO addCar(CarRequestDTO carRequestDTO) {
         if (carRepository.existsByNumberAndDeletedIsFalse(carRequestDTO.getNumber())) {
@@ -68,6 +75,10 @@ public class CarServiceImpl implements CarService {
     @Transactional
     public CarResponseDTO updateCar(CarRequestDTO carRequestDTO) {
         if (carRepository.existsByIdAndDeletedIsFalse(carRequestDTO.getId())) {
+            Optional<Car> existingCar = carRepository.findByNumberAndDeletedIsFalse(carRequestDTO.getNumber());
+            if(existingCar.isPresent() && !existingCar.get().getId().equals(carRequestDTO.getId())) {
+                throw new DuplicateFieldException("Car with this number already exist", 400L);
+            }
             Car car = carRepository.save(carMapper.toCar(carRequestDTO));
             return carMapper.toCarResponseDTO(car);
         }

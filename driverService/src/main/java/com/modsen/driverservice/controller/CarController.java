@@ -24,7 +24,7 @@ public class CarController {
     }
 
     @GetMapping
-    public ResponseEntity<PageDTO<CarResponseDTO>> getPageCars(@RequestParam Integer offset, @RequestParam Integer limit) {
+    public ResponseEntity<PageDTO<CarResponseDTO>> getPageCars(@RequestParam (defaultValue = "0") Integer offset, @RequestParam (defaultValue = "5") Integer limit) {
         PageDTO<CarResponseDTO> cars = carService.getPageCars(offset, limit);
         return new ResponseEntity<>(cars, HttpStatus.OK);
     }

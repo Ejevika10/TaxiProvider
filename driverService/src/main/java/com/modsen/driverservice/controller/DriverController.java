@@ -24,7 +24,7 @@ public class DriverController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getPageDrivers(@RequestParam Integer offset, @RequestParam Integer limit) {
+    public ResponseEntity<?> getPageDrivers(@RequestParam (defaultValue = "0") Integer offset, @RequestParam (defaultValue = "5") Integer limit) {
         PageDTO<DriverResponseDTO> drivers = driverService.getPageDrivers(offset, limit);
         return new ResponseEntity<>(drivers, HttpStatus.OK);
     }
