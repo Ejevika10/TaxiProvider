@@ -1,17 +1,18 @@
 package com.modsen.driverservice.mapper;
 
-import com.modsen.driverservice.dto.CarRequestDTO;
-import com.modsen.driverservice.dto.CarResponseDTO;
+import com.modsen.driverservice.dto.CarRequestDto;
+import com.modsen.driverservice.dto.CarResponseDto;
 import com.modsen.driverservice.model.Car;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = "spring", uses = DriverMapper.class)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = DriverMapper.class)
 public interface CarMapper {
-    Car toCar(CarRequestDTO carRequestDTO);
+    Car toCar(CarRequestDto carRequestDTO);
 
-    Car toCar(CarResponseDTO carResponseDTO);
+    Car toCar(CarResponseDto carResponseDTO);
 
-    CarRequestDTO toCarRequestDTO(Car car);
+    CarRequestDto toCarRequestDTO(Car car);
 
-    CarResponseDTO toCarResponseDTO(Car car);
+    CarResponseDto toCarResponseDTO(Car car);
 }

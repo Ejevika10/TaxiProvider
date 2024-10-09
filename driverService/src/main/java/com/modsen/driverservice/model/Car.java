@@ -1,6 +1,12 @@
 package com.modsen.driverservice.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Column;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,7 +36,7 @@ public class Car {
     private String number;
 
     @Column(nullable = false)
-    private boolean deleted;
+    private Boolean deleted;
 
     @ManyToOne
     @JoinColumn(name = "driver_id")

@@ -15,6 +15,5 @@ public record PageDto<T> (
         this.totalPages = totalPages;
         this.totalElements = totalElements;
         this.content = content;
-
     }
 }

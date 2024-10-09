@@ -1,6 +1,11 @@
 package com.modsen.driverservice.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,5 +36,5 @@ public class Driver {
     private List<Car> cars;
 
     @Column(nullable = false)
-    private boolean deleted;
+    private Boolean deleted;
 }

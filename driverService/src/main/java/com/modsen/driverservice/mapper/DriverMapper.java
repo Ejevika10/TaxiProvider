@@ -1,17 +1,18 @@
 package com.modsen.driverservice.mapper;
 
-import com.modsen.driverservice.dto.DriverRequestDTO;
-import com.modsen.driverservice.dto.DriverResponseDTO;
+import com.modsen.driverservice.dto.DriverRequestDto;
+import com.modsen.driverservice.dto.DriverResponseDto;
 import com.modsen.driverservice.model.Driver;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface DriverMapper {
-    Driver toDriver(DriverRequestDTO driverRequestDTO);
+    Driver toDriver(DriverRequestDto driverRequestDTO);
 
-    Driver toDriver(DriverResponseDTO driverResponseDTO);
+    Driver toDriver(DriverResponseDto driverResponseDTO);
 
-    DriverRequestDTO toDriverRequestDTO(Driver driver);
+    DriverRequestDto toDriverRequestDTO(Driver driver);
 
-    DriverResponseDTO toDriverResponseDTO(Driver driver);
+    DriverResponseDto toDriverResponseDTO(Driver driver);
 }
