@@ -9,7 +9,9 @@ import com.modsen.driverservice.mapper.CarListMapper;
 import com.modsen.driverservice.mapper.CarMapper;
 import com.modsen.driverservice.mapper.PageMapper;
 import com.modsen.driverservice.model.Car;
+import com.modsen.driverservice.model.Driver;
 import com.modsen.driverservice.repository.CarRepository;
+import com.modsen.driverservice.repository.DriverRepository;
 import com.modsen.driverservice.service.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -26,6 +28,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CarServiceImpl implements CarService {
     private final CarRepository carRepository;
+
+    private final DriverRepository driverRepository;
 
     private final CarMapper carMapper;
 
@@ -73,17 +77,26 @@ public class CarServiceImpl implements CarService {
     @Override
     @Transactional
     public CarResponseDto addCar(CarRequestDto carRequestDTO) {
+        Driver driver = driverRepository.findByIdAndDeletedIsFalse(carRequestDTO.driverId())
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage("driver.notfound", new Object[]{}, Locale.US)));
         if (carRepository.existsByNumberAndDeletedIsFalse(carRequestDTO.number())) {
             throw new DuplicateFieldException(
                     messageSource.getMessage("car.number.exist", new Object[]{}, Locale.US));
         }
-        Car car = carRepository.save(carMapper.toCar(carRequestDTO));
+        Car carToSave = carMapper.toCar(carRequestDTO);
+        carToSave.setDeleted(false);
+        carToSave.setDriver(driver);
+        Car car = carRepository.save(carToSave);
         return carMapper.toCarResponseDTO(car);
     }
 
     @Override
     @Transactional
     public CarResponseDto updateCar(Long id, CarRequestDto carRequestDTO) {
+        Driver driver = driverRepository.findByIdAndDeletedIsFalse(carRequestDTO.driverId())
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage("driver.notfound", new Object[]{}, Locale.US)));
         if (carRepository.existsByIdAndDeletedIsFalse(id)) {
             Optional<Car> existingCar = carRepository.findByNumberAndDeletedIsFalse(carRequestDTO.number());
             if(existingCar.isPresent() && !existingCar.get().getId().equals(id)) {
@@ -92,6 +105,8 @@ public class CarServiceImpl implements CarService {
             }
             Car carToSave = carMapper.toCar(carRequestDTO);
             carToSave.setId(id);
+            carToSave.setDeleted(false);
+            carToSave.setDriver(driver);
             Car car = carRepository.save(carToSave);
             return carMapper.toCarResponseDTO(car);
         }

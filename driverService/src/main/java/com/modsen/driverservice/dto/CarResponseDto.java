@@ -8,19 +8,19 @@ public record CarResponseDto (
     @NotNull
     Long id,
 
-    @NotBlank(message = "car.color.mandatory")
+    @NotBlank(message = "{car.color.mandatory}")
     @Size(min = 2, max = 50)
     String color,
 
-    @NotBlank(message = "car.model.mandatory")
+    @NotBlank(message = "{car.model.mandatory}")
     @Size(min = 2, max = 50)
     String model,
 
-    @NotBlank(message = "car.brand.mandatory")
+    @NotBlank(message = "{car.brand.mandatory}")
     @Size(min = 2, max = 50)
     String brand,
 
-    @NotBlank(message = "car.number.mandatory")
+    @NotBlank(message = "{car.number.mandatory}")
     @Size(min = 2, max = 20)
     String number,
 

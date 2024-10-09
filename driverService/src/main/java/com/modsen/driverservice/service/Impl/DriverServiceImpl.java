@@ -72,7 +72,10 @@ public class DriverServiceImpl implements DriverService {
             throw new DuplicateFieldException(
                     messageSource.getMessage("driver.email.exist", new Object[]{}, Locale.US));
         }
-        Driver driver = driverRepository.save(driverMapper.toDriver(driverRequestDTO));
+        Driver driverToSave = driverMapper.toDriver(driverRequestDTO);
+        driverToSave.setDeleted(false);
+        Driver driver = driverRepository.save(driverToSave);
+        driver.setDeleted(false);
         return driverMapper.toDriverResponseDTO(driver);
     }
 
@@ -87,6 +90,7 @@ public class DriverServiceImpl implements DriverService {
             }
             Driver driverToSave = driverMapper.toDriver(driverRequestDTO);
             driverToSave.setId(id);
+            driverToSave.setDeleted(false);
             Driver driver = driverRepository.save(driverToSave);
             return driverMapper.toDriverResponseDTO(driver);
         }

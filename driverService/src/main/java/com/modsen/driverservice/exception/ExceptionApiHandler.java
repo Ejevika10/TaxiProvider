@@ -1,5 +1,6 @@
 package com.modsen.driverservice.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -26,9 +27,16 @@ public class ExceptionApiHandler {
         return new ErrorMessage(400, exception.getMessage());
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage constraintViolationException(ConstraintViolationException exception) {
+        return new ErrorMessage(400, exception.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage defException(Exception exception) {
         return new ErrorMessage(500, messageSource.getMessage("internal.server.error", new Object[]{}, Locale.getDefault()));
+        //return new ErrorMessage(500, exception.getMessage());
     }
 }
