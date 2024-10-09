@@ -71,7 +71,9 @@ public class PassengerServiceImpl implements PassengerService {
             throw new DuplicateFieldException(
                     messageSource.getMessage("passenger.email.exist", new Object[]{}, Locale.US));
         }
-        Passenger passenger = passengerRepository.save(passengerMapper.toPassenger(requestDTO));
+        Passenger passengerToSave = passengerMapper.toPassenger(requestDTO);
+        passengerToSave.setDeleted(false);
+        Passenger passenger = passengerRepository.save(passengerToSave);
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
@@ -84,8 +86,9 @@ public class PassengerServiceImpl implements PassengerService {
                 throw new DuplicateFieldException(
                         messageSource.getMessage("passenger.email.exist", new Object[]{}, Locale.US));
             }
-            Passenger passengerToSave = passengerRepository.save(passengerMapper.toPassenger(requestDTO));
+            Passenger passengerToSave = passengerMapper.toPassenger(requestDTO);
             passengerToSave.setId(id);
+            passengerToSave.setDeleted(false);
             Passenger passenger = passengerRepository.save(passengerToSave);
             return passengerMapper.toPassengerResponseDTO(passenger);
         }

@@ -27,5 +27,5 @@ public class Passenger {
     private String phone;
 
     @Column(nullable = false)
-    private boolean deleted;
+    private Boolean deleted;
 }
