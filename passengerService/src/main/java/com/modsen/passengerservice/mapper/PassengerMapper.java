@@ -1,17 +1,18 @@
 package com.modsen.passengerservice.mapper;
 
-import com.modsen.passengerservice.dto.PassengerRequestDTO;
-import com.modsen.passengerservice.dto.PassengerResponseDTO;
+import com.modsen.passengerservice.dto.PassengerRequestDto;
+import com.modsen.passengerservice.dto.PassengerResponseDto;
 import com.modsen.passengerservice.model.Passenger;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface PassengerMapper {
-    PassengerRequestDTO toPassengerRequestDTO(Passenger passenger);
+    PassengerRequestDto toPassengerRequestDTO(Passenger passenger);
 
-    Passenger toPassenger(PassengerRequestDTO requestDTO);
+    Passenger toPassenger(PassengerRequestDto requestDTO);
 
-    PassengerResponseDTO toPassengerResponseDTO(Passenger passenger);
+    PassengerResponseDto toPassengerResponseDTO(Passenger passenger);
 
-    Passenger toPassenger(PassengerResponseDTO responseDTO);
+    Passenger toPassenger(PassengerResponseDto responseDTO);
 }

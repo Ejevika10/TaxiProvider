@@ -1,8 +1,8 @@
 package com.modsen.passengerservice.service.impl;
 
-import com.modsen.passengerservice.dto.PageDTO;
-import com.modsen.passengerservice.dto.PassengerRequestDTO;
-import com.modsen.passengerservice.dto.PassengerResponseDTO;
+import com.modsen.passengerservice.dto.PageDto;
+import com.modsen.passengerservice.dto.PassengerRequestDto;
+import com.modsen.passengerservice.dto.PassengerResponseDto;
 import com.modsen.passengerservice.exception.DuplicateFieldException;
 import com.modsen.passengerservice.exception.NotFoundException;
 import com.modsen.passengerservice.mapper.PageMapper;
@@ -12,12 +12,14 @@ import com.modsen.passengerservice.model.Passenger;
 import com.modsen.passengerservice.repository.PassengerRepository;
 import com.modsen.passengerservice.service.PassengerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -29,37 +31,45 @@ public class PassengerServiceImpl implements PassengerService {
     private final PassengerMapper passengerMapper;
 
     private final PassengerListMapper passengerListMapper;
+
     private final PageMapper pageMapper;
 
+    private final MessageSource messageSource;
+
     @Override
-    public List<PassengerResponseDTO> getAllPassengers() {
-        List<Passenger> passengers = passengerRepository.findAll();
+    public List<PassengerResponseDto> getAllPassengers() {
+        List<Passenger> passengers = passengerRepository.findAllByDeletedIsFalse();
         return passengerListMapper.toPassengerResponseDTOList(passengers);
     }
 
     @Override
-    public PageDTO<PassengerResponseDTO> getPagePassengers(Integer offset, Integer limit) {
-        Page<PassengerResponseDTO> passengers = passengerRepository.findAll(PageRequest.of(offset, limit)).map(passengerMapper::toPassengerResponseDTO);
+    public PageDto<PassengerResponseDto> getPagePassengers(Integer offset, Integer limit) {
+        Page<PassengerResponseDto> passengers = passengerRepository.findAllByDeletedIsFalse(PageRequest.of(offset, limit)).map(passengerMapper::toPassengerResponseDTO);
         return pageMapper.pageToDto(passengers);
     }
 
     @Override
-    public PassengerResponseDTO getPassengerById(Long id) {
-        Passenger passenger = passengerRepository.findByIdAndDeletedIsFalse(id).orElseThrow(() -> new NotFoundException("Passenger not found", 404L));
+    public PassengerResponseDto getPassengerById(Long id) {
+        Passenger passenger = passengerRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage("passenger.notfound", new Object[]{}, Locale.US)));
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
     @Override
-    public PassengerResponseDTO getPassengerByEmail(String email) {
-        Passenger passenger = passengerRepository.findByEmailAndDeletedIsFalse(email).orElseThrow(() -> new NotFoundException("Passenger not found", 404L));
+    public PassengerResponseDto getPassengerByEmail(String email) {
+        Passenger passenger = passengerRepository.findByEmailAndDeletedIsFalse(email)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage("passenger.notfound", new Object[]{}, Locale.US)));
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
     @Override
     @Transactional
-    public PassengerResponseDTO addPassenger(PassengerRequestDTO requestDTO) {
-        if(passengerRepository.existsByEmailAndDeletedIsFalse(requestDTO.getEmail())) {
-            throw new DuplicateFieldException("Passenger with this email already exist", 400L);
+    public PassengerResponseDto addPassenger(PassengerRequestDto requestDTO) {
+        if(passengerRepository.existsByEmailAndDeletedIsFalse(requestDTO.email())) {
+            throw new DuplicateFieldException(
+                    messageSource.getMessage("passenger.email.exist", new Object[]{}, Locale.US));
         }
         Passenger passenger = passengerRepository.save(passengerMapper.toPassenger(requestDTO));
         return passengerMapper.toPassengerResponseDTO(passenger);
@@ -67,22 +77,27 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     @Transactional
-    public PassengerResponseDTO updatePassenger(PassengerRequestDTO requestDTO) {
-        if(passengerRepository.existsByIdAndDeletedIsFalse(requestDTO.getId())) {
-            Optional<Passenger> existingPassenger = passengerRepository.findByEmailAndDeletedIsFalse(requestDTO.getEmail());
-            if(existingPassenger.isPresent() && !existingPassenger.get().getId().equals(requestDTO.getId())) {
-                throw new DuplicateFieldException("Passenger with this email already exist", 400L);
+    public PassengerResponseDto updatePassenger(Long id, PassengerRequestDto requestDTO) {
+        if(passengerRepository.existsByIdAndDeletedIsFalse(id)) {
+            Optional<Passenger> existingPassenger = passengerRepository.findByEmailAndDeletedIsFalse(requestDTO.email());
+            if(existingPassenger.isPresent() && !existingPassenger.get().getId().equals(id)) {
+                throw new DuplicateFieldException(
+                        messageSource.getMessage("passenger.email.exist", new Object[]{}, Locale.US));
             }
-            Passenger passenger = passengerRepository.save(passengerMapper.toPassenger(requestDTO));
+            Passenger passengerToSave = passengerRepository.save(passengerMapper.toPassenger(requestDTO));
+            passengerToSave.setId(id);
+            Passenger passenger = passengerRepository.save(passengerToSave);
             return passengerMapper.toPassengerResponseDTO(passenger);
         }
-        throw new NotFoundException("Passenger not found", 404L);
+        throw new NotFoundException(messageSource.getMessage("passenger.notfound", new Object[]{}, Locale.US));
     }
 
     @Override
     @Transactional
     public void deletePassenger(Long id) {
-        Passenger passenger = passengerRepository.findById(id).orElseThrow(() -> new NotFoundException("Passenger not found", 404L));
+        Passenger passenger = passengerRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage("passenger.notfound", new Object[]{}, Locale.US)));
         passenger.setDeleted(true);
         passengerRepository.save(passenger);
     }

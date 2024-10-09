@@ -7,5 +7,4 @@ import lombok.Getter;
 @Getter
 public class DuplicateFieldException extends RuntimeException {
     private String message;
-    private Long errorCode;
 }

@@ -1,8 +1,8 @@
 package com.modsen.passengerservice.service;
 
-import com.modsen.passengerservice.dto.PageDTO;
-import com.modsen.passengerservice.dto.PassengerRequestDTO;
-import com.modsen.passengerservice.dto.PassengerResponseDTO;
+import com.modsen.passengerservice.dto.PageDto;
+import com.modsen.passengerservice.dto.PassengerRequestDto;
+import com.modsen.passengerservice.dto.PassengerResponseDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -12,17 +12,17 @@ import java.util.List;
 
 @Validated
 public interface PassengerService{
-    List<PassengerResponseDTO> getAllPassengers();
+    List<PassengerResponseDto> getAllPassengers();
 
-    PageDTO<PassengerResponseDTO> getPagePassengers(@Min(0) Integer offset, @Min(1) @Max(20) Integer limit);
+    PageDto<PassengerResponseDto> getPagePassengers(@Min(0) Integer offset, @Min(1) @Max(20) Integer limit);
 
-    PassengerResponseDTO getPassengerById(@Min(0) Long id);
+    PassengerResponseDto getPassengerById(@Min(0) Long id);
 
-    PassengerResponseDTO getPassengerByEmail(String email);
+    PassengerResponseDto getPassengerByEmail(String email);
 
-    PassengerResponseDTO addPassenger(@Valid PassengerRequestDTO requestDTO);
+    PassengerResponseDto addPassenger(@Valid PassengerRequestDto requestDTO);
 
-    PassengerResponseDTO updatePassenger(@Valid PassengerRequestDTO requestDTO);
+    PassengerResponseDto updatePassenger(@Min(0) Long id, @Valid PassengerRequestDto requestDTO);
 
     void deletePassenger(@Min(0) Long id);
 }

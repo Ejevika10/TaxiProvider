@@ -1,19 +1,14 @@
 package com.modsen.passengerservice.mapper;
 
-import com.modsen.passengerservice.dto.PageDTO;
+import com.modsen.passengerservice.dto.PageDto;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 import org.springframework.data.domain.Page;
 
-@Mapper(componentModel = "spring", uses = PassengerMapper.class)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = PassengerMapper.class)
 public interface PageMapper {
-    default <T> PageDTO<T> pageToDto(Page<T> page) {
-        PageDTO<T> dto = new PageDTO<T>();
-        dto.setContent(page.getContent());
-        dto.setPageNumber(page.getPageable().getPageNumber());
-        dto.setPageSize(page.getPageable().getPageSize());
-        dto.setTotalPages(page.getTotalPages());
-        dto.setTotalElements(page.getTotalElements());
-        return dto;
+    default <T> PageDto<T> pageToDto(Page<T> page) {
+        return new PageDto<T>(page.getPageable().getPageNumber(), page.getPageable().getPageSize(), page.getTotalPages(), page.getTotalElements(), page.getContent());
     }
 }
 
