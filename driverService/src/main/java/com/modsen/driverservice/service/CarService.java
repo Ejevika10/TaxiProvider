@@ -1,8 +1,8 @@
 package com.modsen.driverservice.service;
 
-import com.modsen.driverservice.dto.CarRequestDTO;
-import com.modsen.driverservice.dto.CarResponseDTO;
-import com.modsen.driverservice.dto.PageDTO;
+import com.modsen.driverservice.dto.CarRequestDto;
+import com.modsen.driverservice.dto.CarResponseDto;
+import com.modsen.driverservice.dto.PageDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -12,19 +12,19 @@ import java.util.List;
 
 @Validated
 public interface CarService {
-    List<CarResponseDTO> getAllCars();
+    List<CarResponseDto> getAllCars();
 
-    PageDTO<CarResponseDTO> getPageCars(@Min(0) Integer offset, @Min(1) @Max(20) Integer limit);
+    PageDto<CarResponseDto> getPageCars(@Min(0) Integer offset, @Min(1) @Max(20) Integer limit);
 
-    List<CarResponseDTO> getAllCarsByDriverId(@Min(0) Long driverId);
+    List<CarResponseDto> getAllCarsByDriverId(@Min(0) Long driverId);
 
-    CarResponseDTO getCarById(@Min(0) Long id);
+    CarResponseDto getCarById(@Min(0) Long id);
 
-    CarResponseDTO getCarByNumber(String number);
+    CarResponseDto getCarByNumber(String number);
 
-    CarResponseDTO addCar(@Valid CarRequestDTO carRequestDTO);
+    CarResponseDto addCar(@Valid CarRequestDto carRequestDTO);
 
-    CarResponseDTO updateCar(@Valid CarRequestDTO carRequestDTO);
+    CarResponseDto updateCar(@Min(0) Long id, @Valid CarRequestDto carRequestDTO);
 
     void deleteCar(@Min(0) Long id);
 }

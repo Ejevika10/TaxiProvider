@@ -1,8 +1,8 @@
 package com.modsen.driverservice.service.Impl;
 
-import com.modsen.driverservice.dto.DriverRequestDTO;
-import com.modsen.driverservice.dto.DriverResponseDTO;
-import com.modsen.driverservice.dto.PageDTO;
+import com.modsen.driverservice.dto.DriverRequestDto;
+import com.modsen.driverservice.dto.DriverResponseDto;
+import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.exception.DuplicateFieldException;
 import com.modsen.driverservice.exception.NotFoundException;
 import com.modsen.driverservice.mapper.DriverListMapper;
@@ -12,12 +12,14 @@ import com.modsen.driverservice.model.Driver;
 import com.modsen.driverservice.repository.DriverRepository;
 import com.modsen.driverservice.service.DriverService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -32,35 +34,43 @@ public class DriverServiceImpl implements DriverService {
 
     private final PageMapper pageMapper;
 
+    private final MessageSource messageSource;
+
     @Override
-    public List<DriverResponseDTO> getAllDrivers() {
+    public List<DriverResponseDto> getAllDrivers() {
         List<Driver> drivers = driverRepository.findAllByDeletedIsFalse();
         return driverListMapper.toDriverResponseDTOList(drivers);
     }
 
     @Override
-    public PageDTO<DriverResponseDTO> getPageDrivers(Integer offset, Integer limit) {
-        Page<DriverResponseDTO> pageDrivers = driverRepository.findAllByDeletedIsFalse(PageRequest.of(offset, limit)).map(driverMapper::toDriverResponseDTO);
+    public PageDto<DriverResponseDto> getPageDrivers(Integer offset, Integer limit) {
+        Page<DriverResponseDto> pageDrivers = driverRepository.findAllByDeletedIsFalse(PageRequest.of(offset, limit))
+                .map(driverMapper::toDriverResponseDTO);
         return pageMapper.pageToDto(pageDrivers);
     }
 
     @Override
-    public DriverResponseDTO getDriverById(Long id) {
-        Driver driver = driverRepository.findByIdAndDeletedIsFalse(id).orElseThrow(() -> new NotFoundException("Driver not found", 404L));
+    public DriverResponseDto getDriverById(Long id) {
+        Driver driver = driverRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage("driver.notfound", new Object[]{}, Locale.US)));
         return driverMapper.toDriverResponseDTO(driver);
     }
 
     @Override
-    public DriverResponseDTO getDriverByEmail(String email) {
-        Driver driver = driverRepository.findByEmailAndDeletedIsFalse(email).orElseThrow(() -> new NotFoundException("Driver not found", 404L));
+    public DriverResponseDto getDriverByEmail(String email) {
+        Driver driver = driverRepository.findByEmailAndDeletedIsFalse(email)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage("driver.notfound", new Object[]{}, Locale.US)));
         return driverMapper.toDriverResponseDTO(driver);
     }
 
     @Override
     @Transactional
-    public DriverResponseDTO createDriver(DriverRequestDTO driverRequestDTO) {
-        if (driverRepository.existsByEmailAndDeletedIsFalse(driverRequestDTO.getEmail())) {
-            throw new DuplicateFieldException("Driver with this email already exists", 400L);
+    public DriverResponseDto createDriver(DriverRequestDto driverRequestDTO) {
+        if (driverRepository.existsByEmailAndDeletedIsFalse(driverRequestDTO.email())) {
+            throw new DuplicateFieldException(
+                    messageSource.getMessage("driver.email.exist", new Object[]{}, Locale.US));
         }
         Driver driver = driverRepository.save(driverMapper.toDriver(driverRequestDTO));
         return driverMapper.toDriverResponseDTO(driver);
@@ -68,22 +78,28 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
-    public DriverResponseDTO updateDriver(DriverRequestDTO driverRequestDTO) {
-        if (driverRepository.existsByIdAndDeletedIsFalse(driverRequestDTO.getId())) {
-            Optional<Driver> existingDriver = driverRepository.findByEmailAndDeletedIsFalse(driverRequestDTO.getEmail());
-            if(existingDriver.isPresent() && !existingDriver.get().getId().equals(driverRequestDTO.getId())) {
-                throw new DuplicateFieldException("Driver with this email already exists", 400L);
+    public DriverResponseDto updateDriver(Long id, DriverRequestDto driverRequestDTO) {
+        if (driverRepository.existsByIdAndDeletedIsFalse(id)) {
+            Optional<Driver> existingDriver = driverRepository.findByEmailAndDeletedIsFalse(driverRequestDTO.email());
+            if(existingDriver.isPresent() && !existingDriver.get().getId().equals(id)) {
+                throw new DuplicateFieldException(
+                        messageSource.getMessage("driver.email.exist", new Object[]{}, Locale.US));
             }
-            Driver driver = driverRepository.save(driverMapper.toDriver(driverRequestDTO));
+            Driver driverToSave = driverMapper.toDriver(driverRequestDTO);
+            driverToSave.setId(id);
+            Driver driver = driverRepository.save(driverToSave);
             return driverMapper.toDriverResponseDTO(driver);
         }
-        return null;
+        throw new NotFoundException(
+                messageSource.getMessage("driver.notfound", new Object[]{}, Locale.US));
     }
 
     @Override
     @Transactional
     public void deleteDriver(Long id) {
-        Driver driver = driverRepository.findByIdAndDeletedIsFalse(id).orElseThrow(() -> new NotFoundException("Driver not found", 404L));
+        Driver driver = driverRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage("driver.notfound", new Object[]{}, Locale.US)));
         driver.setDeleted(true);
         driverRepository.save(driver);
     }
