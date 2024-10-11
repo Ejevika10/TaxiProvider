@@ -1,5 +1,6 @@
 package com.modsen.driverservice.service.Impl;
 
+import com.modsen.driverservice.configuration.MessageConstants;
 import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.dto.CarResponseDto;
 import com.modsen.driverservice.dto.PageDto;
@@ -15,13 +16,13 @@ import com.modsen.driverservice.repository.DriverRepository;
 import com.modsen.driverservice.service.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -62,7 +63,7 @@ public class CarServiceImpl implements CarService {
     public CarResponseDto getCarById(Long id) {
         Car car = carRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage("car.notfound", new Object[]{}, Locale.US)));
+                        messageSource.getMessage(MessageConstants.CAR_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
         return carMapper.toCarResponseDTO(car);
     }
 
@@ -70,7 +71,7 @@ public class CarServiceImpl implements CarService {
     public CarResponseDto getCarByNumber(String number) {
         Car car = carRepository.findByNumberAndDeletedIsFalse(number)
                 .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage("car.notfound", new Object[]{}, Locale.US)));
+                        messageSource.getMessage(MessageConstants.CAR_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
         return carMapper.toCarResponseDTO(car);
     }
 
@@ -79,10 +80,10 @@ public class CarServiceImpl implements CarService {
     public CarResponseDto addCar(CarRequestDto carRequestDTO) {
         Driver driver = driverRepository.findByIdAndDeletedIsFalse(carRequestDTO.driverId())
                 .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage("driver.notfound", new Object[]{}, Locale.US)));
+                        messageSource.getMessage(MessageConstants.CAR_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
         if (carRepository.existsByNumberAndDeletedIsFalse(carRequestDTO.number())) {
             throw new DuplicateFieldException(
-                    messageSource.getMessage("car.number.exist", new Object[]{}, Locale.US));
+                    messageSource.getMessage(MessageConstants.CAR_NUMBER_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
         }
         Car carToSave = carMapper.toCar(carRequestDTO);
         carToSave.setDeleted(false);
@@ -96,12 +97,12 @@ public class CarServiceImpl implements CarService {
     public CarResponseDto updateCar(Long id, CarRequestDto carRequestDTO) {
         Driver driver = driverRepository.findByIdAndDeletedIsFalse(carRequestDTO.driverId())
                 .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage("driver.notfound", new Object[]{}, Locale.US)));
+                        messageSource.getMessage(MessageConstants.DRIVER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
         if (carRepository.existsByIdAndDeletedIsFalse(id)) {
             Optional<Car> existingCar = carRepository.findByNumberAndDeletedIsFalse(carRequestDTO.number());
             if(existingCar.isPresent() && !existingCar.get().getId().equals(id)) {
                 throw new DuplicateFieldException(
-                        messageSource.getMessage("car.number.exist", new Object[]{}, Locale.US));
+                        messageSource.getMessage(MessageConstants.CAR_NUMBER_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
             }
             Car carToSave = carMapper.toCar(carRequestDTO);
             carToSave.setId(id);
@@ -112,7 +113,7 @@ public class CarServiceImpl implements CarService {
         }
 
         throw new NotFoundException(
-                messageSource.getMessage("car.notfound", new Object[]{}, Locale.US));
+                messageSource.getMessage(MessageConstants.CAR_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -120,7 +121,7 @@ public class CarServiceImpl implements CarService {
     public void deleteCar(Long id) {
         Car car = carRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage("car.notfound", new Object[]{}, Locale.US)));
+                        messageSource.getMessage(MessageConstants.CAR_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
         car.setDeleted(true);
         carRepository.save(car);
     }
