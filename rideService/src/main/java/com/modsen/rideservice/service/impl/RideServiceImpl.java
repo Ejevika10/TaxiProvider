@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,8 @@ public class RideServiceImpl implements RideService {
     private final RideListMapper rideListMapper;
     private final PageMapper pageMapper ;
     private final MessageSource messageSource;
+
+    private static final Random RANDOM = new Random();
 
     @Override
     public List<RideResponseDto> getAllRides() {
@@ -83,7 +86,6 @@ public class RideServiceImpl implements RideService {
 
     /*To Do: check if passenger with passengerId exists
     *       check if driver with driverId exists
-    *       create setRideCost function
     * */
     @Override
     @Transactional
@@ -91,7 +93,7 @@ public class RideServiceImpl implements RideService {
         Ride rideToSave = rideMapper.toRide(rideRequestDto);
         rideToSave.setRideState(RideState.CREATED);
         rideToSave.setRideDateTime(LocalDateTime.now());
-        rideToSave.setRideCost(BigInteger.ZERO);
+        rideToSave.setRideCost(getRideCost());
         Ride ride = rideRepository.save(rideToSave);
         return rideMapper.toRideResponseDto(ride);
     }
@@ -118,5 +120,13 @@ public class RideServiceImpl implements RideService {
                 RideState.fromValue(newState));
         Ride ride = rideRepository.save(rideToSave);
         return rideMapper.toRideResponseDto(ride);
+    }
+
+    public BigInteger getRideCost(){
+        int intPart = RANDOM.nextInt(0,99);
+        int fractPart = RANDOM.nextInt(0,99);
+        return BigInteger.valueOf(intPart)
+                .multiply(BigInteger.valueOf(100))
+                .add(BigInteger.valueOf(fractPart));
     }
 }
