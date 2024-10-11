@@ -8,6 +8,7 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <modules>
+        <module>passengerService</module>
         <module>driverService</module>
     </modules>
     <packaging>pom</packaging>
@@ -15,3 +16,4 @@
         <java.version>23</java.version>
     </properties>
 </project>
+
