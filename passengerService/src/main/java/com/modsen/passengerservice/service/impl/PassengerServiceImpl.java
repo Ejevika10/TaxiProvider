@@ -94,7 +94,8 @@ public class PassengerServiceImpl implements PassengerService {
             Passenger passenger = passengerRepository.save(passengerToSave);
             return passengerMapper.toPassengerResponseDTO(passenger);
         }
-        throw new NotFoundException(messageSource.getMessage(MessageConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
+        throw new NotFoundException(
+                messageSource.getMessage(MessageConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
     @Override

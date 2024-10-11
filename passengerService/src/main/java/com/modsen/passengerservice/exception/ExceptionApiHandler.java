@@ -51,6 +51,7 @@ public class ExceptionApiHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage defException(Exception exception) {
-        return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(),  messageSource.getMessage(MessageConstants.INTERNAL_SERVER_ERROR, new Object[]{}, LocaleContextHolder.getLocale()));
+        return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                messageSource.getMessage(MessageConstants.INTERNAL_SERVER_ERROR, new Object[]{}, LocaleContextHolder.getLocale()));
     }
 }
