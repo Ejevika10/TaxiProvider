@@ -1,6 +1,10 @@
-package com.modsen.passengerservice.configuration;
+package com.modsen.passengerservice.util;
 
-public class MessageConstants {
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class AppConstants {
     public static final String INTERNAL_SERVER_ERROR = "internal.server.error";
     public static final String PASSENGER_NOT_FOUND = "passenger.notfound";
     public static final String PASSENGER_EMAIL_EXISTS = "passenger.email.exist";

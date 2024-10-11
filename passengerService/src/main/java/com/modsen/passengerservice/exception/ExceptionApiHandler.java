@@ -1,6 +1,6 @@
 package com.modsen.passengerservice.exception;
 
-import com.modsen.passengerservice.configuration.MessageConstants;
+import com.modsen.passengerservice.util.AppConstants;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -52,6 +52,6 @@ public class ExceptionApiHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage defException(Exception exception) {
         return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                messageSource.getMessage(MessageConstants.INTERNAL_SERVER_ERROR, new Object[]{}, LocaleContextHolder.getLocale()));
+                messageSource.getMessage(AppConstants.INTERNAL_SERVER_ERROR, new Object[]{}, LocaleContextHolder.getLocale()));
     }
 }

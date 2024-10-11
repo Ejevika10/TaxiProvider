@@ -1,6 +1,6 @@
 package com.modsen.passengerservice.service.impl;
 
-import com.modsen.passengerservice.configuration.MessageConstants;
+import com.modsen.passengerservice.util.AppConstants;
 import com.modsen.passengerservice.dto.PageDto;
 import com.modsen.passengerservice.dto.PassengerRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
@@ -54,7 +54,7 @@ public class PassengerServiceImpl implements PassengerService {
     public PassengerResponseDto getPassengerById(Long id) {
         Passenger passenger = passengerRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(MessageConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                        messageSource.getMessage(AppConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
@@ -62,7 +62,7 @@ public class PassengerServiceImpl implements PassengerService {
     public PassengerResponseDto getPassengerByEmail(String email) {
         Passenger passenger = passengerRepository.findByEmailAndDeletedIsFalse(email)
                 .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(MessageConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                        messageSource.getMessage(AppConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
@@ -71,7 +71,7 @@ public class PassengerServiceImpl implements PassengerService {
     public PassengerResponseDto addPassenger(PassengerRequestDto requestDTO) {
         if(passengerRepository.existsByEmailAndDeletedIsFalse(requestDTO.email())) {
             throw new DuplicateFieldException(
-                    messageSource.getMessage(MessageConstants.PASSENGER_EMAIL_EXISTS, new Object[]{}, LocaleContextHolder.getLocale()));
+                    messageSource.getMessage(AppConstants.PASSENGER_EMAIL_EXISTS, new Object[]{}, LocaleContextHolder.getLocale()));
         }
         Passenger passengerToSave = passengerMapper.toPassenger(requestDTO);
         passengerToSave.setDeleted(false);
@@ -86,7 +86,7 @@ public class PassengerServiceImpl implements PassengerService {
             Optional<Passenger> existingPassenger = passengerRepository.findByEmailAndDeletedIsFalse(requestDTO.email());
             if(existingPassenger.isPresent() && !existingPassenger.get().getId().equals(id)) {
                 throw new DuplicateFieldException(
-                        messageSource.getMessage(MessageConstants.PASSENGER_EMAIL_EXISTS, new Object[]{}, LocaleContextHolder.getLocale()));
+                        messageSource.getMessage(AppConstants.PASSENGER_EMAIL_EXISTS, new Object[]{}, LocaleContextHolder.getLocale()));
             }
             Passenger passengerToSave = passengerMapper.toPassenger(requestDTO);
             passengerToSave.setId(id);
@@ -95,7 +95,7 @@ public class PassengerServiceImpl implements PassengerService {
             return passengerMapper.toPassengerResponseDTO(passenger);
         }
         throw new NotFoundException(
-                messageSource.getMessage(MessageConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
+                messageSource.getMessage(AppConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -103,7 +103,7 @@ public class PassengerServiceImpl implements PassengerService {
     public void deletePassenger(Long id) {
         Passenger passenger = passengerRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(MessageConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                        messageSource.getMessage(AppConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
         passenger.setDeleted(true);
         passengerRepository.save(passenger);
     }
