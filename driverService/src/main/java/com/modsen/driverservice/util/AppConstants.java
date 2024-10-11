@@ -1,6 +1,11 @@
-package com.modsen.driverservice.configuration;
+package com.modsen.driverservice.util;
 
-public class MessageConstants {
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class AppConstants {
+
     public static final String CAR_NOT_FOUND = "car.notfound";
     public static final String CAR_NUMBER_EXIST = "car.number.exist";
 
