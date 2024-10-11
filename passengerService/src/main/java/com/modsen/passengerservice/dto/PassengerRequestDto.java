@@ -1,5 +1,6 @@
 package com.modsen.passengerservice.dto;
 
+import com.modsen.passengerservice.configuration.MessageConstants;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -15,6 +16,6 @@ public record PassengerRequestDto (
     String email,
 
     @NotBlank(message = "{passenger.phone.mandatory}")
-    @Pattern(regexp = "^((8|\\+7)[\\- ]?)?(\\(?\\d{3}\\)?[\\- ]?)?[\\d\\- ]{7,10}$", message = "{passenger.phone.invalid}")
+    @Pattern(regexp = MessageConstants.PHONE_REGEXP, message = "{passenger.phone.invalid}")
     String phone) {
 }
