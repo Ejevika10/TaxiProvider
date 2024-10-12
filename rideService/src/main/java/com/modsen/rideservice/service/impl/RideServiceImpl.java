@@ -112,6 +112,7 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
+    @Transactional
     public RideResponseDto setNewState(Long id, String newState) {
         Ride rideToSave = rideRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
