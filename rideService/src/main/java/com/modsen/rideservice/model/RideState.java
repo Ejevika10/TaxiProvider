@@ -2,9 +2,8 @@ package com.modsen.rideservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.modsen.rideservice.exception.NotFoundException;
+import com.modsen.rideservice.exception.InvalidFieldValueException;
 import com.modsen.rideservice.util.AppConstants;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 public enum RideState {
     CREATED("Created"),
@@ -33,6 +32,6 @@ public enum RideState {
                 return state;
             }
         }
-        throw new NotFoundException(AppConstants.INVALID_STATE_VALUE + ": " + value);
+        throw new InvalidFieldValueException(AppConstants.INVALID_STATE_VALUE + ": " + value);
     }
 }

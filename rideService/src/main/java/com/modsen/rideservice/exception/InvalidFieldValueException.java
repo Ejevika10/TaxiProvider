@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class DuplicateFieldException extends RuntimeException {
+public class InvalidFieldValueException extends RuntimeException {
     private String message;
 }

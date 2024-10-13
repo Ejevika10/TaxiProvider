@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -24,9 +25,9 @@ public class ExceptionApiHandler {
         return new ErrorMessage(HttpStatus.NOT_FOUND.value(), exception.getMessage());
     }
 
-    @ExceptionHandler(DuplicateFieldException.class)
+    @ExceptionHandler(InvalidFieldValueException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorMessage duplicateFieldException(DuplicateFieldException exception) {
+    public ErrorMessage invalidFieldValueException(InvalidFieldValueException exception) {
         return new ErrorMessage(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
     }
 
@@ -41,11 +42,17 @@ public class ExceptionApiHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<ErrorMessage> constraintViolationException(MethodArgumentNotValidException exception) {
+    public List<ErrorMessage> methodArgumentNotValidException(MethodArgumentNotValidException exception) {
         return exception.getBindingResult().getFieldErrors().stream()
                 .map(error -> new ErrorMessage(HttpStatus.BAD_REQUEST.value(),
                         error.getField() + ": " + error.getDefaultMessage()))
                 .toList();
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage httpMessageNotReadableException(HttpMessageNotReadableException exception) {
+        return new ErrorMessage(HttpStatus.BAD_REQUEST.value(), exception.getMostSpecificCause().getMessage());
     }
 
     @ExceptionHandler(Exception.class)
