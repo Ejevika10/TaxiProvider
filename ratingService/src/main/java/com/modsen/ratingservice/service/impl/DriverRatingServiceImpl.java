@@ -1,0 +1,115 @@
+package com.modsen.ratingservice.service.impl;
+
+import com.modsen.ratingservice.dto.PageDto;
+import com.modsen.ratingservice.dto.RatingRequestDto;
+import com.modsen.ratingservice.dto.RatingResponseDto;
+import com.modsen.ratingservice.exception.DuplicateFieldException;
+import com.modsen.ratingservice.exception.NotFoundException;
+import com.modsen.ratingservice.mapper.PageMapper;
+import com.modsen.ratingservice.mapper.RatingListMapper;
+import com.modsen.ratingservice.mapper.RatingMapper;
+import com.modsen.ratingservice.model.DriverRating;
+import com.modsen.ratingservice.repository.DriverRatingRepository;
+import com.modsen.ratingservice.service.RatingService;
+import com.modsen.ratingservice.util.AppConstants;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Qualifier("DriverRatingServiceImpl")
+public class DriverRatingServiceImpl implements RatingService {
+
+    private final DriverRatingRepository driverRatingRepository;
+    private final RatingMapper ratingMapper;
+    private final RatingListMapper ratingListMapper;
+    private final MessageSource messageSource;
+    private final PageMapper pageMapper;
+
+    @Override
+    public List<RatingResponseDto> getAllRatings() {
+        List<DriverRating> ratings = driverRatingRepository.findAllByDeletedIsFalse();
+        return ratingListMapper.toDriverRatingResponseDtoList(ratings);
+    }
+
+    @Override
+    public PageDto<RatingResponseDto> getPageRatings(Integer offset, Integer limit) {
+        Page<RatingResponseDto> pageRating = driverRatingRepository.findAllByDeletedIsFalse(PageRequest.of(offset,limit))
+                .map(ratingMapper::toRatingResponseDto);
+        return pageMapper.pageToDto(pageRating);
+    }
+
+    @Override
+    public List<RatingResponseDto> getAllRatingsByUserId(Long userID) {
+        List<DriverRating> ratings = driverRatingRepository.findAllByUserIdAndDeletedIsFalse(userID);
+        return ratingListMapper.toDriverRatingResponseDtoList(ratings);
+    }
+
+    @Override
+    public PageDto<RatingResponseDto> getPageRatingsByUserId(Long userId, Integer offset, Integer limit) {
+        Page<RatingResponseDto> pageRating = driverRatingRepository.findAllByUserIdAndDeletedIsFalse(userId, PageRequest.of(offset,limit))
+                .map(ratingMapper::toRatingResponseDto);
+        return pageMapper.pageToDto(pageRating);
+    }
+
+    @Override
+    public RatingResponseDto getRatingById(String id) {
+        DriverRating rating = driverRatingRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+        return ratingMapper.toRatingResponseDto(rating);
+    }
+
+    /*To Do: check, if ride with rideId exists
+    *       check, if driver with userId is in this ride
+    * */
+    @Override
+    public RatingResponseDto addRating(RatingRequestDto ratingRequestDto) {
+        if(driverRatingRepository.existsByRideIdAndDeletedIsFalse(ratingRequestDto.rideId())){
+            throw new DuplicateFieldException(
+                    messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
+        }
+        DriverRating ratingToSave = ratingMapper.toDriverRating(ratingRequestDto);
+        ratingToSave.setDeleted(false);
+        DriverRating rating = driverRatingRepository.save(ratingToSave);
+        return ratingMapper.toRatingResponseDto(rating);
+    }
+
+    /*To Do: check, if ride with rideId exists
+     *       check, if driver with userId is in this ride
+     * */
+    @Override
+    public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto) {
+        if(driverRatingRepository.existsByIdAndDeletedIsFalse(id)) {
+            Optional<DriverRating> existingRating = driverRatingRepository.findByRideIdAndDeletedIsFalse(ratingRequestDto.rideId());
+            if(existingRating.isPresent() && !existingRating.get().getId().equals(id)) {
+                throw new DuplicateFieldException(
+                        messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
+            }
+            DriverRating ratingToSave = ratingMapper.toDriverRating(ratingRequestDto);
+            ratingToSave.setId(id);
+            ratingToSave.setDeleted(false);
+            DriverRating rating = driverRatingRepository.save(ratingToSave);
+            return ratingMapper.toRatingResponseDto(rating);
+        }
+        throw new NotFoundException(
+                messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
+    }
+
+    @Override
+    public void deleteRating(String id) {
+        DriverRating rating = driverRatingRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+        rating.setDeleted(true);
+        driverRatingRepository.save(rating);
+    }
+}
