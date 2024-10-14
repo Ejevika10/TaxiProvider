@@ -25,9 +25,9 @@ public class ExceptionApiHandler {
     }
 
     @ExceptionHandler(DuplicateFieldException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorMessage duplicateFieldException(DuplicateFieldException exception) {
-        return new ErrorMessage(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
+        return new ErrorMessage(HttpStatus.CONFLICT.value(), exception.getMessage());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -41,7 +41,7 @@ public class ExceptionApiHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<ErrorMessage> constraintViolationException(MethodArgumentNotValidException exception) {
+    public List<ErrorMessage> methodArgumentNotValidException(MethodArgumentNotValidException exception) {
         return exception.getBindingResult().getFieldErrors().stream()
                 .map(error -> new ErrorMessage(HttpStatus.BAD_REQUEST.value(),
                         error.getField() + ": " + error.getDefaultMessage()))
