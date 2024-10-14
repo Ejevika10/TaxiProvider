@@ -3,6 +3,7 @@ package com.modsen.rideservice.service.impl;
 import com.modsen.rideservice.dto.PageDto;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
+import com.modsen.rideservice.exception.InvalidStateException;
 import com.modsen.rideservice.exception.NotFoundException;
 import com.modsen.rideservice.mapper.PageMapper;
 import com.modsen.rideservice.mapper.RideListMapper;
@@ -34,6 +35,7 @@ public class RideServiceImpl implements RideService {
     private final RideListMapper rideListMapper;
     private final PageMapper pageMapper ;
     private final MessageSource messageSource;
+    private final ValidateStateService validateStateService;
 
     private static final Random RANDOM = new Random();
 
@@ -117,10 +119,14 @@ public class RideServiceImpl implements RideService {
         Ride rideToSave = rideRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         messageSource.getMessage(AppConstants.RIDE_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
-        rideToSave.setRideState(
-                RideState.fromValue(newState));
-        Ride ride = rideRepository.save(rideToSave);
-        return rideMapper.toRideResponseDto(ride);
+        if(validateStateService.validateState(rideToSave.getRideState(), RideState.fromValue(newState))){
+            rideToSave.setRideState(
+                    RideState.fromValue(newState));
+            Ride ride = rideRepository.save(rideToSave);
+            return rideMapper.toRideResponseDto(ride);
+        }
+        throw new InvalidStateException(
+                messageSource.getMessage(AppConstants.STATE_VALUE_ERROR, new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
     public BigInteger getRideCost(){

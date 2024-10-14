@@ -28,7 +28,7 @@ public enum RideState {
     public static RideState fromValue(String value) {
         for (RideState state : values()) {
             String currentState = state.getState();
-            if (currentState.equals(value)) {
+            if (currentState.equalsIgnoreCase(value)) {
                 return state;
             }
         }

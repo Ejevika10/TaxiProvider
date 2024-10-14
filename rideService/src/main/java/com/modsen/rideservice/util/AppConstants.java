@@ -11,4 +11,6 @@ public final class AppConstants {
     public static final String INTERNAL_SERVER_ERROR = "internal.server.error";
 
     public static final String INVALID_STATE_VALUE = "Invalid value for State";
+
+    public static final String STATE_VALUE_ERROR = "ride.state.error";
 }

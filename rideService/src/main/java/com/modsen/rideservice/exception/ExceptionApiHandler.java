@@ -25,6 +25,18 @@ public class ExceptionApiHandler {
         return new ErrorMessage(HttpStatus.NOT_FOUND.value(), exception.getMessage());
     }
 
+    @ExceptionHandler(DuplicateFieldException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorMessage duplicateFieldException(DuplicateFieldException exception) {
+        return new ErrorMessage(HttpStatus.CONFLICT.value(), exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorMessage invalidStateException(InvalidStateException exception) {
+        return new ErrorMessage(HttpStatus.CONFLICT.value(), exception.getMessage());
+    }
+
     @ExceptionHandler(InvalidFieldValueException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage invalidFieldValueException(InvalidFieldValueException exception) {
