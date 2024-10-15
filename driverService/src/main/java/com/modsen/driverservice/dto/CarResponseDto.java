@@ -1,28 +1,15 @@
 package com.modsen.driverservice.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+public record CarResponseDto(
+        Long id,
 
-public record CarResponseDto (
-    @NotNull
-    Long id,
+        String color,
 
-    @NotBlank(message = "{car.color.mandatory}")
-    @Size(min = 2, max = 50)
-    String color,
+        String model,
 
-    @NotBlank(message = "{car.model.mandatory}")
-    @Size(min = 2, max = 50)
-    String model,
+        String brand,
 
-    @NotBlank(message = "{car.brand.mandatory}")
-    @Size(min = 2, max = 50)
-    String brand,
+        String number,
 
-    @NotBlank(message = "{car.number.mandatory}")
-    @Size(min = 2, max = 20)
-    String number,
-
-    DriverResponseDto driver) {
+        DriverResponseDto driver) {
 }
