@@ -54,7 +54,8 @@ public class PassengerRatingServiceImpl implements RatingService {
 
     @Override
     public PageDto<RatingResponseDto> getPageRatingsByUserId(Long userId, Integer offset, Integer limit) {
-        Page<RatingResponseDto> pageRating = passengerRatingRepository.findAllByUserIdAndDeletedIsFalse(userId, PageRequest.of(offset, limit))
+        Page<RatingResponseDto> pageRating = passengerRatingRepository
+                .findAllByUserIdAndDeletedIsFalse(userId, PageRequest.of(offset, limit))
                 .map(ratingMapper::toRatingResponseDto);
         return pageMapper.pageToDto(pageRating);
     }
@@ -72,7 +73,8 @@ public class PassengerRatingServiceImpl implements RatingService {
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto) {
         if (passengerRatingRepository.existsByRideIdAndDeletedIsFalse(ratingRequestDto.rideId())) {
             throw new DuplicateFieldException(
-                    messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
+                    messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST,
+                            new Object[]{}, LocaleContextHolder.getLocale()));
         }
         PassengerRating ratingToSave = ratingMapper.toPassengerRating(ratingRequestDto);
         ratingToSave.setDeleted(false);
@@ -101,7 +103,8 @@ public class PassengerRatingServiceImpl implements RatingService {
     private PassengerRating findByIdWithExc(String id) {
         return passengerRatingRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND,
+                                new Object[]{}, LocaleContextHolder.getLocale())));
     }
 }
 

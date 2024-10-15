@@ -9,5 +9,5 @@ public record RatingResponseDto (
 
         Integer rating,
 
-        String comment){
+        String comment) {
 }

@@ -47,21 +47,22 @@ public class DriverRatingServiceImpl implements RatingService {
     }
 
     @Override
-    public List<RatingResponseDto> getAllRatingsByUserId(Long userID) {
-        List<DriverRating> ratings = driverRatingRepository.findAllByUserIdAndDeletedIsFalse(userID);
+    public List<RatingResponseDto> getAllRatingsByUserId(Long userId) {
+        List<DriverRating> ratings = driverRatingRepository.findAllByUserIdAndDeletedIsFalse(userId);
         return ratingListMapper.toDriverRatingResponseDtoList(ratings);
     }
 
     @Override
     public PageDto<RatingResponseDto> getPageRatingsByUserId(Long userId, Integer offset, Integer limit) {
-        Page<RatingResponseDto> pageRating = driverRatingRepository.findAllByUserIdAndDeletedIsFalse(userId, PageRequest.of(offset, limit))
+        Page<RatingResponseDto> pageRating = driverRatingRepository
+                .findAllByUserIdAndDeletedIsFalse(userId, PageRequest.of(offset, limit))
                 .map(ratingMapper::toRatingResponseDto);
         return pageMapper.pageToDto(pageRating);
     }
 
     @Override
     public RatingResponseDto getRatingById(String id) {
-        DriverRating rating = findByIdWithExc(id);
+        DriverRating rating = findByIdOrThrow(id);
         return ratingMapper.toRatingResponseDto(rating);
     }
 
@@ -72,7 +73,8 @@ public class DriverRatingServiceImpl implements RatingService {
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto) {
         if (driverRatingRepository.existsByRideIdAndDeletedIsFalse(ratingRequestDto.rideId())) {
             throw new DuplicateFieldException(
-                    messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
+                    messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST,
+                            new Object[]{}, LocaleContextHolder.getLocale()));
         }
         DriverRating ratingToSave = ratingMapper.toDriverRating(ratingRequestDto);
         ratingToSave.setDeleted(false);
@@ -85,7 +87,7 @@ public class DriverRatingServiceImpl implements RatingService {
      * */
     @Override
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto) {
-        DriverRating ratingToSave = findByIdWithExc(id);
+        DriverRating ratingToSave = findByIdOrThrow(id);
         ratingMapper.updateDriverRating(ratingRequestDto, ratingToSave);
         DriverRating rating = driverRatingRepository.save(ratingToSave);
         return ratingMapper.toRatingResponseDto(rating);
@@ -93,12 +95,12 @@ public class DriverRatingServiceImpl implements RatingService {
 
     @Override
     public void deleteRating(String id) {
-        DriverRating rating = findByIdWithExc(id);
+        DriverRating rating = findByIdOrThrow(id);
         rating.setDeleted(true);
         driverRatingRepository.save(rating);
     }
 
-    private DriverRating findByIdWithExc(String id) {
+    private DriverRating findByIdOrThrow(String id) {
         return driverRatingRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException(
                         messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
