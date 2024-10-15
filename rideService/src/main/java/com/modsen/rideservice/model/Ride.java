@@ -1,12 +1,17 @@
 package com.modsen.rideservice.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Entity
@@ -39,5 +44,5 @@ public class Ride {
     private LocalDateTime rideDateTime;
 
     @Column(nullable = false)
-    private BigInteger rideCost;
+    private Integer rideCost;
 }

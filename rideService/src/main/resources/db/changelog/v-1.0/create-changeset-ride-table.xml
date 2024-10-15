@@ -35,7 +35,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="ride_cost"
-                    type="DECIMAL">
+                    type="INT">
                 <constraints nullable="false"/>
             </column>
         </createTable>

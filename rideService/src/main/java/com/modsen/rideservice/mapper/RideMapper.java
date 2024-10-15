@@ -3,16 +3,18 @@ package com.modsen.rideservice.mapper;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.model.Ride;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface RideMapper {
-    RideRequestDto toRideRequestDto(Ride ride);
-
     Ride toRide(RideRequestDto rideRequestDto);
 
-    Ride toRideDto(RideResponseDto rideResponseDto);
-
     RideResponseDto toRideResponseDto(Ride ride);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateRide(@MappingTarget Ride ride, RideRequestDto rideRequestDto);
 }

@@ -6,15 +6,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 
-public record RideRequestDto (
+public record RideRequestDto(
         @Min(0)
         Long driverId,
 
-        @Min(0)
-        @NotNull(message = "{ride.passenger.mandatory}")
+        @Min(0) @NotNull(message = "{ride.passenger.mandatory}")
         Long passengerId,
 
         @NotBlank(message = "{ride.sourceaddress.mandatory}")
@@ -29,5 +27,5 @@ public record RideRequestDto (
 
         LocalDateTime rideDateTime,
 
-        BigInteger rideCost){
+        Integer rideCost) {
 }
