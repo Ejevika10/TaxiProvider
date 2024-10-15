@@ -47,8 +47,8 @@ public class PassengerRatingServiceImpl implements RatingService {
     }
 
     @Override
-    public List<RatingResponseDto> getAllRatingsByUserId(Long userID) {
-        List<PassengerRating> ratings = passengerRatingRepository.findAllByUserIdAndDeletedIsFalse(userID);
+    public List<RatingResponseDto> getAllRatingsByUserId(Long userId) {
+        List<PassengerRating> ratings = passengerRatingRepository.findAllByUserIdAndDeletedIsFalse(userId);
         return ratingListMapper.toPassengerRatingResponseDtoList(ratings);
     }
 
@@ -62,7 +62,7 @@ public class PassengerRatingServiceImpl implements RatingService {
 
     @Override
     public RatingResponseDto getRatingById(String id) {
-        PassengerRating rating = findByIdWithExc(id);
+        PassengerRating rating = findByIdOrThrow(id);
         return ratingMapper.toRatingResponseDto(rating);
     }
 
@@ -87,7 +87,7 @@ public class PassengerRatingServiceImpl implements RatingService {
      * */
     @Override
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto) {
-        PassengerRating ratingToSave = findByIdWithExc(id);
+        PassengerRating ratingToSave = findByIdOrThrow(id);
         ratingMapper.updatePassengerRating(ratingRequestDto, ratingToSave);
         PassengerRating rating = passengerRatingRepository.save(ratingToSave);
         return ratingMapper.toRatingResponseDto(rating);
@@ -95,12 +95,12 @@ public class PassengerRatingServiceImpl implements RatingService {
 
     @Override
     public void deleteRating(String id) {
-        PassengerRating rating = findByIdWithExc(id);
+        PassengerRating rating = findByIdOrThrow(id);
         rating.setDeleted(true);
         passengerRatingRepository.save(rating);
     }
 
-    private PassengerRating findByIdWithExc(String id) {
+    private PassengerRating findByIdOrThrow(String id) {
         return passengerRatingRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException(
                         messageSource.getMessage(AppConstants.RATING_NOT_FOUND,

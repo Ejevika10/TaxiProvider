@@ -103,6 +103,7 @@ public class DriverRatingServiceImpl implements RatingService {
     private DriverRating findByIdOrThrow(String id) {
         return driverRatingRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND,
+                                new Object[]{}, LocaleContextHolder.getLocale())));
     }
 }
