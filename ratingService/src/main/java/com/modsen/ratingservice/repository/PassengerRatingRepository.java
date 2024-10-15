@@ -10,13 +10,18 @@ import java.util.Optional;
 
 public interface PassengerRatingRepository extends MongoRepository<PassengerRating, String> {
     boolean existsByIdAndDeletedIsFalse(String id);
+
     boolean existsByRideIdAndDeletedIsFalse(Long rideId);
 
     List<PassengerRating> findAllByDeletedIsFalse();
+
     Page<PassengerRating> findAllByDeletedIsFalse(Pageable pageable);
+
     Optional<PassengerRating> findByIdAndDeletedIsFalse(String id);
+
     Optional<PassengerRating> findByRideIdAndDeletedIsFalse(Long rideId);
 
     List<PassengerRating> findAllByUserIdAndDeletedIsFalse(Long userId);
+
     Page<PassengerRating> findAllByUserIdAndDeletedIsFalse(Long userId, Pageable pageable);
 }

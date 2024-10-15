@@ -10,13 +10,18 @@ import java.util.Optional;
 
 public interface DriverRatingRepository extends MongoRepository<DriverRating, String> {
     boolean existsByIdAndDeletedIsFalse(String id);
+
     boolean existsByRideIdAndDeletedIsFalse(Long rideId);
 
     List<DriverRating> findAllByDeletedIsFalse();
+
     Page<DriverRating> findAllByDeletedIsFalse(Pageable pageable);
+
     Optional<DriverRating> findByIdAndDeletedIsFalse(String id);
+
     Optional<DriverRating> findByRideIdAndDeletedIsFalse(Long rideId);
 
     List<DriverRating> findAllByUserIdAndDeletedIsFalse(Long userId);
+
     Page<DriverRating> findAllByUserIdAndDeletedIsFalse(Long userId, Pageable pageable);
 }

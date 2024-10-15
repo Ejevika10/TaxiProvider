@@ -21,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +41,7 @@ public class DriverRatingServiceImpl implements RatingService {
 
     @Override
     public PageDto<RatingResponseDto> getPageRatings(Integer offset, Integer limit) {
-        Page<RatingResponseDto> pageRating = driverRatingRepository.findAllByDeletedIsFalse(PageRequest.of(offset,limit))
+        Page<RatingResponseDto> pageRating = driverRatingRepository.findAllByDeletedIsFalse(PageRequest.of(offset, limit))
                 .map(ratingMapper::toRatingResponseDto);
         return pageMapper.pageToDto(pageRating);
     }
@@ -55,25 +54,23 @@ public class DriverRatingServiceImpl implements RatingService {
 
     @Override
     public PageDto<RatingResponseDto> getPageRatingsByUserId(Long userId, Integer offset, Integer limit) {
-        Page<RatingResponseDto> pageRating = driverRatingRepository.findAllByUserIdAndDeletedIsFalse(userId, PageRequest.of(offset,limit))
+        Page<RatingResponseDto> pageRating = driverRatingRepository.findAllByUserIdAndDeletedIsFalse(userId, PageRequest.of(offset, limit))
                 .map(ratingMapper::toRatingResponseDto);
         return pageMapper.pageToDto(pageRating);
     }
 
     @Override
     public RatingResponseDto getRatingById(String id) {
-        DriverRating rating = driverRatingRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+        DriverRating rating = findByIdWithExc(id);
         return ratingMapper.toRatingResponseDto(rating);
     }
 
     /*To Do: check, if ride with rideId exists
-    *       check, if driver with userId is in this ride
-    * */
+     *       check, if driver with userId is in this ride
+     * */
     @Override
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto) {
-        if(driverRatingRepository.existsByRideIdAndDeletedIsFalse(ratingRequestDto.rideId())){
+        if (driverRatingRepository.existsByRideIdAndDeletedIsFalse(ratingRequestDto.rideId())) {
             throw new DuplicateFieldException(
                     messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
         }
@@ -88,28 +85,22 @@ public class DriverRatingServiceImpl implements RatingService {
      * */
     @Override
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto) {
-        if(driverRatingRepository.existsByIdAndDeletedIsFalse(id)) {
-            Optional<DriverRating> existingRating = driverRatingRepository.findByRideIdAndDeletedIsFalse(ratingRequestDto.rideId());
-            if(existingRating.isPresent() && !existingRating.get().getId().equals(id)) {
-                throw new DuplicateFieldException(
-                        messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
-            }
-            DriverRating ratingToSave = ratingMapper.toDriverRating(ratingRequestDto);
-            ratingToSave.setId(id);
-            ratingToSave.setDeleted(false);
-            DriverRating rating = driverRatingRepository.save(ratingToSave);
-            return ratingMapper.toRatingResponseDto(rating);
-        }
-        throw new NotFoundException(
-                messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
+        DriverRating ratingToSave = findByIdWithExc(id);
+        ratingMapper.updateDriverRating(ratingRequestDto, ratingToSave);
+        DriverRating rating = driverRatingRepository.save(ratingToSave);
+        return ratingMapper.toRatingResponseDto(rating);
     }
 
     @Override
     public void deleteRating(String id) {
-        DriverRating rating = driverRatingRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+        DriverRating rating = findByIdWithExc(id);
         rating.setDeleted(true);
         driverRatingRepository.save(rating);
+    }
+
+    private DriverRating findByIdWithExc(String id) {
+        return driverRatingRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
     }
 }

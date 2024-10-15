@@ -21,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +41,7 @@ public class PassengerRatingServiceImpl implements RatingService {
 
     @Override
     public PageDto<RatingResponseDto> getPageRatings(Integer offset, Integer limit) {
-        Page<RatingResponseDto> pageRating = passengerRatingRepository.findAllByDeletedIsFalse(PageRequest.of(offset,limit))
+        Page<RatingResponseDto> pageRating = passengerRatingRepository.findAllByDeletedIsFalse(PageRequest.of(offset, limit))
                 .map(ratingMapper::toRatingResponseDto);
         return pageMapper.pageToDto(pageRating);
     }
@@ -55,16 +54,14 @@ public class PassengerRatingServiceImpl implements RatingService {
 
     @Override
     public PageDto<RatingResponseDto> getPageRatingsByUserId(Long userId, Integer offset, Integer limit) {
-        Page<RatingResponseDto> pageRating = passengerRatingRepository.findAllByUserIdAndDeletedIsFalse(userId, PageRequest.of(offset,limit))
+        Page<RatingResponseDto> pageRating = passengerRatingRepository.findAllByUserIdAndDeletedIsFalse(userId, PageRequest.of(offset, limit))
                 .map(ratingMapper::toRatingResponseDto);
         return pageMapper.pageToDto(pageRating);
     }
 
     @Override
     public RatingResponseDto getRatingById(String id) {
-        PassengerRating rating = passengerRatingRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+        PassengerRating rating = findByIdWithExc(id);
         return ratingMapper.toRatingResponseDto(rating);
     }
 
@@ -73,7 +70,7 @@ public class PassengerRatingServiceImpl implements RatingService {
      * */
     @Override
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto) {
-        if(passengerRatingRepository.existsByRideIdAndDeletedIsFalse(ratingRequestDto.rideId())){
+        if (passengerRatingRepository.existsByRideIdAndDeletedIsFalse(ratingRequestDto.rideId())) {
             throw new DuplicateFieldException(
                     messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
         }
@@ -88,29 +85,23 @@ public class PassengerRatingServiceImpl implements RatingService {
      * */
     @Override
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto) {
-        if(passengerRatingRepository.existsByIdAndDeletedIsFalse(id)) {
-            Optional<PassengerRating> existingRating = passengerRatingRepository.findByRideIdAndDeletedIsFalse(ratingRequestDto.rideId());
-            if(existingRating.isPresent() && !existingRating.get().getId().equals(id)) {
-                throw new DuplicateFieldException(
-                        messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
-            }
-            PassengerRating ratingToSave = ratingMapper.toPassengerRating(ratingRequestDto);
-            ratingToSave.setId(id);
-            ratingToSave.setDeleted(false);
-            PassengerRating rating = passengerRatingRepository.save(ratingToSave);
-            return ratingMapper.toRatingResponseDto(rating);
-        }
-        throw new NotFoundException(
-                messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
+        PassengerRating ratingToSave = findByIdWithExc(id);
+        ratingMapper.updatePassengerRating(ratingRequestDto, ratingToSave);
+        PassengerRating rating = passengerRatingRepository.save(ratingToSave);
+        return ratingMapper.toRatingResponseDto(rating);
     }
 
     @Override
     public void deleteRating(String id) {
-        PassengerRating rating = passengerRatingRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+        PassengerRating rating = findByIdWithExc(id);
         rating.setDeleted(true);
         passengerRatingRepository.save(rating);
+    }
+
+    private PassengerRating findByIdWithExc(String id) {
+        return passengerRatingRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
     }
 }
 

@@ -38,20 +38,22 @@ public class ExceptionApiHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<ErrorMessage> constraintViolationException(ConstraintViolationException exception) {
-        return exception.getConstraintViolations().stream()
-                .map(error -> new ErrorMessage(HttpStatus.BAD_REQUEST.value(),
-                        error.getPropertyPath().toString() + ": " + error.getMessage()))
+    public ListErrorMessage constraintViolationException(ConstraintViolationException exception) {
+        List<String> errors;
+        errors = exception.getConstraintViolations().stream()
+                .map(error -> error.getPropertyPath().toString() + ": " + error.getMessage())
                 .toList();
+        return new ListErrorMessage(HttpStatus.BAD_REQUEST.value(), errors);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public List<ErrorMessage> methodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        return exception.getBindingResult().getFieldErrors().stream()
-                .map(error -> new ErrorMessage(HttpStatus.BAD_REQUEST.value(),
-                        error.getField() + ": " + error.getDefaultMessage()))
+    public ListErrorMessage methodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        List<String> errors;
+        errors = exception.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .toList();
+        return new ListErrorMessage(HttpStatus.BAD_REQUEST.value(), errors);
     }
 
     @ExceptionHandler(Exception.class)
