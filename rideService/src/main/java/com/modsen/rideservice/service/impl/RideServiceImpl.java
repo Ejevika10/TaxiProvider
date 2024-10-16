@@ -78,7 +78,7 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public RideResponseDto getRideById(Long id) {
-        Ride ride = findByIdWithExc(id);
+        Ride ride = findByIdOrThrow(id);
         return rideMapper.toRideResponseDto(ride);
     }
 
@@ -99,7 +99,7 @@ public class RideServiceImpl implements RideService {
     @Override
     @Transactional
     public RideResponseDto updateRide(Long id, RideRequestDto rideRequestDto) {
-        Ride rideToSave = findByIdWithExc(id);
+        Ride rideToSave = findByIdOrThrow(id);
         rideMapper.updateRide(rideToSave, rideRequestDto);
         Ride ride = rideRepository.save(rideToSave);
         return rideMapper.toRideResponseDto(ride);
@@ -108,7 +108,7 @@ public class RideServiceImpl implements RideService {
     @Override
     @Transactional
     public RideResponseDto setNewState(Long id, RideStateRequestDto newStateDto) {
-        Ride rideToSave = findByIdWithExc(id);
+        Ride rideToSave = findByIdOrThrow(id);
         RideState newState = RideState.fromValue(newStateDto.rideState());
         if (validateStateService.validateState(rideToSave.getRideState(), newState)) {
             rideToSave.setRideState(newState);
@@ -119,7 +119,7 @@ public class RideServiceImpl implements RideService {
                 messageSource.getMessage(AppConstants.STATE_VALUE_ERROR, new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
-    private Ride findByIdWithExc(Long id) {
+    private Ride findByIdOrThrow(Long id) {
         return rideRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         messageSource.getMessage(AppConstants.RIDE_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
