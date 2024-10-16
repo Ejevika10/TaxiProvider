@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+    <changeSet id="2" author="loziukvika10@gmail.com">
+        <createTable tableName="ride">
+            <column autoIncrement="true"
+                    name="id"
+                    type="BIGINT">
+                <constraints nullable="false"
+                             primaryKey="true"
+                             primaryKeyName="pk_ride"/>
+            </column>
+            <column name="driver_id"
+                    type="BIGINT"/>
+            <column name="passenger_id"
+                    type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_address"
+                    type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="destination_address"
+                    type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ride_state"
+                    type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ride_date_time"
+                    type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ride_cost"
+                    type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="ride"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
+
