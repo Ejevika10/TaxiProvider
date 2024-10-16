@@ -11,6 +11,7 @@
         <module>rideService</module>
         <module>passengerService</module>
         <module>driverService</module>
+        <module>ratingService</module>
     </modules>
     <packaging>pom</packaging>
     <properties>
