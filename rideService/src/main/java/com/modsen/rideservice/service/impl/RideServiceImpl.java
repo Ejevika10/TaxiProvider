@@ -1,6 +1,10 @@
 package com.modsen.rideservice.service.impl;
 
+import com.modsen.rideservice.client.DriverClient;
+import com.modsen.rideservice.client.PassengerClient;
+import com.modsen.rideservice.dto.DriverResponseDto;
 import com.modsen.rideservice.dto.PageDto;
+import com.modsen.rideservice.dto.PassengerResponseDto;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
@@ -36,6 +40,8 @@ public class RideServiceImpl implements RideService {
     private final MessageSource messageSource;
     private final ValidateStateService validateStateService;
     private final RideCostService rideCostService;
+    private final PassengerClient passengerClient;
+    private final DriverClient driverClient;
 
     @Override
     public List<RideResponseDto> getAllRides() {
@@ -88,6 +94,12 @@ public class RideServiceImpl implements RideService {
     @Override
     @Transactional
     public RideResponseDto createRide(RideRequestDto rideRequestDto) {
+        PassengerResponseDto passengerResponseDto = passengerClient.getPassengerById(rideRequestDto.passengerId());
+        System.out.println(passengerResponseDto);
+        if(rideRequestDto.driverId() != null) {
+            DriverResponseDto driverResponseDto = driverClient.getDriverById(rideRequestDto.driverId());
+            System.out.println(driverResponseDto);
+        }
         Ride rideToSave = rideMapper.toRide(rideRequestDto);
         rideToSave.setRideState(RideState.CREATED);
         rideToSave.setRideDateTime(LocalDateTime.now());
@@ -100,6 +112,12 @@ public class RideServiceImpl implements RideService {
     @Transactional
     public RideResponseDto updateRide(Long id, RideRequestDto rideRequestDto) {
         Ride rideToSave = findByIdOrThrow(id);
+        PassengerResponseDto passengerResponseDto = passengerClient.getPassengerById(rideRequestDto.passengerId());
+        System.out.println(passengerResponseDto);
+        if(rideRequestDto.driverId() != null) {
+            DriverResponseDto driverResponseDto = driverClient.getDriverById(rideRequestDto.driverId());
+            System.out.println(driverResponseDto);
+        }
         rideMapper.updateRide(rideToSave, rideRequestDto);
         Ride ride = rideRepository.save(rideToSave);
         return rideMapper.toRideResponseDto(ride);

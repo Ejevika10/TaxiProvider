@@ -1,9 +1,12 @@
 package com.modsen.ratingservice.service.impl;
 
+import com.modsen.ratingservice.client.RideClient;
 import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
+import com.modsen.ratingservice.dto.RideResponseDto;
 import com.modsen.ratingservice.exception.DuplicateFieldException;
+import com.modsen.ratingservice.exception.InvalidFieldValueException;
 import com.modsen.ratingservice.exception.NotFoundException;
 import com.modsen.ratingservice.mapper.PageMapper;
 import com.modsen.ratingservice.mapper.RatingListMapper;
@@ -32,6 +35,7 @@ public class DriverRatingServiceImpl implements RatingService {
     private final RatingListMapper ratingListMapper;
     private final MessageSource messageSource;
     private final PageMapper pageMapper;
+    private final RideClient rideClient;
 
     @Override
     public List<RatingResponseDto> getAllRatings() {
@@ -66,14 +70,17 @@ public class DriverRatingServiceImpl implements RatingService {
         return ratingMapper.toRatingResponseDto(rating);
     }
 
-    /*To Do: check, if ride with rideId exists
-     *       check, if driver with userId is in this ride
-     * */
     @Override
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto) {
         if (driverRatingRepository.existsByRideIdAndDeletedIsFalse(ratingRequestDto.rideId())) {
             throw new DuplicateFieldException(
                     messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST,
+                            new Object[]{}, LocaleContextHolder.getLocale()));
+        }
+        RideResponseDto rideResponseDto = rideClient.getRideById(ratingRequestDto.rideId());
+        if(rideResponseDto.driverId().compareTo(ratingRequestDto.userId()) != 0) {
+            throw new InvalidFieldValueException(
+                    messageSource.getMessage(AppConstants.DIFFERENT_DRIVERS_ID,
                             new Object[]{}, LocaleContextHolder.getLocale()));
         }
         DriverRating ratingToSave = ratingMapper.toDriverRating(ratingRequestDto);
@@ -82,12 +89,15 @@ public class DriverRatingServiceImpl implements RatingService {
         return ratingMapper.toRatingResponseDto(rating);
     }
 
-    /*To Do: check, if ride with rideId exists
-     *       check, if driver with userId is in this ride
-     * */
     @Override
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto) {
         DriverRating ratingToSave = findByIdOrThrow(id);
+        RideResponseDto rideResponseDto = rideClient.getRideById(ratingRequestDto.rideId());
+        if(rideResponseDto.driverId().compareTo(ratingRequestDto.userId()) != 0) {
+            throw new InvalidFieldValueException(
+                    messageSource.getMessage(AppConstants.DIFFERENT_DRIVERS_ID,
+                            new Object[]{}, LocaleContextHolder.getLocale()));
+        }
         ratingMapper.updateDriverRating(ratingRequestDto, ratingToSave);
         DriverRating rating = driverRatingRepository.save(ratingToSave);
         return ratingMapper.toRatingResponseDto(rating);
