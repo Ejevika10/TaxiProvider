@@ -70,9 +70,6 @@ public class PassengerRatingServiceImpl implements RatingService {
         return ratingMapper.toRatingResponseDto(rating);
     }
 
-    /*To Do: check, if ride with rideId exists
-     *       check, if passenger with userId is in this ride
-     * */
     @Override
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto) {
         if (passengerRatingRepository.existsByRideIdAndDeletedIsFalse(ratingRequestDto.rideId())) {
