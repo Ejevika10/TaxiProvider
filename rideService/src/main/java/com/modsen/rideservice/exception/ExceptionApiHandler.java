@@ -65,6 +65,12 @@ public class ExceptionApiHandler {
         return new ErrorMessage(HttpStatus.BAD_REQUEST.value(), exception.getMostSpecificCause().getMessage());
     }
 
+    @ExceptionHandler(ClientException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage clientException(ClientException exception) {
+        return exception.getErrorMessage();
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage defException(Exception exception) {

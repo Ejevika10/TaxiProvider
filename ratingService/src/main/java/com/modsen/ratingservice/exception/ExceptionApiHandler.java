@@ -56,10 +56,17 @@ public class ExceptionApiHandler {
         return new ListErrorMessage(HttpStatus.BAD_REQUEST.value(), errors);
     }
 
+    @ExceptionHandler(ClientException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorMessage clientException(ClientException exception) {
+        return exception.getErrorMessage();
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage defException(Exception exception) {
         return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                messageSource.getMessage(AppConstants.INTERNAL_SERVER_ERROR, new Object[]{}, Locale.getDefault()));
+                messageSource.getMessage(AppConstants.INTERNAL_SERVER_ERROR,
+                        new Object[]{}, Locale.getDefault()));
     }
 }
