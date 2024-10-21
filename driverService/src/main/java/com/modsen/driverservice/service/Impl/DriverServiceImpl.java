@@ -1,5 +1,6 @@
 package com.modsen.driverservice.service.Impl;
 
+import com.modsen.driverservice.dto.UserRatingDto;
 import com.modsen.driverservice.util.AppConstants;
 import com.modsen.driverservice.dto.DriverRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
@@ -75,6 +76,7 @@ public class DriverServiceImpl implements DriverService {
         }
         Driver driverToSave = driverMapper.toDriver(driverRequestDTO);
         driverToSave.setDeleted(false);
+        driverToSave.setRating(0D);
         Driver driver = driverRepository.save(driverToSave);
         driver.setDeleted(false);
         return driverMapper.toDriverResponseDTO(driver);
@@ -97,6 +99,16 @@ public class DriverServiceImpl implements DriverService {
         }
         throw new NotFoundException(
                 messageSource.getMessage(AppConstants.DRIVER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
+    }
+
+    @Override
+    public DriverResponseDto updateRating(UserRatingDto userRatingDto) {
+        Driver driverToSave = driverRepository.findByIdAndDeletedIsFalse(userRatingDto.id())
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage(AppConstants.DRIVER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+        driverToSave.setRating(userRatingDto.rating());
+        Driver driver = driverRepository.save(driverToSave);
+        return driverMapper.toDriverResponseDTO(driver);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.modsen.passengerservice.service.impl;
 
+import com.modsen.passengerservice.dto.UserRatingDto;
 import com.modsen.passengerservice.util.AppConstants;
 import com.modsen.passengerservice.dto.PageDto;
 import com.modsen.passengerservice.dto.PassengerRequestDto;
@@ -75,6 +76,7 @@ public class PassengerServiceImpl implements PassengerService {
         }
         Passenger passengerToSave = passengerMapper.toPassenger(requestDTO);
         passengerToSave.setDeleted(false);
+        passengerToSave.setRating(0D);
         Passenger passenger = passengerRepository.save(passengerToSave);
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
@@ -106,5 +108,15 @@ public class PassengerServiceImpl implements PassengerService {
                         messageSource.getMessage(AppConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
         passenger.setDeleted(true);
         passengerRepository.save(passenger);
+    }
+
+    @Override
+    public PassengerResponseDto updateRating(UserRatingDto userRatingDTO) {
+        Passenger passengerToSave = passengerRepository.findById(userRatingDTO.id())
+                .orElseThrow(() -> new NotFoundException(
+                        messageSource.getMessage(AppConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+        passengerToSave.setRating(userRatingDTO.rating());
+        Passenger passenger = passengerRepository.save(passengerToSave);
+        return passengerMapper.toPassengerResponseDTO(passenger);
     }
 }
