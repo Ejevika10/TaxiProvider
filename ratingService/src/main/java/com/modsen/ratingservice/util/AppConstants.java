@@ -10,5 +10,11 @@ public final class AppConstants {
 
     public static final String RATING_FOR_RIDE_ALREADY_EXIST = "rating.ride.id";
 
+    public static final String INVALID_STATE_VALUE = "Invalid value for State";
+
+    public static final String DIFFERENT_DRIVERS_ID = "rating.drivers.different";
+
+    public static final String DIFFERENT_PASSENGERS_ID = "rating.passengers.different";
+
     public static final String INTERNAL_SERVER_ERROR = "internal.server.error";
 }
