@@ -7,6 +7,10 @@ import com.modsen.ratingservice.dto.RatingResponseDto;
 import java.util.List;
 
 public interface RatingService {
+    String EXCHANGE_NAME = "ratingservice";
+    String DRIVER_ROUTING_KEY = "rating.drivers";
+    String PASSENGER_ROUTING_KEY = "rating.passengers";
+
     List<RatingResponseDto> getAllRatings();
 
     PageDto<RatingResponseDto> getPageRatings(Integer offset, Integer limit);

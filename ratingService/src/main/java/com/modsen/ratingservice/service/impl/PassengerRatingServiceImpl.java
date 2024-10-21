@@ -3,6 +3,7 @@ package com.modsen.ratingservice.service.impl;
 import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
+import com.modsen.ratingservice.dto.UserRatingDto;
 import com.modsen.ratingservice.exception.DuplicateFieldException;
 import com.modsen.ratingservice.exception.NotFoundException;
 import com.modsen.ratingservice.mapper.PageMapper;
@@ -10,6 +11,7 @@ import com.modsen.ratingservice.mapper.RatingListMapper;
 import com.modsen.ratingservice.mapper.RatingMapper;
 import com.modsen.ratingservice.model.PassengerRating;
 import com.modsen.ratingservice.repository.PassengerRatingRepository;
+import com.modsen.ratingservice.service.RabbitService;
 import com.modsen.ratingservice.service.RatingService;
 import com.modsen.ratingservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,8 @@ public class PassengerRatingServiceImpl implements RatingService {
     private final RatingListMapper ratingListMapper;
     private final MessageSource messageSource;
     private final PageMapper pageMapper;
+    private final RabbitService rabbitService;
+    private final RatingCounterService ratingCounterService;
 
     @Override
     public List<RatingResponseDto> getAllRatings() {
@@ -79,6 +83,7 @@ public class PassengerRatingServiceImpl implements RatingService {
         PassengerRating ratingToSave = ratingMapper.toPassengerRating(ratingRequestDto);
         ratingToSave.setDeleted(false);
         PassengerRating rating = passengerRatingRepository.save(ratingToSave);
+        updateAverageRating(rating.getUserId());
         return ratingMapper.toRatingResponseDto(rating);
     }
 
@@ -90,6 +95,7 @@ public class PassengerRatingServiceImpl implements RatingService {
         PassengerRating ratingToSave = findByIdOrThrow(id);
         ratingMapper.updatePassengerRating(ratingRequestDto, ratingToSave);
         PassengerRating rating = passengerRatingRepository.save(ratingToSave);
+        updateAverageRating(rating.getUserId());
         return ratingMapper.toRatingResponseDto(rating);
     }
 
@@ -106,5 +112,15 @@ public class PassengerRatingServiceImpl implements RatingService {
                         messageSource.getMessage(AppConstants.RATING_NOT_FOUND,
                                 new Object[]{}, LocaleContextHolder.getLocale())));
     }
+
+    private void updateAverageRating(long userId){
+        List<PassengerRating> ratings = passengerRatingRepository.findTop40ByUserIdAndDeletedIsFalse(userId);
+        List<RatingResponseDto> ratingDtos = ratingListMapper.toPassengerRatingResponseDtoList(ratings);
+        double averageRating = ratingCounterService.countRating(ratingDtos);
+        UserRatingDto userRatingDto = new UserRatingDto(userId, averageRating);
+        rabbitService.sendMessage(EXCHANGE_NAME,PASSENGER_ROUTING_KEY, userRatingDto);
+    }
+
+
 }
 
