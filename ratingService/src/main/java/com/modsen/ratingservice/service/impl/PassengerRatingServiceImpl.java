@@ -36,6 +36,7 @@ public class PassengerRatingServiceImpl implements RatingService {
     private final PageMapper pageMapper;
     private final RabbitService rabbitService;
     private final RatingCounterService ratingCounterService;
+    private final PassengerValidatorService validator;
 
     @Override
     public List<RatingResponseDto> getAllRatings() {
@@ -70,16 +71,10 @@ public class PassengerRatingServiceImpl implements RatingService {
         return ratingMapper.toRatingResponseDto(rating);
     }
 
-    /*To Do: check, if ride with rideId exists
-     *       check, if passenger with userId is in this ride
-     * */
     @Override
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto) {
-        if (passengerRatingRepository.existsByRideIdAndDeletedIsFalse(ratingRequestDto.rideId())) {
-            throw new DuplicateFieldException(
-                    messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST,
-                            new Object[]{}, LocaleContextHolder.getLocale()));
-        }
+        validator.ratingExistsByRideId(ratingRequestDto.rideId());
+        validator.rideExistsAndUserIsCorrect(ratingRequestDto.rideId(), ratingRequestDto.userId());
         PassengerRating ratingToSave = ratingMapper.toPassengerRating(ratingRequestDto);
         ratingToSave.setDeleted(false);
         PassengerRating rating = passengerRatingRepository.save(ratingToSave);
@@ -87,12 +82,10 @@ public class PassengerRatingServiceImpl implements RatingService {
         return ratingMapper.toRatingResponseDto(rating);
     }
 
-    /*To Do: check, if ride with rideId exists
-     *       check, if passenger with userId is in this ride
-     * */
     @Override
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto) {
         PassengerRating ratingToSave = findByIdOrThrow(id);
+        validator.rideExistsAndUserIsCorrect(ratingRequestDto.rideId(), ratingRequestDto.userId());
         ratingMapper.updatePassengerRating(ratingRequestDto, ratingToSave);
         PassengerRating rating = passengerRatingRepository.save(ratingToSave);
         updateAverageRating(rating.getUserId());

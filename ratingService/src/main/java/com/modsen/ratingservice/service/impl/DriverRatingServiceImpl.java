@@ -36,6 +36,7 @@ public class DriverRatingServiceImpl implements RatingService {
     private final PageMapper pageMapper;
     private final RabbitService rabbitService;
     private final RatingCounterService ratingCounterService;
+    private final DriverValidatorService validator;
 
     @Override
     public List<RatingResponseDto> getAllRatings() {
@@ -70,16 +71,10 @@ public class DriverRatingServiceImpl implements RatingService {
         return ratingMapper.toRatingResponseDto(rating);
     }
 
-    /*To Do: check, if ride with rideId exists
-     *       check, if driver with userId is in this ride
-     * */
     @Override
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto) {
-        if (driverRatingRepository.existsByRideIdAndDeletedIsFalse(ratingRequestDto.rideId())) {
-            throw new DuplicateFieldException(
-                    messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST,
-                            new Object[]{}, LocaleContextHolder.getLocale()));
-        }
+        validator.ratingExistsByRideId(ratingRequestDto.rideId());
+        validator.rideExistsAndUserIsCorrect(ratingRequestDto.rideId(), ratingRequestDto.userId());
         DriverRating ratingToSave = ratingMapper.toDriverRating(ratingRequestDto);
         ratingToSave.setDeleted(false);
         DriverRating rating = driverRatingRepository.save(ratingToSave);
@@ -87,12 +82,10 @@ public class DriverRatingServiceImpl implements RatingService {
         return ratingMapper.toRatingResponseDto(rating);
     }
 
-    /*To Do: check, if ride with rideId exists
-     *       check, if driver with userId is in this ride
-     * */
     @Override
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto) {
         DriverRating ratingToSave = findByIdOrThrow(id);
+        validator.rideExistsAndUserIsCorrect(ratingRequestDto.rideId(), ratingRequestDto.userId());
         ratingMapper.updateDriverRating(ratingRequestDto, ratingToSave);
         DriverRating rating = driverRatingRepository.save(ratingToSave);
         updateAverageRating(rating.getUserId());
