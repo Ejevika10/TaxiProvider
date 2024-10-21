@@ -6,11 +6,11 @@ import java.time.LocalDateTime;
 
 public record RideResponseDto(
 
-        Long id,
+        long id,
 
         Long driverId,
 
-        Long passengerId,
+        long passengerId,
 
         String sourceAddress,
 

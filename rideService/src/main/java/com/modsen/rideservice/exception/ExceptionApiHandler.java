@@ -66,7 +66,7 @@ public class ExceptionApiHandler {
     }
 
     @ExceptionHandler(ClientException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorMessage clientException(ClientException exception) {
         return exception.getErrorMessage();
     }

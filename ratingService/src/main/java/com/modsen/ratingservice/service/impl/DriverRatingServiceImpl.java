@@ -1,6 +1,6 @@
 package com.modsen.ratingservice.service.impl;
 
-import com.modsen.ratingservice.client.RideClient;
+import com.modsen.ratingservice.client.RideClientService;
 import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
@@ -35,7 +35,7 @@ public class DriverRatingServiceImpl implements RatingService {
     private final RatingListMapper ratingListMapper;
     private final MessageSource messageSource;
     private final PageMapper pageMapper;
-    private final RideClient rideClient;
+    private final RideClientService rideClientService;
 
     @Override
     public List<RatingResponseDto> getAllRatings() {
@@ -77,7 +77,7 @@ public class DriverRatingServiceImpl implements RatingService {
                     messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST,
                             new Object[]{}, LocaleContextHolder.getLocale()));
         }
-        RideResponseDto rideResponseDto = rideClient.getRideById(ratingRequestDto.rideId());
+        RideResponseDto rideResponseDto = rideClientService.getRideById(ratingRequestDto.rideId());
         if(rideResponseDto.driverId().compareTo(ratingRequestDto.userId()) != 0) {
             throw new InvalidFieldValueException(
                     messageSource.getMessage(AppConstants.DIFFERENT_DRIVERS_ID,
@@ -92,7 +92,7 @@ public class DriverRatingServiceImpl implements RatingService {
     @Override
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto) {
         DriverRating ratingToSave = findByIdOrThrow(id);
-        RideResponseDto rideResponseDto = rideClient.getRideById(ratingRequestDto.rideId());
+        RideResponseDto rideResponseDto = rideClientService.getRideById(ratingRequestDto.rideId());
         if(rideResponseDto.driverId().compareTo(ratingRequestDto.userId()) != 0) {
             throw new InvalidFieldValueException(
                     messageSource.getMessage(AppConstants.DIFFERENT_DRIVERS_ID,

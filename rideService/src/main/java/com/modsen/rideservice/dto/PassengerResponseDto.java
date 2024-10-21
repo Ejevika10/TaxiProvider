@@ -1,7 +1,7 @@
 package com.modsen.rideservice.dto;
 
 public record PassengerResponseDto(
-        Long id,
+        long id,
 
         String name,
 

@@ -10,16 +10,15 @@ import org.springframework.stereotype.Component;
 import java.io.InputStream;
 
 @Component
-public class CustomErrorDecoder implements ErrorDecoder {
+public class ExternalErrorDecoder implements ErrorDecoder {
     @Override
-    public Exception decode(String s, Response response) {
-        ErrorMessage errorMessage;
+    public Exception decode(String errorString, Response response) {
         try (InputStream bodyIs = response.body().asInputStream()) {
             ObjectMapper mapper = new ObjectMapper();
-            errorMessage = mapper.readValue(bodyIs, ErrorMessage.class);
+            ErrorMessage errorMessage = mapper.readValue(bodyIs, ErrorMessage.class);
+            return new ClientException(errorMessage);
         } catch (Exception e) {
             return new Exception(e.getMessage());
         }
-        return new ClientException(errorMessage);
     }
 }
