@@ -1,4 +1,4 @@
-package com.modsen.rideservice.client;
+package com.modsen.rideservice.client.passenger;
 
 import com.modsen.rideservice.dto.PassengerResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;

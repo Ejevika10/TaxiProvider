@@ -1,4 +1,4 @@
-package com.modsen.ratingservice.client;
+package com.modsen.ratingservice.client.ride;
 
 import com.modsen.ratingservice.dto.RideResponseDto;
 import lombok.RequiredArgsConstructor;

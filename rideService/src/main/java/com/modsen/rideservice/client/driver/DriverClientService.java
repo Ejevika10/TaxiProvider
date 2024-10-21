@@ -1,4 +1,4 @@
-package com.modsen.rideservice.client;
+package com.modsen.rideservice.client.driver;
 
 import com.modsen.rideservice.dto.DriverResponseDto;
 import lombok.RequiredArgsConstructor;

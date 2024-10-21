@@ -1,6 +1,6 @@
 package com.modsen.ratingservice.service.impl;
 
-import com.modsen.ratingservice.client.RideClientService;
+import com.modsen.ratingservice.client.ride.RideClientService;
 import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;

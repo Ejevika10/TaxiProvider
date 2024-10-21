@@ -1,7 +1,7 @@
 package com.modsen.rideservice.service.impl;
 
-import com.modsen.rideservice.client.DriverClientService;
-import com.modsen.rideservice.client.PassengerClientService;
+import com.modsen.rideservice.client.driver.DriverClientService;
+import com.modsen.rideservice.client.passenger.PassengerClientService;
 import com.modsen.rideservice.dto.DriverResponseDto;
 import com.modsen.rideservice.dto.PageDto;
 import com.modsen.rideservice.dto.PassengerResponseDto;
