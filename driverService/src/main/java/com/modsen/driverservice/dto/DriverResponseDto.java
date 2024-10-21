@@ -7,5 +7,7 @@ public record DriverResponseDto(
 
         String email,
 
-        String phone) {
+        String phone,
+
+        Double rating) {
 }
