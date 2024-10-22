@@ -4,7 +4,6 @@ import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
 import com.modsen.ratingservice.dto.UserRatingDto;
-import com.modsen.ratingservice.exception.DuplicateFieldException;
 import com.modsen.ratingservice.exception.NotFoundException;
 import com.modsen.ratingservice.mapper.PageMapper;
 import com.modsen.ratingservice.mapper.RatingListMapper;
@@ -16,8 +15,6 @@ import com.modsen.ratingservice.service.RatingService;
 import com.modsen.ratingservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -32,7 +29,6 @@ public class DriverRatingServiceImpl implements RatingService {
     private final DriverRatingRepository driverRatingRepository;
     private final RatingMapper ratingMapper;
     private final RatingListMapper ratingListMapper;
-    private final MessageSource messageSource;
     private final PageMapper pageMapper;
     private final RabbitService rabbitService;
     private final RatingCounterService ratingCounterService;
@@ -101,9 +97,7 @@ public class DriverRatingServiceImpl implements RatingService {
 
     private DriverRating findByIdOrThrow(String id) {
         return driverRatingRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND,
-                                new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.RATING_NOT_FOUND));
     }
 
     private void updateAverageRating(long userId){
