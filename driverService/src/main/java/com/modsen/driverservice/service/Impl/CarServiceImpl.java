@@ -62,16 +62,14 @@ public class CarServiceImpl implements CarService {
     @Override
     public CarResponseDto getCarById(Long id) {
         Car car = carRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.CAR_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.CAR_NOT_FOUND));
         return carMapper.toCarResponseDTO(car);
     }
 
     @Override
     public CarResponseDto getCarByNumber(String number) {
         Car car = carRepository.findByNumberAndDeletedIsFalse(number)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.CAR_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.CAR_NOT_FOUND));
         return carMapper.toCarResponseDTO(car);
     }
 
@@ -79,11 +77,9 @@ public class CarServiceImpl implements CarService {
     @Transactional
     public CarResponseDto addCar(CarRequestDto carRequestDTO) {
         Driver driver = driverRepository.findByIdAndDeletedIsFalse(carRequestDTO.driverId())
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.CAR_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.CAR_NOT_FOUND));
         if (carRepository.existsByNumberAndDeletedIsFalse(carRequestDTO.number())) {
-            throw new DuplicateFieldException(
-                    messageSource.getMessage(AppConstants.CAR_NUMBER_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
+            throw new DuplicateFieldException(AppConstants.CAR_NUMBER_EXIST);
         }
         Car carToSave = carMapper.toCar(carRequestDTO);
         carToSave.setDeleted(false);
@@ -101,8 +97,7 @@ public class CarServiceImpl implements CarService {
         if (carRepository.existsByIdAndDeletedIsFalse(id)) {
             Optional<Car> existingCar = carRepository.findByNumberAndDeletedIsFalse(carRequestDTO.number());
             if(existingCar.isPresent() && !existingCar.get().getId().equals(id)) {
-                throw new DuplicateFieldException(
-                        messageSource.getMessage(AppConstants.CAR_NUMBER_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
+                throw new DuplicateFieldException(AppConstants.CAR_NUMBER_EXIST);
             }
             Car carToSave = carMapper.toCar(carRequestDTO);
             carToSave.setId(id);
@@ -112,16 +107,14 @@ public class CarServiceImpl implements CarService {
             return carMapper.toCarResponseDTO(car);
         }
 
-        throw new NotFoundException(
-                messageSource.getMessage(AppConstants.CAR_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
+        throw new NotFoundException(AppConstants.CAR_NOT_FOUND);
     }
 
     @Override
     @Transactional
     public void deleteCar(Long id) {
         Car car = carRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.CAR_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.CAR_NOT_FOUND));
         car.setDeleted(true);
         carRepository.save(car);
     }

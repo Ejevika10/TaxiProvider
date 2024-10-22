@@ -14,8 +14,6 @@ import com.modsen.driverservice.model.Driver;
 import com.modsen.driverservice.repository.DriverRepository;
 import com.modsen.driverservice.service.DriverService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -36,8 +34,6 @@ public class DriverServiceImpl implements DriverService {
 
     private final PageMapper pageMapper;
 
-    private final MessageSource messageSource;
-
     @Override
     public List<DriverResponseDto> getAllDrivers() {
         List<Driver> drivers = driverRepository.findAllByDeletedIsFalse();
@@ -54,16 +50,14 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public DriverResponseDto getDriverById(Long id) {
         Driver driver = driverRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.DRIVER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
         return driverMapper.toDriverResponseDTO(driver);
     }
 
     @Override
     public DriverResponseDto getDriverByEmail(String email) {
         Driver driver = driverRepository.findByEmailAndDeletedIsFalse(email)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.DRIVER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
         return driverMapper.toDriverResponseDTO(driver);
     }
 
@@ -71,14 +65,10 @@ public class DriverServiceImpl implements DriverService {
     @Transactional
     public DriverResponseDto createDriver(DriverRequestDto driverRequestDTO) {
         if (driverRepository.existsByEmailAndDeletedIsFalse(driverRequestDTO.email())) {
-            throw new DuplicateFieldException(
-                    messageSource.getMessage(AppConstants.DRIVER_EMAIL_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
+            throw new DuplicateFieldException(AppConstants.DRIVER_EMAIL_EXIST);
         }
         Driver driverToSave = driverMapper.toDriver(driverRequestDTO);
-        driverToSave.setDeleted(false);
-        driverToSave.setRating(0D);
         Driver driver = driverRepository.save(driverToSave);
-        driver.setDeleted(false);
         return driverMapper.toDriverResponseDTO(driver);
     }
 
@@ -88,24 +78,21 @@ public class DriverServiceImpl implements DriverService {
         if (driverRepository.existsByIdAndDeletedIsFalse(id)) {
             Optional<Driver> existingDriver = driverRepository.findByEmailAndDeletedIsFalse(driverRequestDTO.email());
             if(existingDriver.isPresent() && !existingDriver.get().getId().equals(id)) {
-                throw new DuplicateFieldException(
-                        messageSource.getMessage(AppConstants.DRIVER_EMAIL_EXIST, new Object[]{}, LocaleContextHolder.getLocale()));
+                throw new DuplicateFieldException(AppConstants.DRIVER_EMAIL_EXIST);
             }
             Driver driverToSave = driverMapper.toDriver(driverRequestDTO);
             driverToSave.setId(id);
-            driverToSave.setDeleted(false);
             Driver driver = driverRepository.save(driverToSave);
             return driverMapper.toDriverResponseDTO(driver);
         }
-        throw new NotFoundException(
-                messageSource.getMessage(AppConstants.DRIVER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
+        throw new NotFoundException(AppConstants.DRIVER_NOT_FOUND);
     }
 
     @Override
+    @Transactional
     public DriverResponseDto updateRating(UserRatingDto userRatingDto) {
         Driver driverToSave = driverRepository.findByIdAndDeletedIsFalse(userRatingDto.id())
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.DRIVER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
         driverToSave.setRating(userRatingDto.rating());
         Driver driver = driverRepository.save(driverToSave);
         return driverMapper.toDriverResponseDTO(driver);
@@ -115,8 +102,7 @@ public class DriverServiceImpl implements DriverService {
     @Transactional
     public void deleteDriver(Long id) {
         Driver driver = driverRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.DRIVER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
         driver.setDeleted(true);
         driverRepository.save(driver);
     }
