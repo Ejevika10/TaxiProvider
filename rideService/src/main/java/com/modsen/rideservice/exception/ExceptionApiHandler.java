@@ -4,6 +4,7 @@ import com.modsen.rideservice.util.AppConstants;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -22,19 +23,22 @@ public class ExceptionApiHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessage notFoundException(NotFoundException exception) {
-        return new ErrorMessage(HttpStatus.NOT_FOUND.value(), exception.getMessage());
+        return new ErrorMessage(HttpStatus.NOT_FOUND.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
     @ExceptionHandler(DuplicateFieldException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorMessage duplicateFieldException(DuplicateFieldException exception) {
-        return new ErrorMessage(HttpStatus.CONFLICT.value(), exception.getMessage());
+        return new ErrorMessage(HttpStatus.CONFLICT.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
     @ExceptionHandler(InvalidStateException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorMessage invalidStateException(InvalidStateException exception) {
-        return new ErrorMessage(HttpStatus.CONFLICT.value(), exception.getMessage());
+        return new ErrorMessage(HttpStatus.CONFLICT.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
     @ExceptionHandler(InvalidFieldValueException.class)
