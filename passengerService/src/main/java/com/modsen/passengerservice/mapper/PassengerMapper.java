@@ -3,9 +3,12 @@ package com.modsen.passengerservice.mapper;
 import com.modsen.passengerservice.dto.PassengerRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
 import com.modsen.passengerservice.model.Passenger;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface PassengerMapper {
@@ -19,4 +22,6 @@ public interface PassengerMapper {
 
     PassengerRequestDto toPassengerRequestDTO(Passenger passenger);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updatePassenger(@MappingTarget Passenger passenger, PassengerRequestDto passengerRequestDto);
 }

@@ -49,8 +49,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public DriverResponseDto getDriverById(Long id) {
-        Driver driver = driverRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
+        Driver driver = findByIdOrThrow(id);
         return driverMapper.toDriverResponseDTO(driver);
     }
 
@@ -75,24 +74,20 @@ public class DriverServiceImpl implements DriverService {
     @Override
     @Transactional
     public DriverResponseDto updateDriver(Long id, DriverRequestDto driverRequestDTO) {
-        if (driverRepository.existsByIdAndDeletedIsFalse(id)) {
-            Optional<Driver> existingDriver = driverRepository.findByEmailAndDeletedIsFalse(driverRequestDTO.email());
-            if(existingDriver.isPresent() && !existingDriver.get().getId().equals(id)) {
-                throw new DuplicateFieldException(AppConstants.DRIVER_EMAIL_EXIST);
-            }
-            Driver driverToSave = driverMapper.toDriver(driverRequestDTO);
-            driverToSave.setId(id);
-            Driver driver = driverRepository.save(driverToSave);
-            return driverMapper.toDriverResponseDTO(driver);
+        Driver driverToSave = findByIdOrThrow(id);
+        Optional<Driver> existingDriver = driverRepository.findByEmailAndDeletedIsFalse(driverRequestDTO.email());
+        if(existingDriver.isPresent() && !existingDriver.get().getId().equals(id)) {
+            throw new DuplicateFieldException(AppConstants.DRIVER_EMAIL_EXIST);
         }
-        throw new NotFoundException(AppConstants.DRIVER_NOT_FOUND);
+        driverMapper.updateDriver(driverToSave, driverRequestDTO);
+        Driver driver = driverRepository.save(driverToSave);
+        return driverMapper.toDriverResponseDTO(driver);
     }
 
     @Override
     @Transactional
     public DriverResponseDto updateRating(UserRatingDto userRatingDto) {
-        Driver driverToSave = driverRepository.findByIdAndDeletedIsFalse(userRatingDto.id())
-                .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
+        Driver driverToSave = findByIdOrThrow(userRatingDto.id());
         driverToSave.setRating(userRatingDto.rating());
         Driver driver = driverRepository.save(driverToSave);
         return driverMapper.toDriverResponseDTO(driver);
@@ -101,9 +96,13 @@ public class DriverServiceImpl implements DriverService {
     @Override
     @Transactional
     public void deleteDriver(Long id) {
-        Driver driver = driverRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
+        Driver driver = findByIdOrThrow(id);
         driver.setDeleted(true);
         driverRepository.save(driver);
+    }
+
+    private Driver findByIdOrThrow(Long id) {
+        return driverRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
     }
 }
