@@ -9,16 +9,27 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfiguration {
-    static final String EXCHANGE_NAME = "ratingservice";
-    static final String DRIVER_ROUTING_KEY = "rating.drivers";
-    static final String PASSENGER_ROUTING_KEY = "rating.passengers";
-    static final String DRIVER_QUEUE_NAME = "rating.drivers";
-    static final String PASSENGER_QUEUE_NAME = "rating.passengers";
+
+    @Value("${spring.rabbitmq.exchange}")
+    private String EXCHANGE_NAME;
+
+    @Value("${spring.rabbitmq.driver.routing.key}")
+    private String DRIVER_ROUTING_KEY;
+
+    @Value("${spring.rabbitmq.passenger.routing.key}")
+    private String PASSENGER_ROUTING_KEY;
+
+    @Value("${spring.rabbitmq.driver.queue}")
+    private String DRIVER_QUEUE_NAME;
+
+    @Value("${spring.rabbitmq.passenger.queue}")
+    private String PASSENGER_QUEUE_NAME;
 
     @Bean
     public Declarables topicBindings() {

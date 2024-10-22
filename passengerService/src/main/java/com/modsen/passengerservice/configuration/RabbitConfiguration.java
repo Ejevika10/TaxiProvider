@@ -9,14 +9,21 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfiguration {
-    static final String EXCHANGE_NAME = "ratingservice";
-    static final String PASSENGER_ROUTING_KEY = "rating.passengers";
-    static final String PASSENGER_QUEUE_NAME = "rating.passengers";
+    @Value("${spring.rabbitmq.exchange}")
+    private String EXCHANGE_NAME;
+
+    @Value("${spring.rabbitmq.passenger.routing.key}")
+    private String PASSENGER_ROUTING_KEY;
+
+    @Value("${spring.rabbitmq.passenger.queue}")
+    private String PASSENGER_QUEUE_NAME;
+
 
     @Bean
     public Queue queue() {

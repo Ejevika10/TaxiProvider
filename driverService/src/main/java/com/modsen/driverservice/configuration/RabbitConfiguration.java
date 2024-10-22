@@ -9,14 +9,20 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfiguration {
-    static final String EXCHANGE_NAME = "ratingservice";
-    static final String DRIVER_ROUTING_KEY = "rating.drivers";
-    static final String DRIVER_QUEUE_NAME = "rating.drivers";
+    @Value("${spring.rabbitmq.exchange}")
+    private String EXCHANGE_NAME;
+
+    @Value("${spring.rabbitmq.driver.routing.key}")
+    private String DRIVER_ROUTING_KEY;
+
+    @Value("${spring.rabbitmq.driver.queue}")
+    private String DRIVER_QUEUE_NAME;
 
     @Bean
     public Queue queue() {

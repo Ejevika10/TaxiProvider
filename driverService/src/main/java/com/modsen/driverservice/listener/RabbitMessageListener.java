@@ -10,11 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class RabbitMessageListener {
-    static final String DRIVER_QUEUE_NAME = "rating.drivers";
 
     private final DriverService driverService;
 
-    @RabbitListener(queues = DRIVER_QUEUE_NAME)
+    @RabbitListener(queues = "${spring.rabbitmq.driver.queue}")
     public void listen(UserRatingDto userRatingDto) {
         DriverResponseDto driverResponseDto = driverService.updateRating(userRatingDto);
         System.out.println(driverResponseDto);

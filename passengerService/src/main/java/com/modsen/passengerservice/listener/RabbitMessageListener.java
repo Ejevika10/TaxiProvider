@@ -10,11 +10,10 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class RabbitMessageListener {
-    static final String PASSENGER_QUEUE_NAME = "rating.passengers";
 
     private final PassengerService passengerService;
 
-    @RabbitListener(queues = PASSENGER_QUEUE_NAME)
+    @RabbitListener(queues = "${spring.rabbitmq.passenger.queue}")
     public void listen(UserRatingDto userRatingDto) {
         PassengerResponseDto passenger = passengerService.updateRating(userRatingDto);
         System.out.println(passenger);
