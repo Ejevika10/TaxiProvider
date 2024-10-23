@@ -17,30 +17,30 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfiguration {
 
     @Value("${spring.rabbitmq.exchange}")
-    private String EXCHANGE_NAME;
+    private String exchangeName;
 
     @Value("${spring.rabbitmq.driver.routing.key}")
-    private String DRIVER_ROUTING_KEY;
+    private String driverRoutingKey;
 
     @Value("${spring.rabbitmq.passenger.routing.key}")
-    private String PASSENGER_ROUTING_KEY;
+    private String passengerRoutingKey;
 
     @Value("${spring.rabbitmq.driver.queue}")
-    private String DRIVER_QUEUE_NAME;
+    private String driverQueueName;
 
     @Value("${spring.rabbitmq.passenger.queue}")
-    private String PASSENGER_QUEUE_NAME;
+    private String passengerQueueName;
 
     @Bean
     public Declarables topicBindings() {
-        Queue topicQueueDrivers = new Queue(DRIVER_QUEUE_NAME, false);
-        Queue topicQueuePassengers = new Queue(PASSENGER_QUEUE_NAME, false);
+        Queue topicQueueDrivers = new Queue(driverQueueName, false);
+        Queue topicQueuePassengers = new Queue(passengerQueueName, false);
 
-        TopicExchange topicExchange = new TopicExchange(EXCHANGE_NAME);
+        TopicExchange topicExchange = new TopicExchange(exchangeName);
 
         return new Declarables(topicQueueDrivers, topicQueuePassengers, topicExchange,
-                BindingBuilder.bind(topicQueueDrivers).to(topicExchange).with(DRIVER_ROUTING_KEY),
-                BindingBuilder.bind(topicQueuePassengers).to(topicExchange).with(PASSENGER_ROUTING_KEY));
+                BindingBuilder.bind(topicQueueDrivers).to(topicExchange).with(driverRoutingKey),
+                BindingBuilder.bind(topicQueuePassengers).to(topicExchange).with(passengerRoutingKey));
     }
 
     @Bean

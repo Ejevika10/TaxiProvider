@@ -16,28 +16,28 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfiguration {
     @Value("${spring.rabbitmq.exchange}")
-    private String EXCHANGE_NAME;
+    private String exchangeName;
 
     @Value("${spring.rabbitmq.passenger.routing.key}")
-    private String PASSENGER_ROUTING_KEY;
+    private String passengerRoutingKey;
 
     @Value("${spring.rabbitmq.passenger.queue}")
-    private String PASSENGER_QUEUE_NAME;
+    private String passengerQueueName;
 
 
     @Bean
     public Queue queue() {
-        return new Queue(PASSENGER_QUEUE_NAME, false);
+        return new Queue(passengerQueueName, false);
     }
 
     @Bean
     TopicExchange exchange() {
-        return new TopicExchange(EXCHANGE_NAME);
+        return new TopicExchange(exchangeName);
     }
 
     @Bean
     public Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(PASSENGER_ROUTING_KEY);
+        return BindingBuilder.bind(queue).to(exchange).with(passengerRoutingKey);
     }
 
     @Bean
