@@ -24,4 +24,6 @@ public interface DriverRatingRepository extends MongoRepository<DriverRating, St
     List<DriverRating> findAllByUserIdAndDeletedIsFalse(Long userId);
 
     Page<DriverRating> findAllByUserIdAndDeletedIsFalse(Long userId, Pageable pageable);
+
+    List<DriverRating> findTop100ByUserIdAndDeletedIsFalse(Long id);
 }

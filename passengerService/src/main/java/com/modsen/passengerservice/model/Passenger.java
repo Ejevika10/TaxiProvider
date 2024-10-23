@@ -31,5 +31,8 @@ public class Passenger {
     private String phone;
 
     @Column(nullable = false)
+    private Double rating;
+
+    @Column(nullable = false)
     private Boolean deleted;
 }

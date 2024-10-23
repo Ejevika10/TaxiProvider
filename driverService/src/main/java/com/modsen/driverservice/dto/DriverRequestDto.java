@@ -14,6 +14,8 @@ public record DriverRequestDto (
     @Email(message = "{driver.email.invalid}")
     String email,
 
+    Double rating,
+
     @NotBlank(message = "{driver.phone.mandatory}")
     @Pattern(regexp = "^((8|\\+7)[\\- ]?)?(\\(?\\d{3}\\)?[\\- ]?)?[\\d\\- ]{7,10}$", message = "{driver.phone.invalid}")
     String phone ) {

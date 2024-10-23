@@ -32,6 +32,9 @@ public class Driver {
     @Column(nullable = false)
     private String phone;
 
+    @Column(nullable = false)
+    private Double rating;
+
     @OneToMany(mappedBy = "driver")
     private List<Car> cars;
 

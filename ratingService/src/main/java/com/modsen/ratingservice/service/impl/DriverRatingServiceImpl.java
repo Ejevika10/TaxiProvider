@@ -3,18 +3,18 @@ package com.modsen.ratingservice.service.impl;
 import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
+import com.modsen.ratingservice.dto.UserRatingDto;
 import com.modsen.ratingservice.exception.NotFoundException;
 import com.modsen.ratingservice.mapper.PageMapper;
 import com.modsen.ratingservice.mapper.RatingListMapper;
 import com.modsen.ratingservice.mapper.RatingMapper;
 import com.modsen.ratingservice.model.DriverRating;
 import com.modsen.ratingservice.repository.DriverRatingRepository;
+import com.modsen.ratingservice.service.RabbitService;
 import com.modsen.ratingservice.service.RatingService;
 import com.modsen.ratingservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -29,8 +29,9 @@ public class DriverRatingServiceImpl implements RatingService {
     private final DriverRatingRepository driverRatingRepository;
     private final RatingMapper ratingMapper;
     private final RatingListMapper ratingListMapper;
-    private final MessageSource messageSource;
     private final PageMapper pageMapper;
+    private final RabbitService rabbitService;
+    private final RatingCounterService ratingCounterService;
     private final DriverValidatorService validator;
 
     @Override
@@ -73,6 +74,7 @@ public class DriverRatingServiceImpl implements RatingService {
         DriverRating ratingToSave = ratingMapper.toDriverRating(ratingRequestDto);
         ratingToSave.setDeleted(false);
         DriverRating rating = driverRatingRepository.save(ratingToSave);
+        updateAverageRating(rating.getUserId());
         return ratingMapper.toRatingResponseDto(rating);
     }
 
@@ -82,6 +84,7 @@ public class DriverRatingServiceImpl implements RatingService {
         validator.rideExistsAndUserIsCorrect(ratingRequestDto.rideId(), ratingRequestDto.userId());
         ratingMapper.updateDriverRating(ratingRequestDto, ratingToSave);
         DriverRating rating = driverRatingRepository.save(ratingToSave);
+        updateAverageRating(rating.getUserId());
         return ratingMapper.toRatingResponseDto(rating);
     }
 
@@ -94,8 +97,14 @@ public class DriverRatingServiceImpl implements RatingService {
 
     private DriverRating findByIdOrThrow(String id) {
         return driverRatingRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.RATING_NOT_FOUND,
-                                new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.RATING_NOT_FOUND));
+    }
+
+    private void updateAverageRating(long userId){
+        List<DriverRating> ratings = driverRatingRepository.findTop100ByUserIdAndDeletedIsFalse(userId);
+        List<RatingResponseDto> ratingDtos = ratingListMapper.toDriverRatingResponseDtoList(ratings);
+        double averageRating = ratingCounterService.countRating(ratingDtos);
+        UserRatingDto userRatingDto = new UserRatingDto(userId, averageRating);
+        rabbitService.sendMessage(EXCHANGE_NAME,DRIVER_ROUTING_KEY, userRatingDto);
     }
 }

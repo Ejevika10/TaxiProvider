@@ -1,5 +1,6 @@
 package com.modsen.passengerservice.service.impl;
 
+import com.modsen.passengerservice.dto.UserRatingDto;
 import com.modsen.passengerservice.util.AppConstants;
 import com.modsen.passengerservice.dto.PageDto;
 import com.modsen.passengerservice.dto.PassengerRequestDto;
@@ -13,8 +14,6 @@ import com.modsen.passengerservice.model.Passenger;
 import com.modsen.passengerservice.repository.PassengerRepository;
 import com.modsen.passengerservice.service.PassengerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -35,8 +34,6 @@ public class PassengerServiceImpl implements PassengerService {
 
     private final PageMapper pageMapper;
 
-    private final MessageSource messageSource;
-
     @Override
     public List<PassengerResponseDto> getAllPassengers() {
         List<Passenger> passengers = passengerRepository.findAllByDeletedIsFalse();
@@ -52,17 +49,14 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     public PassengerResponseDto getPassengerById(Long id) {
-        Passenger passenger = passengerRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+        Passenger passenger = findByIdOrThrow(id);
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
     @Override
     public PassengerResponseDto getPassengerByEmail(String email) {
         Passenger passenger = passengerRepository.findByEmailAndDeletedIsFalse(email)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.PASSENGER_NOT_FOUND));
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
@@ -70,11 +64,9 @@ public class PassengerServiceImpl implements PassengerService {
     @Transactional
     public PassengerResponseDto addPassenger(PassengerRequestDto requestDTO) {
         if(passengerRepository.existsByEmailAndDeletedIsFalse(requestDTO.email())) {
-            throw new DuplicateFieldException(
-                    messageSource.getMessage(AppConstants.PASSENGER_EMAIL_EXISTS, new Object[]{}, LocaleContextHolder.getLocale()));
+            throw new DuplicateFieldException(AppConstants.PASSENGER_EMAIL_EXISTS);
         }
         Passenger passengerToSave = passengerMapper.toPassenger(requestDTO);
-        passengerToSave.setDeleted(false);
         Passenger passenger = passengerRepository.save(passengerToSave);
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
@@ -82,29 +74,35 @@ public class PassengerServiceImpl implements PassengerService {
     @Override
     @Transactional
     public PassengerResponseDto updatePassenger(Long id, PassengerRequestDto requestDTO) {
-        if(passengerRepository.existsByIdAndDeletedIsFalse(id)) {
-            Optional<Passenger> existingPassenger = passengerRepository.findByEmailAndDeletedIsFalse(requestDTO.email());
-            if(existingPassenger.isPresent() && !existingPassenger.get().getId().equals(id)) {
-                throw new DuplicateFieldException(
-                        messageSource.getMessage(AppConstants.PASSENGER_EMAIL_EXISTS, new Object[]{}, LocaleContextHolder.getLocale()));
-            }
-            Passenger passengerToSave = passengerMapper.toPassenger(requestDTO);
-            passengerToSave.setId(id);
-            passengerToSave.setDeleted(false);
-            Passenger passenger = passengerRepository.save(passengerToSave);
-            return passengerMapper.toPassengerResponseDTO(passenger);
+        Passenger passengerToSave = findByIdOrThrow(id);
+        Optional<Passenger> existingPassenger = passengerRepository.findByEmailAndDeletedIsFalse(requestDTO.email());
+        if(existingPassenger.isPresent() && !existingPassenger.get().getId().equals(id)) {
+            throw new DuplicateFieldException(AppConstants.PASSENGER_EMAIL_EXISTS);
         }
-        throw new NotFoundException(
-                messageSource.getMessage(AppConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale()));
+        passengerMapper.updatePassenger(passengerToSave, requestDTO);
+        Passenger passenger = passengerRepository.save(passengerToSave);
+        return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
     @Override
     @Transactional
     public void deletePassenger(Long id) {
-        Passenger passenger = passengerRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.PASSENGER_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+        Passenger passenger = findByIdOrThrow(id);
         passenger.setDeleted(true);
         passengerRepository.save(passenger);
+    }
+
+    @Override
+    @Transactional
+    public PassengerResponseDto updateRating(UserRatingDto userRatingDTO) {
+        Passenger passengerToSave = findByIdOrThrow(userRatingDTO.id());
+        passengerToSave.setRating(userRatingDTO.rating());
+        Passenger passenger = passengerRepository.save(passengerToSave);
+        return passengerMapper.toPassengerResponseDTO(passenger);
+    }
+
+    private Passenger findByIdOrThrow(Long id) {
+        return passengerRepository.findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new NotFoundException(AppConstants.PASSENGER_NOT_FOUND));
     }
 }

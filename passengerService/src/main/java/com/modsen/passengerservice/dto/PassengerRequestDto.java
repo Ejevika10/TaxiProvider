@@ -17,5 +17,7 @@ public record PassengerRequestDto (
 
     @NotBlank(message = "{passenger.phone.mandatory}")
     @Pattern(regexp = AppConstants.PHONE_REGEXP, message = "{passenger.phone.invalid}")
-    String phone) {
+    String phone,
+
+    Double rating) {
 }

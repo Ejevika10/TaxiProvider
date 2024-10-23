@@ -24,4 +24,6 @@ public interface PassengerRatingRepository extends MongoRepository<PassengerRati
     List<PassengerRating> findAllByUserIdAndDeletedIsFalse(Long userId);
 
     Page<PassengerRating> findAllByUserIdAndDeletedIsFalse(Long userId, Pageable pageable);
+
+    List<PassengerRating> findTop40ByUserIdAndDeletedIsFalse(Long userId);
 }

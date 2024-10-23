@@ -7,8 +7,6 @@ import com.modsen.ratingservice.exception.InvalidFieldValueException;
 import com.modsen.ratingservice.repository.DriverRatingRepository;
 import com.modsen.ratingservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,23 +14,18 @@ import org.springframework.stereotype.Service;
 public class DriverValidatorService {
 
     private final DriverRatingRepository driverRatingRepository;
-    private final MessageSource messageSource;
     private final RideClientService rideClientService;
 
     public void ratingExistsByRideId(long rideId){
         if (driverRatingRepository.existsByRideIdAndDeletedIsFalse(rideId)) {
-            throw new DuplicateFieldException(
-                    messageSource.getMessage(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST,
-                            new Object[]{}, LocaleContextHolder.getLocale()));
+            throw new DuplicateFieldException(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST);
         }
     }
 
     public void rideExistsAndUserIsCorrect(long rideId, long userId){
         RideResponseDto rideResponseDto = rideClientService.getRideById(rideId);
         if(rideResponseDto.driverId().compareTo(userId) != 0) {
-            throw new InvalidFieldValueException(
-                    messageSource.getMessage(AppConstants.DIFFERENT_DRIVERS_ID,
-                            new Object[]{}, LocaleContextHolder.getLocale()));
+            throw new InvalidFieldValueException(AppConstants.DIFFERENT_DRIVERS_ID);
         }
     }
 }

@@ -19,8 +19,6 @@ import com.modsen.rideservice.repository.RideRepository;
 import com.modsen.rideservice.service.RideService;
 import com.modsen.rideservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -37,7 +35,6 @@ public class RideServiceImpl implements RideService {
     private final RideMapper rideMapper;
     private final RideListMapper rideListMapper;
     private final PageMapper pageMapper;
-    private final MessageSource messageSource;
     private final ValidateStateService validateStateService;
     private final RideCostService rideCostService;
     private final PassengerClientService passengerClientService;
@@ -88,17 +85,12 @@ public class RideServiceImpl implements RideService {
         return rideMapper.toRideResponseDto(ride);
     }
 
-    /*To Do: check if passenger with passengerId exists
-     *       check if driver with driverId exists
-     * */
     @Override
     @Transactional
     public RideResponseDto createRide(RideRequestDto rideRequestDto) {
         PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId());
-        System.out.println(passengerResponseDto);
         if(rideRequestDto.driverId() != null) {
             DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId());
-            System.out.println(driverResponseDto);
         }
         Ride rideToSave = rideMapper.toRide(rideRequestDto);
         rideToSave.setRideState(RideState.CREATED);
@@ -113,10 +105,8 @@ public class RideServiceImpl implements RideService {
     public RideResponseDto updateRide(Long id, RideRequestDto rideRequestDto) {
         Ride rideToSave = findByIdOrThrow(id);
         PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId());
-        System.out.println(passengerResponseDto);
         if(rideRequestDto.driverId() != null) {
             DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId());
-            System.out.println(driverResponseDto);
         }
         rideMapper.updateRide(rideToSave, rideRequestDto);
         Ride ride = rideRepository.save(rideToSave);
@@ -133,13 +123,11 @@ public class RideServiceImpl implements RideService {
             Ride ride = rideRepository.save(rideToSave);
             return rideMapper.toRideResponseDto(ride);
         }
-        throw new InvalidStateException(
-                messageSource.getMessage(AppConstants.STATE_VALUE_ERROR, new Object[]{}, LocaleContextHolder.getLocale()));
+        throw new InvalidStateException(AppConstants.STATE_VALUE_ERROR);
     }
 
     private Ride findByIdOrThrow(Long id) {
         return rideRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        messageSource.getMessage(AppConstants.RIDE_NOT_FOUND, new Object[]{}, LocaleContextHolder.getLocale())));
+                .orElseThrow(() -> new NotFoundException(AppConstants.RIDE_NOT_FOUND));
     }
 }

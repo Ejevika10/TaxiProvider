@@ -7,5 +7,7 @@ public record PassengerResponseDto (
 
     String email,
 
-    String phone){
+    String phone,
+
+    Double rating){
 }

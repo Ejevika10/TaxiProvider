@@ -21,13 +21,15 @@ public class ExceptionApiHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorMessage notFoundException(NotFoundException exception) {
-        return new ErrorMessage(HttpStatus.NOT_FOUND.value(), exception.getMessage());
+        return new ErrorMessage(HttpStatus.NOT_FOUND.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
     @ExceptionHandler(DuplicateFieldException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorMessage duplicateFieldException(DuplicateFieldException exception) {
-        return new ErrorMessage(HttpStatus.CONFLICT.value(), exception.getMessage());
+        return new ErrorMessage(HttpStatus.CONFLICT.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
