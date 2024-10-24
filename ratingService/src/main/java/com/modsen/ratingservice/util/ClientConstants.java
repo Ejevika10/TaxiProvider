@@ -5,7 +5,10 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ClientConstants {
-    public static final String RIDE_CLIENT = "ride-client";
+    public static final String RIDE_CLIENT_CIRCUIT = "ride-client-circuit";
 
-    public static final String RIDE_CLIENT_FALLBACK = "getRideByIdFallback";
+    public static final String RIDE_CLIENT_CIRCUIT_FALLBACK = "getRideByIdFallback";
+
+    public static final String RIDE_CLIENT_RETRY = "ride-client-retry";
+
 }

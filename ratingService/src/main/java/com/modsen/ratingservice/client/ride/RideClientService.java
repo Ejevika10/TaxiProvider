@@ -3,6 +3,7 @@ package com.modsen.ratingservice.client.ride;
 import com.modsen.ratingservice.dto.RideResponseDto;
 import com.modsen.ratingservice.util.ClientConstants;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,8 @@ import org.springframework.stereotype.Service;
 public class RideClientService {
     private final RideClient rideClient;
 
-    @CircuitBreaker(name = ClientConstants.RIDE_CLIENT, fallbackMethod = ClientConstants.RIDE_CLIENT_FALLBACK)
+    @CircuitBreaker(name = ClientConstants.RIDE_CLIENT_CIRCUIT, fallbackMethod = ClientConstants.RIDE_CLIENT_CIRCUIT_FALLBACK)
+    @Retry(name = ClientConstants.RIDE_CLIENT_RETRY)
     public RideResponseDto getRideById(long rideId) {
         log.info("getRideById");
         return rideClient.getRideById(rideId);
