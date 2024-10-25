@@ -29,7 +29,7 @@ public class DriverClientService {
         throw e;
     }
 
-    private DriverResponseDto getDriverByIdFallback(Exception e) throws Exception {
+    private DriverResponseDto getDriverByIdFallback(Exception e) throws ServiceUnavailableException {
         log.info("getDriverByIdFallback - Exception");
         log.info(e.getMessage());
         throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);

@@ -29,7 +29,7 @@ public class PassengerClientService {
         throw e;
     }
 
-    private PassengerResponseDto getPassengerByIdFallback(Exception e) throws Exception {
+    private PassengerResponseDto getPassengerByIdFallback(Exception e) throws ServiceUnavailableException {
         log.info("getPassengerByIdFallback - Exception");
         log.info(e.getMessage());
         throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
