@@ -1,6 +1,9 @@
 package com.modsen.ratingservice.client.ride;
 
 import com.modsen.ratingservice.dto.RideResponseDto;
+import com.modsen.ratingservice.exception.ClientException;
+import com.modsen.ratingservice.exception.ServiceUnavailableException;
+import com.modsen.ratingservice.util.AppConstants;
 import com.modsen.ratingservice.util.ClientConstants;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -21,8 +24,14 @@ public class RideClientService {
         return rideClient.getRideById(rideId);
     }
 
-    private RideResponseDto getRideByIdFallback(Exception e) throws Exception {
-        log.info("getRideByIdFallback");
+    private RideResponseDto getRideByIdFallback(ClientException e) throws ClientException {
+        log.info("getRideByIdFallback - ClientException");
         throw e;
+    }
+
+    private RideResponseDto getRideByIdFallback(Exception e) throws ServiceUnavailableException {
+        log.info("getRideByIdFallback - Exception");
+        log.info(e.getMessage());
+        throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
     }
 }

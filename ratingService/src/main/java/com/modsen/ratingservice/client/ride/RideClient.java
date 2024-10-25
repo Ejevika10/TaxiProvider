@@ -10,5 +10,3 @@ public interface RideClient {
     @GetMapping("/{id}")
     RideResponseDto getRideById(@PathVariable("id") long id);
 }
-
-
