@@ -73,4 +73,11 @@ public class ExceptionApiHandler {
                 messageSource.getMessage(AppConstants.INTERNAL_SERVER_ERROR,
                         new Object[]{}, Locale.getDefault()));
     }
+
+    @ExceptionHandler(ServiceUnavailableException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorMessage serviceUnavailableException(ServiceUnavailableException exception) {
+        return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, Locale.getDefault()));
+    }
 }
