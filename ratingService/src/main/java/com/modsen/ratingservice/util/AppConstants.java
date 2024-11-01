@@ -16,6 +16,8 @@ public final class AppConstants {
 
     public static final String DIFFERENT_PASSENGERS_ID = "rating.passengers.different";
 
+    public static final String INVALID_RIDE_STATE = "rating.ride.state";
+
     public static final String INTERNAL_SERVER_ERROR = "internal.server.error";
 
     public static final String SERVICE_UNAVAILABLE = "service.unavailable";

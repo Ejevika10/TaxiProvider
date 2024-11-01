@@ -4,10 +4,11 @@ import com.modsen.ratingservice.client.ride.RideClientService;
 import com.modsen.ratingservice.dto.RideResponseDto;
 import com.modsen.ratingservice.exception.DuplicateFieldException;
 import com.modsen.ratingservice.exception.InvalidFieldValueException;
+import com.modsen.ratingservice.exception.InvalidStateException;
+import com.modsen.ratingservice.model.RideState;
 import com.modsen.ratingservice.repository.PassengerRatingRepository;
 import com.modsen.ratingservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,10 +24,13 @@ public class PassengerValidatorService {
         }
     }
 
-    public void rideExistsAndUserIsCorrect(long rideId, long userId){
+    public void rideExistsAndUserIsCorrectAndRideStateIsCorrect(long rideId, long userId) {
         RideResponseDto rideResponseDto = rideClientService.getRideById(rideId);
-        if(rideResponseDto.passengerId() != userId) {
+        if (rideResponseDto.passengerId() != userId) {
             throw new InvalidFieldValueException(AppConstants.DIFFERENT_PASSENGERS_ID);
+        }
+        if (rideResponseDto.rideState() != RideState.COMPLETED && rideResponseDto.rideState() != RideState.CANCELLED) {
+            throw new InvalidStateException(AppConstants.INVALID_RIDE_STATE);
         }
     }
 }

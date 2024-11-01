@@ -33,6 +33,13 @@ public class ExceptionApiHandler {
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
+    @ExceptionHandler(InvalidStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorMessage invalidStateException(InvalidStateException exception) {
+        return new ErrorMessage(HttpStatus.CONFLICT.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
+    }
+
     @ExceptionHandler(InvalidFieldValueException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage invalidFieldValueException(InvalidFieldValueException exception) {
