@@ -85,8 +85,8 @@ public class CarServiceImpl implements CarService {
     @Override
     @Transactional
     public CarResponseDto updateCar(Long id, CarRequestDto carRequestDTO) {
-        Driver driver = findDriverByIdOrThrow(carRequestDTO.driverId());
         Car carToSave = findCarByIdOrThrow(id);
+        Driver driver = findDriverByIdOrThrow(carRequestDTO.driverId());
         Optional<Car> existingCar = carRepository.findByNumberAndDeletedIsFalse(carRequestDTO.number());
         if(existingCar.isPresent() && !existingCar.get().getId().equals(id)) {
             throw new DuplicateFieldException(AppConstants.CAR_NUMBER_EXIST);
