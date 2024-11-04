@@ -143,6 +143,19 @@ class CarServiceImplTest {
     }
 
     @Test
+    void getCarById_NonExistingId_ReturnsNotFoundException() {
+        //Arrange
+        when(carRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+
+        //Act
+        //Assert
+        assertThrows(NotFoundException.class,
+                () -> carService.getCarById(1L),
+                AppConstants.CAR_NOT_FOUND);
+        verify(carRepository).findByIdAndDeletedIsFalse(1L);
+    }
+
+    @Test
     void getCarByNumber_ExistingNumber_ReturnsValidDto() {
         //Arrange
         when(carRepository.findByNumberAndDeletedIsFalse(anyString())).thenReturn(Optional.of(carA));
