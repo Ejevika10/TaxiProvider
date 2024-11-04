@@ -76,7 +76,6 @@ public class ExceptionApiHandler {
                 .body(exception.getErrorMessage());
     }
 
-    //thrown when circuit breaker is open
     @ExceptionHandler(CallNotPermittedException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorMessage circuitBreakerException(CallNotPermittedException exception) {
@@ -85,7 +84,10 @@ public class ExceptionApiHandler {
                         new Object[]{}, Locale.getDefault()));
     }
 
-    //thrown when circuit breaker is closed and feign client is trying to send request to non-existent service
+    /**
+     * thrown when circuit breaker is closed and feign client is trying to send request to non-existent service
+     * @author ejevika
+     */
     @ExceptionHandler(RetryableException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorMessage serviceInstanceWasntResolvedException(RetryableException exception) {
@@ -94,7 +96,10 @@ public class ExceptionApiHandler {
                         new Object[]{}, Locale.getDefault()));
     }
 
-    //any unknown exception from feign client
+    /**
+     * any unknown exception from feign client
+     * @author ejevika
+     */
     @ExceptionHandler(ServiceUnavailableException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorMessage serviceUnavailableException(ServiceUnavailableException exception) {

@@ -24,8 +24,7 @@ public class ExternalErrorDecoder implements ErrorDecoder {
             log.info("ClientException");
             return new ClientException(errorMessage);
         } catch (Exception e) {
-            log.info("Exception");
-            log.info(e.getMessage());
+            log.info("Exception {}", e.getMessage());
             return new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
         }
     }
