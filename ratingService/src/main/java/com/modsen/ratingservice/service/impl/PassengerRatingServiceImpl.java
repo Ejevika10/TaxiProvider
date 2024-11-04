@@ -69,8 +69,7 @@ public class PassengerRatingServiceImpl implements RatingService {
 
     @Override
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto) {
-        validator.ratingExistsByRideId(ratingRequestDto.rideId());
-        validator.rideExistsAndUserIsCorrectAndRideStateIsCorrect(ratingRequestDto.rideId(), ratingRequestDto.userId());
+        validator.validateForCreate(ratingRequestDto);
         PassengerRating ratingToSave = ratingMapper.toPassengerRating(ratingRequestDto);
         ratingToSave.setDeleted(false);
         PassengerRating rating = passengerRatingRepository.save(ratingToSave);
@@ -81,7 +80,7 @@ public class PassengerRatingServiceImpl implements RatingService {
     @Override
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto) {
         PassengerRating ratingToSave = findByIdOrThrow(id);
-        validator.rideExistsAndUserIsCorrectAndRideStateIsCorrect(ratingRequestDto.rideId(), ratingRequestDto.userId());
+        validator.validateForUpdate(ratingRequestDto);
         ratingMapper.updatePassengerRating(ratingRequestDto, ratingToSave);
         PassengerRating rating = passengerRatingRepository.save(ratingToSave);
         updateAverageRating(rating.getUserId());
