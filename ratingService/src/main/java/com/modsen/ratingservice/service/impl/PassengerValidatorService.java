@@ -20,8 +20,9 @@ public class PassengerValidatorService {
     private final RideClientService rideClientService;
 
     public void validateForCreate(RatingRequestDto ratingRequestDto){
-        ratingDoesntExistsByRideId(ratingRequestDto.rideId());
-        RideResponseDto ride = rideExistsByRideId(ratingRequestDto.rideId());
+        Long rideId = ratingRequestDto.rideId();
+        ratingDoesntExistsByRideId(rideId);
+        RideResponseDto ride = rideExistsByRideId(rideId);
         userIdIsCorrect(ride, ratingRequestDto.userId());
         rideStateIsCorrect(ride.rideState());
     }

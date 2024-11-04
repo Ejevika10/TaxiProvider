@@ -22,8 +22,9 @@ public class DriverValidatorService {
     private final RideClientService rideClientService;
 
     public void validateForCreate(RatingRequestDto ratingRequestDto){
-        ratingDoesntExistsByRideId(ratingRequestDto.rideId());
-        RideResponseDto ride = rideExistsById(ratingRequestDto.rideId());
+        Long rideId = ratingRequestDto.rideId();
+        ratingDoesntExistsByRideId(rideId);
+        RideResponseDto ride = rideExistsById(rideId);
         userIdIsCorrect(ride, ratingRequestDto.userId());
         rideStateIsCorrect(ride.rideState());
     }
