@@ -7,7 +7,6 @@ import com.modsen.ratingservice.exception.InvalidFieldValueException;
 import com.modsen.ratingservice.repository.PassengerRatingRepository;
 import com.modsen.ratingservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 @Service
