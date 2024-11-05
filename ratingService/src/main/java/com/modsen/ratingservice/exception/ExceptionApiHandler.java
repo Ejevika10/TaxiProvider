@@ -1,11 +1,14 @@
 package com.modsen.ratingservice.exception;
 
 import com.modsen.ratingservice.util.AppConstants;
+import feign.RetryableException;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -29,6 +32,13 @@ public class ExceptionApiHandler {
     @ExceptionHandler(DuplicateFieldException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorMessage duplicateFieldException(DuplicateFieldException exception) {
+        return new ErrorMessage(HttpStatus.CONFLICT.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
+    }
+
+    @ExceptionHandler(InvalidStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorMessage invalidStateException(InvalidStateException exception) {
         return new ErrorMessage(HttpStatus.CONFLICT.value(),
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
@@ -61,9 +71,40 @@ public class ExceptionApiHandler {
     }
 
     @ExceptionHandler(ClientException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorMessage clientException(ClientException exception) {
-        return exception.getErrorMessage();
+    public ResponseEntity<ErrorMessage> clientException(ClientException exception) {
+        return ResponseEntity.status(exception.getErrorMessage().errorCode())
+                .body(exception.getErrorMessage());
+    }
+
+    @ExceptionHandler(CallNotPermittedException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorMessage circuitBreakerException(CallNotPermittedException exception) {
+        return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(),
+                messageSource.getMessage(AppConstants.SERVICE_UNAVAILABLE,
+                        new Object[]{}, Locale.getDefault()));
+    }
+
+    /**
+     * thrown when circuit breaker is closed and feign client is trying to send request to non-existent service
+     * @author ejevika
+     */
+    @ExceptionHandler(RetryableException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorMessage serviceInstanceWasntResolvedException(RetryableException exception) {
+        return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(),
+                messageSource.getMessage(AppConstants.SERVICE_UNAVAILABLE,
+                        new Object[]{}, Locale.getDefault()));
+    }
+
+    /**
+     * any unknown exception from feign client
+     * @author ejevika
+     */
+    @ExceptionHandler(ServiceUnavailableException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorMessage serviceUnavailableException(ServiceUnavailableException exception) {
+        return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, Locale.getDefault()));
     }
 
     @ExceptionHandler(Exception.class)
@@ -72,12 +113,5 @@ public class ExceptionApiHandler {
         return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 messageSource.getMessage(AppConstants.INTERNAL_SERVER_ERROR,
                         new Object[]{}, Locale.getDefault()));
-    }
-
-    @ExceptionHandler(ServiceUnavailableException.class)
-    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    public ErrorMessage serviceUnavailableException(ServiceUnavailableException exception) {
-        return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(),
-                messageSource.getMessage(exception.getMessage(), new Object[]{}, Locale.getDefault()));
     }
 }

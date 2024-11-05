@@ -15,7 +15,6 @@ import com.modsen.ratingservice.service.RatingService;
 import com.modsen.ratingservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -70,8 +69,7 @@ public class PassengerRatingServiceImpl implements RatingService {
 
     @Override
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto) {
-        validator.ratingExistsByRideId(ratingRequestDto.rideId());
-        validator.rideExistsAndUserIsCorrect(ratingRequestDto.rideId(), ratingRequestDto.userId());
+        validator.validateForCreate(ratingRequestDto);
         PassengerRating ratingToSave = ratingMapper.toPassengerRating(ratingRequestDto);
         ratingToSave.setDeleted(false);
         PassengerRating rating = passengerRatingRepository.save(ratingToSave);
@@ -82,7 +80,7 @@ public class PassengerRatingServiceImpl implements RatingService {
     @Override
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto) {
         PassengerRating ratingToSave = findByIdOrThrow(id);
-        validator.rideExistsAndUserIsCorrect(ratingRequestDto.rideId(), ratingRequestDto.userId());
+        validator.validateForUpdate(ratingRequestDto);
         ratingMapper.updatePassengerRating(ratingRequestDto, ratingToSave);
         PassengerRating rating = passengerRatingRepository.save(ratingToSave);
         updateAverageRating(rating.getUserId());
