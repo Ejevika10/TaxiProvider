@@ -35,14 +35,14 @@ public class RideController {
     }
 
     @GetMapping("/driver/{driverId}")
-    public PageDto<RideResponseDto> getPageRidesByDriverId(@Valid @PathVariable Long driverId,
+    public PageDto<RideResponseDto> getPageRidesByDriverId(@Valid @PathVariable @Min(0) Long driverId,
                                                            @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                            @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit) {
         return rideService.getPageRidesByDriverId(driverId, offset, limit);
     }
 
     @GetMapping("/passenger/{passengerId}")
-    public PageDto<RideResponseDto> getPageRidesByPassengerId(@Valid @PathVariable Long passengerId,
+    public PageDto<RideResponseDto> getPageRidesByPassengerId(@Valid @PathVariable @Min(0) Long passengerId,
                                                               @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                               @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit) {
         return rideService.getPageRidesByPassengerId(passengerId, offset, limit);
