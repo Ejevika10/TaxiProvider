@@ -56,6 +56,13 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
+    public PageDto<CarResponseDto> getPageCarsByDriverId(Long driverId, Integer offset, Integer limit) {
+        Page<CarResponseDto> pageCars = carRepository.findAllByDriverIdAndDeletedIsFalse(driverId, PageRequest.of(offset, limit))
+                .map(carMapper::toCarResponseDTO);
+        return pageMapper.pageToDto(pageCars);
+    }
+
+    @Override
     public CarResponseDto getCarById(Long id) {
         Car car = findCarByIdOrThrow(id);
         return carMapper.toCarResponseDTO(car);

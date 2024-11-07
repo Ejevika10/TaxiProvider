@@ -13,6 +13,8 @@ public interface CarService {
 
     List<CarResponseDto> getAllCarsByDriverId(Long driverId);
 
+    PageDto<CarResponseDto> getPageCarsByDriverId(Long driverId, Integer offset, Integer limit);
+
     CarResponseDto getCarById(Long id);
 
     CarResponseDto getCarByNumber(String number);
