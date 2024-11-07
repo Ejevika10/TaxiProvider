@@ -51,7 +51,12 @@ public class ExceptionApiHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ListErrorMessage constraintViolationException(ConstraintViolationException exception) {
         List<String> errors;
-        errors = exception.getConstraintViolations().stream().map(error -> error.getPropertyPath().toString() + ": " + error.getMessage()).toList();
+        errors = exception.getConstraintViolations().stream()
+                .map(error -> {
+                    String fieldPath = error.getPropertyPath().toString();
+                    String[] fieldParts = fieldPath.split("\\.");
+                    return fieldParts[fieldParts.length - 1] + ": " + error.getMessage();})
+                .toList();
         return new ListErrorMessage(HttpStatus.BAD_REQUEST.value(), errors);
     }
 
