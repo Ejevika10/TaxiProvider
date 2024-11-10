@@ -4,7 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
+import lombok.Builder;
 
+@Builder
 public record DriverRequestDto (
     @NotBlank(message = "{driver.name.mandatory}")
     @Size(min = 4, max = 100)

@@ -3,7 +3,9 @@ package com.modsen.driverservice.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+@Builder
 public record CarRequestDto(
     @NotBlank(message = "{car.color.mandatory}")
     @Size(min = 2, max = 50)
