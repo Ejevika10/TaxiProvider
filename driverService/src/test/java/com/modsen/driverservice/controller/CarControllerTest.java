@@ -36,6 +36,19 @@ import static com.modsen.driverservice.util.TestData.getCarResponseDto;
 import static com.modsen.driverservice.util.TestData.getEmptyCarRequestDto;
 import static com.modsen.driverservice.util.TestData.getInvalidCarRequestDto;
 import static com.modsen.driverservice.util.TestData.INSUFFICIENT_CAR_ID;
+import static com.modsen.driverservice.util.ViolationData.carBrandInvalid;
+import static com.modsen.driverservice.util.ViolationData.carBrandMandatory;
+import static com.modsen.driverservice.util.ViolationData.carColorInvalid;
+import static com.modsen.driverservice.util.ViolationData.carColorMandatory;
+import static com.modsen.driverservice.util.ViolationData.carModelInvalid;
+import static com.modsen.driverservice.util.ViolationData.carModelMandatory;
+import static com.modsen.driverservice.util.ViolationData.carNumberInvalid;
+import static com.modsen.driverservice.util.ViolationData.carNumberMandatory;
+import static com.modsen.driverservice.util.ViolationData.driverIdInvalid;
+import static com.modsen.driverservice.util.ViolationData.idInvalid;
+import static com.modsen.driverservice.util.ViolationData.limitExceeded;
+import static com.modsen.driverservice.util.ViolationData.limitInsufficient;
+import static com.modsen.driverservice.util.ViolationData.offsetInsufficient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -50,29 +63,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = CarController.class)
 class CarControllerTest {
 
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
     @MockBean
     private CarService carService;
-
-    private final String carModelMandatory = "model: Model is mandatory";
-    private final String carColorMandatory = "color: Color is mandatory";
-    private final String carBrandMandatory = "brand: Brand is mandatory";
-    private final String carNumberMandatory = "number: Number is mandatory";
-
-    private final String carModelInvalid = "model: size must be between 2 and 50";
-    private final String carColorInvalid = "color: size must be between 2 and 50";
-    private final String carBrandInvalid = "brand: size must be between 2 and 50";
-    private final String carNumberInvalid = "number: size must be between 2 and 20";
-    private final String driverIdInvalid = "driverId: must be greater than or equal to 0";
-
-    private final String carIdInvalid = "id: must be greater than or equal to 0";
-    private final String offsetInvalid = "offset: must be greater than or equal to 0";
-    private final String limitInvalid = "limit: must be greater than or equal to 1";
-    private final String limitBig = "limit: must be less than or equal to 20";
 
     @Test
     void getPageCars_whenEmptyParams_thenReturns201() throws Exception {
@@ -93,7 +89,7 @@ class CarControllerTest {
     void getPageCars_whenInsufficientParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(offsetInvalid, limitInvalid));
+                List.of(offsetInsufficient, limitInsufficient));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR)
                         .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
@@ -113,7 +109,7 @@ class CarControllerTest {
     void getPageCars_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(limitBig));
+                List.of(limitExceeded));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR)
                         .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
@@ -153,7 +149,7 @@ class CarControllerTest {
     void getCar_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(carIdInvalid));
+                List.of(idInvalid));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR_ID, INSUFFICIENT_CAR_ID))
                 .andExpect(status().isBadRequest())
@@ -187,7 +183,7 @@ class CarControllerTest {
     void getPageCarsByDriverId_whenInsufficientParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(offsetInvalid, limitInvalid));
+                List.of(offsetInsufficient, limitInsufficient));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR_DRIVER_ID, DRIVER_ID)
                         .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
@@ -207,7 +203,7 @@ class CarControllerTest {
     void getPageCarsByDriverId_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(limitBig));
+                List.of(limitExceeded));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR_DRIVER_ID, DRIVER_ID)
                         .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
@@ -411,7 +407,7 @@ class CarControllerTest {
     void updateDriver_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         CarRequestDto carRequestDto = getCarRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(HttpStatus.BAD_REQUEST.value(),
-                List.of(carIdInvalid));
+                List.of(idInvalid));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_CAR_ID, INSUFFICIENT_CAR_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -437,7 +433,7 @@ class CarControllerTest {
     void deleteDriver_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(carIdInvalid));
+                List.of(idInvalid));
 
         MvcResult mvcResult = mockMvc.perform(delete(URL_CAR_ID, INSUFFICIENT_CAR_ID))
                 .andExpect(status().isBadRequest())

@@ -33,6 +33,16 @@ import static com.modsen.driverservice.util.TestData.getDriverRequestDto;
 import static com.modsen.driverservice.util.TestData.getDriverResponseDto;
 import static com.modsen.driverservice.util.TestData.getEmptyDriverRequestDto;
 import static com.modsen.driverservice.util.TestData.getInvalidDriverRequestDto;
+import static com.modsen.driverservice.util.ViolationData.driverEmailInvalid;
+import static com.modsen.driverservice.util.ViolationData.driverEmailMandatory;
+import static com.modsen.driverservice.util.ViolationData.driverNameInvalid;
+import static com.modsen.driverservice.util.ViolationData.driverNameMandatory;
+import static com.modsen.driverservice.util.ViolationData.driverPhoneInvalid;
+import static com.modsen.driverservice.util.ViolationData.driverPhoneMandatory;
+import static com.modsen.driverservice.util.ViolationData.idInvalid;
+import static com.modsen.driverservice.util.ViolationData.limitExceeded;
+import static com.modsen.driverservice.util.ViolationData.limitInsufficient;
+import static com.modsen.driverservice.util.ViolationData.offsetInsufficient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -52,26 +62,16 @@ class DriverControllerTest {
     private ObjectMapper objectMapper;
     @MockBean
     private DriverService driverService;
-    private final String driverNameMandatory = "name: Name is mandatory";
-    private final String driverEmailMandatory = "email: Email is mandatory";
-    private final String driverPhoneMandatory = "phone: Phone is mandatory";
-    private final String driverNameInvalid = "name: size must be between 4 and 100";
-    private final String driverEmailInvalid = "email: Email is invalid";
-    private final String driverPhoneInvalid = "phone: Phone is invalid";
-    private final String driverIdInvalid = "id: must be greater than or equal to 0";
-    private final String offsetInvalid = "offset: must be greater than or equal to 0";
-    private final String limitInvalid = "limit: must be greater than or equal to 1";
-    private final String limitBig = "limit: must be less than or equal to 20";
 
     @Test
-    void getPageDrivers_withoutParams_thenReturns201() throws Exception {
+    void getPageDrivers_whenEmptyParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_DRIVER))
                 .andExpect(status().isOk());
         verify(driverService, times(1)).getPageDrivers(OFFSET_VALUE,LIMIT_VALUE);
     }
 
     @Test
-    void getPageDrivers_withValidParams_thenReturns201() throws Exception {
+    void getPageDrivers_whenValidParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_DRIVER)
                         .param(OFFSET, OFFSET_VALUE.toString())
                         .param(LIMIT, LIMIT_VALUE.toString()))
@@ -79,10 +79,10 @@ class DriverControllerTest {
     }
 
     @Test
-    void getPageDrivers_withInsufficientParams_thenReturns400() throws Exception {
+    void getPageDrivers_whenInsufficientParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(offsetInvalid, limitInvalid));
+                List.of(offsetInsufficient, limitInsufficient));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER)
                         .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
@@ -99,10 +99,10 @@ class DriverControllerTest {
     }
 
     @Test
-    void getPageDrivers_withBigLimit_thenReturns400() throws Exception {
+    void getPageDrivers_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(limitBig));
+                List.of(limitExceeded));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER)
                         .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
@@ -141,7 +141,7 @@ class DriverControllerTest {
     void getDriverById_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(driverIdInvalid));
+                List.of(idInvalid));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER_ID, INSUFFICIENT_DRIVER_ID))
                 .andExpect(status().isBadRequest())
@@ -326,7 +326,7 @@ class DriverControllerTest {
         DriverRequestDto driverRequestDto = getDriverRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(driverIdInvalid));
+                List.of(idInvalid));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_DRIVER_ID, INSUFFICIENT_DRIVER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -352,7 +352,7 @@ class DriverControllerTest {
     void deleteDriver_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(driverIdInvalid));
+                List.of(idInvalid));
 
         MvcResult mvcResult = mockMvc.perform(delete(URL_DRIVER_ID, INSUFFICIENT_DRIVER_ID))
                 .andExpect(status().isBadRequest())
