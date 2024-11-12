@@ -248,8 +248,6 @@ class PassengerServiceImplTest {
                 .id(2L)
                 .build();
 
-        PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
-
         when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passenger));
         when(passengerRepository.findByEmailAndDeletedIsFalse(anyString())).thenReturn(Optional.of(passengerWithSameEmail));
 
