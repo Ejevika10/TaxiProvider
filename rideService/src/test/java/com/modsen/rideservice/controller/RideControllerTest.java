@@ -12,13 +12,51 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.modsen.rideservice.util.TestData.DRIVER_ID;
+import static com.modsen.rideservice.util.TestData.EXCEEDED_LIMIT_VALUE;
+import static com.modsen.rideservice.util.TestData.EXCEEDED_OFFSET_VALUE;
+import static com.modsen.rideservice.util.TestData.INSUFFICIENT_DRIVER_ID;
+import static com.modsen.rideservice.util.TestData.INSUFFICIENT_LIMIT_VALUE;
+import static com.modsen.rideservice.util.TestData.INSUFFICIENT_OFFSET_VALUE;
+import static com.modsen.rideservice.util.TestData.INSUFFICIENT_PASSENGER_ID;
+import static com.modsen.rideservice.util.TestData.INSUFFICIENT_RIDE_ID;
+import static com.modsen.rideservice.util.TestData.LIMIT;
+import static com.modsen.rideservice.util.TestData.LIMIT_VALUE;
+import static com.modsen.rideservice.util.TestData.OFFSET;
+import static com.modsen.rideservice.util.TestData.OFFSET_VALUE;
+import static com.modsen.rideservice.util.TestData.PASSENGER_ID;
+import static com.modsen.rideservice.util.TestData.RIDE_ID;
+import static com.modsen.rideservice.util.TestData.URL_RIDE;
+import static com.modsen.rideservice.util.TestData.URL_RIDE_DRIVER_ID;
+import static com.modsen.rideservice.util.TestData.URL_RIDE_ID;
+import static com.modsen.rideservice.util.TestData.URL_RIDE_ID_STATE;
+import static com.modsen.rideservice.util.TestData.URL_RIDE_PASSENGER_ID;
+import static com.modsen.rideservice.util.TestData.getEmptyRideRequestDto;
+import static com.modsen.rideservice.util.TestData.getInvalidRideRequestDto;
+import static com.modsen.rideservice.util.TestData.getRideRequestDto;
+import static com.modsen.rideservice.util.TestData.getRideResponseDto;
+import static com.modsen.rideservice.util.TestData.getRideResponseDtoBuilder;
+import static com.modsen.rideservice.util.TestData.getRideStateRequestDto;
+import static com.modsen.rideservice.util.TestData.getRideStateRequestDtoBuilder;
+import static com.modsen.rideservice.util.ViolationData.destinationAddressInvalid;
+import static com.modsen.rideservice.util.ViolationData.destinationAddressMandatory;
+import static com.modsen.rideservice.util.ViolationData.driverIdInvalid;
+import static com.modsen.rideservice.util.ViolationData.idInvalid;
+import static com.modsen.rideservice.util.ViolationData.limitBig;
+import static com.modsen.rideservice.util.ViolationData.limitInvalid;
+import static com.modsen.rideservice.util.ViolationData.offsetInvalid;
+import static com.modsen.rideservice.util.ViolationData.passengerIdInvalid;
+import static com.modsen.rideservice.util.ViolationData.passengerIdMandatory;
+import static com.modsen.rideservice.util.ViolationData.rideStateMandatory;
+import static com.modsen.rideservice.util.ViolationData.sourceAddressInvalid;
+import static com.modsen.rideservice.util.ViolationData.sourceAddressMandatory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -31,23 +69,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = RideController.class)
 class RideControllerTest {
-    private final RideRequestDto rideRequestDto = new RideRequestDto(1L, 1L, "Source address", "Destination address", RideState.CREATED, LocalDateTime.now(), 1000);
-    private final RideRequestDto emptyRideRequestDto = new RideRequestDto(null, null, null, null, null, null, null);
-    private final RideRequestDto invalidRideRequestDto = new RideRequestDto(-1L, -1L, "addr", "addr", null, null, -1000);
-    private final RideResponseDto rideResponseDto = new RideResponseDto(1L, 1L, 1L, "Source address", "Destination address", RideState.CREATED, LocalDateTime.now(), 1000);
-
-    private final RideStateRequestDto rideStateRequestDto = new RideStateRequestDto("accepted");
-    private final RideStateRequestDto emptyRideStateRequestDto = new RideStateRequestDto(null);
-    private final RideResponseDto rideNewStateResponseDto = new RideResponseDto(1L, 1L, 1L, "Source address", "Destination address", RideState.ACCEPTED, LocalDateTime.now(), 1000);
-
-    private final Long rideId = 1L;
-    private final Long invalidRideId = -1L;
-    private final Long driverId = 1L;
-    private final Long invalidDriverId = -1L;
-    private final Long passengerId = 1L;
-    private final Long invalidPassengerId = -1L;
-
-    private final String URL = "/api/v1/rides";
 
     @Autowired
     private MockMvc mockMvc;
@@ -58,41 +79,30 @@ class RideControllerTest {
     @MockBean
     private RideService rideService;
 
-    private final String sourceAddressMandatory = "sourceAddress: Source address is mandatory";
-    private final String destinationAddressMandatory = "destinationAddress: Destination address is mandatory";
-    private final String passengerIdMandatory = "passengerId: Passenger id is mandatory";
-    private final String rideStateMandatory = "rideState: Ride state is mandatory";
-
-    private final String idInvalid = "id: must be greater than or equal to 0";
-    private final String sourceAddressInvalid = "sourceAddress: size must be between 10 and 255";
-    private final String destinationAddressInvalid = "destinationAddress: size must be between 10 and 255";
-    private final String passengerIdInvalid = "passengerId: must be greater than or equal to 0";
-    private final String driverIdInvalid = "driverId: must be greater than or equal to 0";
-
-    private final String offsetInvalid = "offset: must be greater than or equal to 0";
-    private final String limitInvalid = "limit: must be greater than or equal to 1";
-    private final String limitBig = "limit: must be less than or equal to 20";
-
-
     @Test
     void getPageRides_withoutParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL))
+        mockMvc.perform(get(URL_RIDE))
                 .andExpect(status().isOk());
-        verify(rideService, times(1)).getPageRides(0,5);
+        verify(rideService, times(1)).getPageRides(OFFSET_VALUE,LIMIT_VALUE);
     }
 
     @Test
     void getPageRides_withValidParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL).param("offset", "0").param("limit", "1"))
+        mockMvc.perform(get(URL_RIDE)
+                        .param(OFFSET, OFFSET_VALUE.toString())
+                        .param(LIMIT, LIMIT_VALUE.toString()))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getPageRides_withInvalidParams_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(offsetInvalid, limitInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL).param("offset", "-1").param("limit", "-1"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_RIDE)
+                        .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
+                        .param(LIMIT, INSUFFICIENT_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -104,10 +114,13 @@ class RideControllerTest {
 
     @Test
     void getPageRides_withBigLimit_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(limitBig));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL).param("offset", "100").param("limit", "100"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_RIDE)
+                        .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
+                        .param(LIMIT, EXCEEDED_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -119,59 +132,67 @@ class RideControllerTest {
 
     @Test
     void getPageRidesByDriverId_withoutParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL + "/driver/{driverId}", driverId))
+        mockMvc.perform(get(URL_RIDE_DRIVER_ID, DRIVER_ID))
                 .andExpect(status().isOk());
-        verify(rideService, times(1)).getPageRidesByDriverId(driverId, 0,5);
+        verify(rideService, times(1)).getPageRidesByDriverId(DRIVER_ID, OFFSET_VALUE, LIMIT_VALUE);
+
     }
 
     @Test
     void getPageRidesByDriverId_withValidParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL + "/driver/{driverId}", driverId)
-                        .param("offset", "0")
-                        .param("limit", "1"))
+        mockMvc.perform(get(URL_RIDE_DRIVER_ID, DRIVER_ID)
+                        .param(OFFSET, OFFSET_VALUE.toString())
+                        .param(LIMIT, LIMIT_VALUE.toString()))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getPageRidesByDriverId_withInvalidParams_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(offsetInvalid, limitInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/driver/{driverId}", driverId)
-                        .param("offset", "-1")
-                        .param("limit", "-1"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_RIDE_DRIVER_ID, DRIVER_ID)
+                        .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
+                        .param(LIMIT, INSUFFICIENT_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void getPageRidesByDriverId_withBigLimit_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(limitBig));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/driver/{driverId}", driverId)
-                        .param("offset", "100")
-                        .param("limit", "100"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_RIDE_DRIVER_ID, DRIVER_ID)
+                        .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
+                        .param(LIMIT, EXCEEDED_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void getPageRidesByDriverId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(driverIdInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/driver/{driverId}", invalidDriverId))
+        MvcResult mvcResult = mockMvc.perform(get(URL_RIDE_DRIVER_ID, INSUFFICIENT_DRIVER_ID))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -183,44 +204,49 @@ class RideControllerTest {
 
     @Test
     void getPageRidesByPassengerId_withoutParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL + "/passenger/{passengerId}", passengerId))
+        mockMvc.perform(get(URL_RIDE_PASSENGER_ID, PASSENGER_ID))
                 .andExpect(status().isOk());
-        verify(rideService, times(1)).getPageRidesByPassengerId(driverId, 0,5);
+        verify(rideService, times(1)).getPageRidesByPassengerId(PASSENGER_ID, OFFSET_VALUE,LIMIT_VALUE);
+
     }
 
     @Test
     void getPageRidesByPassengerId_withValidParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL + "/passenger/{passengerId}", passengerId)
-                        .param("offset", "0")
-                        .param("limit", "1"))
+        mockMvc.perform(get(URL_RIDE_PASSENGER_ID, PASSENGER_ID)
+                        .param(OFFSET, OFFSET_VALUE.toString())
+                        .param(LIMIT, LIMIT_VALUE.toString()))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getPageRidesByPassengerId_withInvalidParams_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(offsetInvalid, limitInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/passenger/{passengerId}", passengerId)
-                        .param("offset", "-1")
-                        .param("limit", "-1"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_RIDE_PASSENGER_ID, PASSENGER_ID)
+                        .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
+                        .param(LIMIT, INSUFFICIENT_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void getPageRidesByPassengerId_withBigLimit_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(limitBig));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/passenger/{passengerId}", driverId)
-                        .param("offset", "100")
-                        .param("limit", "100"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_RIDE_PASSENGER_ID, PASSENGER_ID)
+                        .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
+                        .param(LIMIT, EXCEEDED_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -232,10 +258,11 @@ class RideControllerTest {
 
     @Test
     void getPageRidesByPassengerId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(passengerIdInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/passenger/{passengerId}", invalidPassengerId))
+        MvcResult mvcResult = mockMvc.perform(get(URL_RIDE_PASSENGER_ID, INSUFFICIENT_PASSENGER_ID))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -247,14 +274,15 @@ class RideControllerTest {
 
     @Test
     void getRide_whenValidId_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL + "/{rideId}", rideId))
+        mockMvc.perform(get(URL_RIDE_ID, RIDE_ID))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getRide_whenValidInput_thenReturnsResponseDto() throws Exception {
-        when(rideService.getRideById(rideId)).thenReturn(rideResponseDto);
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/{rideId}", rideId))
+        RideResponseDto rideResponseDto = getRideResponseDto();
+        when(rideService.getRideById(RIDE_ID)).thenReturn(rideResponseDto);
+        MvcResult mvcResult = mockMvc.perform(get(URL_RIDE_ID, RIDE_ID))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -265,10 +293,11 @@ class RideControllerTest {
 
     @Test
     void getRide_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(idInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/{rideId}", invalidRideId))
+        MvcResult mvcResult = mockMvc.perform(get(URL_RIDE_ID, INSUFFICIENT_RIDE_ID))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -280,7 +309,8 @@ class RideControllerTest {
 
     @Test
     void createRide_whenValidInput_thenReturns201() throws Exception {
-        mockMvc.perform(post(URL)
+        RideRequestDto rideRequestDto = getRideRequestDto();
+        mockMvc.perform(post(URL_RIDE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rideRequestDto)))
                 .andExpect(status().isCreated());
@@ -288,7 +318,8 @@ class RideControllerTest {
 
     @Test
     void createRide_whenValidInput_thenMapsToBusinessModel() throws Exception {
-        mockMvc.perform(post(URL)
+        RideRequestDto rideRequestDto = getRideRequestDto();
+        mockMvc.perform(post(URL_RIDE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rideRequestDto)))
                 .andExpect(status().isCreated());
@@ -300,8 +331,10 @@ class RideControllerTest {
 
     @Test
     void createRide_whenValidInput_thenReturnsResponseDto() throws Exception {
+        RideResponseDto rideResponseDto = getRideResponseDto();
+        RideRequestDto rideRequestDto = getRideRequestDto();
         when(rideService.createRide(rideRequestDto)).thenReturn(rideResponseDto);
-        MvcResult mvcResult = mockMvc.perform(post(URL)
+        MvcResult mvcResult = mockMvc.perform(post(URL_RIDE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rideRequestDto)))
                 .andExpect(status().isCreated())
@@ -314,10 +347,12 @@ class RideControllerTest {
 
     @Test
     void createRide_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        RideRequestDto emptyRideRequestDto = getEmptyRideRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(passengerIdMandatory, destinationAddressMandatory, sourceAddressMandatory));
 
-        MvcResult mvcResult = mockMvc.perform(post(URL)
+        MvcResult mvcResult = mockMvc.perform(post(URL_RIDE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(emptyRideRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -331,10 +366,12 @@ class RideControllerTest {
 
     @Test
     void createRide_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        RideRequestDto invalidRideRequestDto = getInvalidRideRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(passengerIdInvalid, driverIdInvalid, destinationAddressInvalid, sourceAddressInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(post(URL)
+        MvcResult mvcResult = mockMvc.perform(post(URL_RIDE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRideRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -348,7 +385,8 @@ class RideControllerTest {
 
     @Test
     void updateRide_whenValidInput_thenReturns200() throws Exception {
-        mockMvc.perform(put(URL + "/{rideId}", rideId)
+        RideRequestDto rideRequestDto = getRideRequestDto();
+        mockMvc.perform(put(URL_RIDE_ID, RIDE_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rideRequestDto)))
                 .andExpect(status().isOk());
@@ -356,7 +394,8 @@ class RideControllerTest {
 
     @Test
     void updateRide_whenValidInput_thenMapsToBusinessModel() throws Exception {
-        mockMvc.perform(put(URL + "/{rideId}", rideId)
+        RideRequestDto rideRequestDto = getRideRequestDto();
+        mockMvc.perform(put(URL_RIDE_ID, RIDE_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rideRequestDto)))
                 .andExpect(status().isOk());
@@ -369,14 +408,16 @@ class RideControllerTest {
 
     @Test
     void updateRide_whenValidInput_thenReturnsResponseDto() throws Exception {
-        when(rideService.updateRide(1L, rideRequestDto))
+        RideRequestDto rideRequestDto = getRideRequestDto();
+        RideResponseDto rideResponseDto = getRideResponseDto();
+        when(rideService.updateRide(RIDE_ID, rideRequestDto))
                 .thenReturn(rideResponseDto);
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{rideId}", rideId)
+
+        MvcResult mvcResult = mockMvc.perform(put(URL_RIDE_ID, RIDE_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rideRequestDto)))
                 .andExpect(status().isOk())
                 .andReturn();
-
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
 
         assertThat(actualResponseBody).isEqualToIgnoringWhitespace(objectMapper.writeValueAsString(rideResponseDto));
@@ -384,10 +425,12 @@ class RideControllerTest {
 
     @Test
     void updateRide_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
-                List.of(rideStateMandatory));
+        RideRequestDto emptyRideRequestDto = getEmptyRideRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                List.of(passengerIdMandatory, sourceAddressMandatory, destinationAddressMandatory));
 
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{rideId}/state", rideId)
+        MvcResult mvcResult = mockMvc.perform(put(URL_RIDE_ID, RIDE_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(emptyRideRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -395,16 +438,20 @@ class RideControllerTest {
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void updateRide_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
-                List.of(rideStateMandatory));
+        RideRequestDto invalidRideRequestDto = getInvalidRideRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                List.of(passengerIdInvalid, driverIdInvalid, sourceAddressInvalid, destinationAddressInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{rideId}/state", rideId)
+        MvcResult mvcResult = mockMvc.perform(put(URL_RIDE_ID, RIDE_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRideRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -418,10 +465,12 @@ class RideControllerTest {
 
     @Test
     void updateRide_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        RideRequestDto rideRequestDto = getRideRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(idInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{rideId}", invalidRideId)
+        MvcResult mvcResult = mockMvc.perform(put(URL_RIDE_ID, INSUFFICIENT_RIDE_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rideRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -435,7 +484,8 @@ class RideControllerTest {
 
     @Test
     void updateRideState_whenValidInput_thenReturns200() throws Exception {
-        mockMvc.perform(put(URL + "/{rideId}/state", rideId)
+        RideStateRequestDto rideStateRequestDto = getRideStateRequestDto();
+        mockMvc.perform(put(URL_RIDE_ID_STATE, RIDE_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rideStateRequestDto)))
                 .andExpect(status().isOk());
@@ -443,7 +493,8 @@ class RideControllerTest {
 
     @Test
     void updateRideState_whenValidInput_thenMapsToBusinessModel() throws Exception {
-        mockMvc.perform(put(URL + "/{rideId}/state", rideId)
+        RideStateRequestDto rideStateRequestDto = getRideStateRequestDto();
+        mockMvc.perform(put(URL_RIDE_ID_STATE, RIDE_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rideStateRequestDto)))
                 .andExpect(status().isOk());
@@ -456,9 +507,13 @@ class RideControllerTest {
 
     @Test
     void updateRideState_whenValidInput_thenReturnsResponseDto() throws Exception {
-        when(rideService.setNewState(1L, rideStateRequestDto))
+        RideStateRequestDto rideStateRequestDto = getRideStateRequestDto();
+        RideResponseDto rideNewStateResponseDto = getRideResponseDtoBuilder()
+                .rideState(RideState.ACCEPTED)
+                .build();
+        when(rideService.setNewState(RIDE_ID, rideStateRequestDto))
                 .thenReturn(rideNewStateResponseDto);
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{rideId}/state", rideId)
+        MvcResult mvcResult = mockMvc.perform(put(URL_RIDE_ID_STATE, RIDE_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rideStateRequestDto)))
                 .andExpect(status().isOk())
@@ -471,10 +526,13 @@ class RideControllerTest {
 
     @Test
     void updateRideState_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        RideStateRequestDto emptyRideStateRequestDto = getRideStateRequestDtoBuilder()
+                .rideState(null)
+                .build();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(HttpStatus.BAD_REQUEST.value(),
                 List.of(rideStateMandatory));
 
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{rideId}/state", rideId)
+        MvcResult mvcResult = mockMvc.perform(put(URL_RIDE_ID_STATE, RIDE_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(emptyRideStateRequestDto)))
                 .andExpect(status().isBadRequest())

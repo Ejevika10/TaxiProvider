@@ -1,9 +1,11 @@
 package com.modsen.rideservice.dto;
 
 import com.modsen.rideservice.model.RideState;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
+@Builder
 public record RideResponseDto (
 
         Long id,
