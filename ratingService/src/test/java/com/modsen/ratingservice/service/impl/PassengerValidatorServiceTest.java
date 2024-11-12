@@ -4,7 +4,6 @@ import com.modsen.ratingservice.client.ride.RideClientService;
 import com.modsen.ratingservice.dto.RideResponseDto;
 import com.modsen.ratingservice.exception.DuplicateFieldException;
 import com.modsen.ratingservice.exception.InvalidFieldValueException;
-import com.modsen.ratingservice.model.RideState;
 import com.modsen.ratingservice.repository.PassengerRatingRepository;
 import com.modsen.ratingservice.util.AppConstants;
 import org.junit.jupiter.api.Test;
@@ -13,8 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-
+import static com.modsen.ratingservice.util.TestData.RIDE_ID;
+import static com.modsen.ratingservice.util.TestData.getRideResponseDto;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -31,8 +30,6 @@ class PassengerValidatorServiceTest {
     @InjectMocks
     private PassengerValidatorService validator;
 
-    private final RideResponseDto rideResponseDto = new RideResponseDto(1L, 1L, 1L, "sourse address", "destination address", RideState.CREATED, LocalDateTime.now(), 1000);
-
     @Test
     void ratingExistsByRideId_NonExistingRating() {
         //Arrange
@@ -40,7 +37,7 @@ class PassengerValidatorServiceTest {
 
         //Act
         //Assert
-        assertDoesNotThrow(() -> validator.ratingExistsByRideId(1L));
+        assertDoesNotThrow(() -> validator.ratingExistsByRideId(RIDE_ID));
     }
 
     @Test
@@ -51,13 +48,14 @@ class PassengerValidatorServiceTest {
         //Act
         //Assert
         assertThrows(DuplicateFieldException.class,
-                () -> validator.ratingExistsByRideId(1L),
+                () -> validator.ratingExistsByRideId(RIDE_ID),
                 AppConstants.RATING_FOR_RIDE_ALREADY_EXIST);
     }
 
     @Test
     void rideExistsAndUserIsCorrect_CorrectUser() {
         //Arrange
+        RideResponseDto rideResponseDto = getRideResponseDto();
         when(rideClientService.getRideById(anyLong())).thenReturn(rideResponseDto);
 
         //Act
@@ -68,6 +66,7 @@ class PassengerValidatorServiceTest {
     @Test
     void rideExistsAndUserIsCorrect_IncorrectUser_ReturnsInvalidFieldValueException() {
         //Arrange
+        RideResponseDto rideResponseDto = getRideResponseDto();
         when(rideClientService.getRideById(anyLong())).thenReturn(rideResponseDto);
 
         //Act

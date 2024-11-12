@@ -10,12 +10,41 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
+
+import static com.modsen.ratingservice.util.TestData.EXCEEDED_LIMIT_VALUE;
+import static com.modsen.ratingservice.util.TestData.EXCEEDED_OFFSET_VALUE;
+import static com.modsen.ratingservice.util.TestData.INSUFFICIENT_LIMIT_VALUE;
+import static com.modsen.ratingservice.util.TestData.INSUFFICIENT_OFFSET_VALUE;
+import static com.modsen.ratingservice.util.TestData.INSUFFICIENT_USER_ID;
+import static com.modsen.ratingservice.util.TestData.LIMIT;
+import static com.modsen.ratingservice.util.TestData.LIMIT_VALUE;
+import static com.modsen.ratingservice.util.TestData.OFFSET;
+import static com.modsen.ratingservice.util.TestData.OFFSET_VALUE;
+import static com.modsen.ratingservice.util.TestData.RATING_ID;
+import static com.modsen.ratingservice.util.TestData.URL_DRIVER_RATING;
+import static com.modsen.ratingservice.util.TestData.URL_DRIVER_RATING_USER_ID;
+import static com.modsen.ratingservice.util.TestData.USER_ID;
+import static com.modsen.ratingservice.util.TestData.getEmptyRatingRequestDto;
+import static com.modsen.ratingservice.util.TestData.getInvalidRatingRequestDto;
+import static com.modsen.ratingservice.util.TestData.getRatingRequestDto;
+import static com.modsen.ratingservice.util.TestData.getRatingResponseDto;
+import static com.modsen.ratingservice.util.ViolationData.limitBig;
+import static com.modsen.ratingservice.util.ViolationData.limitInvalid;
+import static com.modsen.ratingservice.util.ViolationData.offsetInvalid;
+import static com.modsen.ratingservice.util.ViolationData.ratingInvalid;
+import static com.modsen.ratingservice.util.ViolationData.ratingMandatory;
+import static com.modsen.ratingservice.util.ViolationData.rideIdInvalid;
+import static com.modsen.ratingservice.util.ViolationData.rideIdMandatory;
+import static com.modsen.ratingservice.util.ViolationData.userIdInvalid;
+import static com.modsen.ratingservice.util.ViolationData.userIdMandatory;
+import static com.modsen.ratingservice.util.TestData.URL_DRIVER_RATING_ID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,16 +60,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = DriverRatingController.class)
 @TestPropertySource(properties = {"mongock.enabled=false"})
 class DriverRatingControllerTest {
-    private final RatingRequestDto ratingRequestDto = new RatingRequestDto(1L, 1L, 5, "awesome");
-    private final RatingRequestDto emptyRatingRequestDto = new RatingRequestDto(null, null, null, null);
-    private final RatingRequestDto invalidRatingRequestDto = new RatingRequestDto(-1L, -1L, 7, null);
-    private final RatingResponseDto ratingResponseDto = new RatingResponseDto("qwertyuiop1234", 1L, 1L, 5, "awesome");
-
-    private final String id = "qwertyuiop1234";
-
-    private final Long userId = 1L;
-    private final Long invalidUserId = -1L;
-    private final String URL = "/api/v1/driverratings";
 
     @Autowired
     private MockMvc mockMvc;
@@ -49,28 +68,17 @@ class DriverRatingControllerTest {
     @MockBean
     private DriverRatingServiceImpl ratingService;
 
-    private final String userIdMandatory = "userId: User id is mandatory";
-    private final String rideIdMandatory = "rideId: Ride id is mandatory";
-    private final String ratingMandatory = "rating: Rating is mandatory";
-
-    private final String userIdInvalid = "userId: must be greater than or equal to 0";
-    private final String rideIdInvalid = "rideId: must be greater than or equal to 0";
-    private final String ratingInvalid = "rating: must be less than or equal to 5";
-
-    private final String offsetInvalid = "offset: must be greater than or equal to 0";
-    private final String limitInvalid = "limit: must be greater than or equal to 1";
-    private final String limitBig = "limit: must be less than or equal to 20";
-
     @Test
     void getRating_whenValidId_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL + "/{ratingId}", id))
+        mockMvc.perform(get(URL_DRIVER_RATING_ID, RATING_ID))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getRating_whenValidInput_thenReturnsResponseDto() throws Exception {
-        when(ratingService.getRatingById(id)).thenReturn(ratingResponseDto);
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/{ratingId}", id))
+        RatingResponseDto ratingResponseDto = getRatingResponseDto();
+        when(ratingService.getRatingById(RATING_ID)).thenReturn(ratingResponseDto);
+        MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER_RATING_ID, RATING_ID))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -81,114 +89,136 @@ class DriverRatingControllerTest {
 
     @Test
     void getPageRatings_withoutParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL))
+        mockMvc.perform(get(URL_DRIVER_RATING))
                 .andExpect(status().isOk());
-        verify(ratingService, times(1)).getPageRatings(0,5);
+        verify(ratingService, times(1)).getPageRatings(OFFSET_VALUE,LIMIT_VALUE);
     }
 
     @Test
     void getPageRatings_withValidParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL).param("offset", "0").param("limit", "1"))
+        mockMvc.perform(get(URL_DRIVER_RATING)
+                        .param(OFFSET, OFFSET_VALUE.toString())
+                        .param(LIMIT, LIMIT_VALUE.toString()))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getPageRatings_withInvalidParams_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(offsetInvalid, limitInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL).param("offset", "-1").param("limit", "-1"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER_RATING)
+                        .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
+                        .param(LIMIT, INSUFFICIENT_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void getPageRatings_withBigLimit_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(limitBig));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL).param("offset", "100").param("limit", "100"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER_RATING)
+                .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
+                .param(LIMIT, EXCEEDED_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void getPageRatingsByUserId_withoutParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL + "/user/{userId}", userId))
+        mockMvc.perform(get(URL_DRIVER_RATING_USER_ID, USER_ID))
                 .andExpect(status().isOk());
-        verify(ratingService, times(1)).getPageRatingsByUserId(userId, 0,5);
+        verify(ratingService, times(1)).getPageRatingsByUserId(USER_ID, OFFSET_VALUE, LIMIT_VALUE);
     }
 
     @Test
     void getPageRatingsByUserId_withValidParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL + "/user/{userId}", userId)
-                        .param("offset", "0")
-                        .param("limit", "1"))
+        mockMvc.perform(get(URL_DRIVER_RATING_USER_ID, USER_ID)
+                        .param(OFFSET, OFFSET_VALUE.toString())
+                        .param(LIMIT, LIMIT_VALUE.toString()))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getPageRatingsByUserId_withInvalidParams_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(offsetInvalid, limitInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/user/{userId}", userId)
-                        .param("offset", "-1")
-                        .param("limit", "-1"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER_RATING_USER_ID, USER_ID)
+                        .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
+                        .param(LIMIT, INSUFFICIENT_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void getPageRatingsByUserId_withBigLimit_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(limitBig));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/user/{userId}", userId)
-                        .param("offset", "100")
-                        .param("limit", "100"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER_RATING_USER_ID, USER_ID)
+                        .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
+                        .param(LIMIT, EXCEEDED_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void getPageRatingsByUserId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(userIdInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/user/{userId}", invalidUserId))
+        MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER_RATING_USER_ID, INSUFFICIENT_USER_ID))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void createRating_whenValidInput_thenReturns201() throws Exception {
-        mockMvc.perform(post(URL)
+        RatingRequestDto ratingRequestDto = getRatingRequestDto();
+        mockMvc.perform(post(URL_DRIVER_RATING)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ratingRequestDto)))
                 .andExpect(status().isCreated());
@@ -196,7 +226,8 @@ class DriverRatingControllerTest {
 
     @Test
     void createRating_whenValidInput_thenMapsToBusinessModel() throws Exception {
-        mockMvc.perform(post(URL)
+        RatingRequestDto ratingRequestDto = getRatingRequestDto();
+        mockMvc.perform(post(URL_DRIVER_RATING)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ratingRequestDto)))
                 .andExpect(status().isCreated());
@@ -208,8 +239,10 @@ class DriverRatingControllerTest {
 
     @Test
     void createRating_whenValidInput_thenReturnsResponseDto() throws Exception {
+        RatingRequestDto ratingRequestDto = getRatingRequestDto();
+        RatingResponseDto ratingResponseDto = getRatingResponseDto();
         when(ratingService.addRating(ratingRequestDto)).thenReturn(ratingResponseDto);
-        MvcResult mvcResult = mockMvc.perform(post(URL)
+        MvcResult mvcResult = mockMvc.perform(post(URL_DRIVER_RATING)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ratingRequestDto)))
                 .andExpect(status().isCreated())
@@ -222,10 +255,12 @@ class DriverRatingControllerTest {
 
     @Test
     void createRating_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        RatingRequestDto emptyRatingRequestDto = getEmptyRatingRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(ratingMandatory,rideIdMandatory,userIdMandatory));
 
-        MvcResult mvcResult = mockMvc.perform(post(URL)
+        MvcResult mvcResult = mockMvc.perform(post(URL_DRIVER_RATING)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(emptyRatingRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -233,16 +268,20 @@ class DriverRatingControllerTest {
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void createRating_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        RatingRequestDto invalidRatingRequestDto = getInvalidRatingRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(ratingInvalid, userIdInvalid, rideIdInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(post(URL)
+        MvcResult mvcResult = mockMvc.perform(post(URL_DRIVER_RATING)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRatingRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -250,13 +289,16 @@ class DriverRatingControllerTest {
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void updateRating_whenValidInput_thenReturns200() throws Exception {
-        mockMvc.perform(put(URL + "/{ratingId}", id)
+        RatingRequestDto ratingRequestDto = getRatingRequestDto();
+        mockMvc.perform(put(URL_DRIVER_RATING_ID, RATING_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ratingRequestDto)))
                 .andExpect(status().isOk());
@@ -264,7 +306,8 @@ class DriverRatingControllerTest {
 
     @Test
     void updateRating_whenValidInput_thenMapsToBusinessModel() throws Exception {
-        mockMvc.perform(put(URL + "/{ratingId}", id)
+        RatingRequestDto ratingRequestDto = getRatingRequestDto();
+        mockMvc.perform(put(URL_DRIVER_RATING_ID, RATING_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ratingRequestDto)))
                 .andExpect(status().isOk());
@@ -277,8 +320,10 @@ class DriverRatingControllerTest {
 
     @Test
     void updateRating_whenValidInput_thenReturnsResponseDto() throws Exception {
-        when(ratingService.updateRating(id, ratingRequestDto)).thenReturn(ratingResponseDto);
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{ratingId}", id)
+        RatingRequestDto ratingRequestDto = getRatingRequestDto();
+        RatingResponseDto ratingResponseDto = getRatingResponseDto();
+        when(ratingService.updateRating(RATING_ID, ratingRequestDto)).thenReturn(ratingResponseDto);
+        MvcResult mvcResult = mockMvc.perform(put(URL_DRIVER_RATING_ID, RATING_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(ratingRequestDto)))
                 .andExpect(status().isOk())
@@ -291,10 +336,12 @@ class DriverRatingControllerTest {
 
     @Test
     void updateRating_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        RatingRequestDto emptyRatingRequestDto = getEmptyRatingRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(ratingMandatory,rideIdMandatory,userIdMandatory));
 
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{ratingId}", id)
+        MvcResult mvcResult = mockMvc.perform(put(URL_DRIVER_RATING_ID, RATING_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(emptyRatingRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -302,16 +349,20 @@ class DriverRatingControllerTest {
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void updateRating_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        RatingRequestDto invalidRatingRequestDto = getInvalidRatingRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(ratingInvalid, userIdInvalid, rideIdInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{ratingId}", id)
+        MvcResult mvcResult = mockMvc.perform(put(URL_DRIVER_RATING_ID, RATING_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRatingRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -319,13 +370,15 @@ class DriverRatingControllerTest {
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void deleteRating_whenValidId_thenReturns204() throws Exception {
-        mockMvc.perform(delete(URL + "/{ratingId}", id))
+        mockMvc.perform(delete(URL_DRIVER_RATING_ID, RATING_ID))
                 .andExpect(status().isNoContent());
     }
 }

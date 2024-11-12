@@ -23,6 +23,16 @@ import org.springframework.data.domain.PageRequest;
 import java.util.List;
 import java.util.Optional;
 
+import static com.modsen.ratingservice.util.TestData.LIMIT_VALUE;
+import static com.modsen.ratingservice.util.TestData.NON_EXISTING_RATING_ID;
+import static com.modsen.ratingservice.util.TestData.OFFSET_VALUE;
+import static com.modsen.ratingservice.util.TestData.RATING_ID;
+import static com.modsen.ratingservice.util.TestData.USER_ID;
+import static com.modsen.ratingservice.util.TestData.getPassengerRating;
+import static com.modsen.ratingservice.util.TestData.getPassengerRatingList;
+import static com.modsen.ratingservice.util.TestData.getRatingRequestDto;
+import static com.modsen.ratingservice.util.TestData.getRatingResponseDto;
+import static com.modsen.ratingservice.util.TestData.getRatingResponseDtoList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -58,18 +68,11 @@ class PassengerRatingServiceImplTest {
     @InjectMocks
     private PassengerRatingServiceImpl passengerRatingService;
 
-    private final PassengerRating passengerRating = new PassengerRating("1", 1L, 1L, 1, "cool", false);
-    private final RatingRequestDto passengerRatingRequestDto = new RatingRequestDto(1L, 1L, 1, "cool");
-    private final RatingResponseDto passengerRatingResponseDto = new RatingResponseDto("1", 1L, 1L, 1, "cool");
-
-    private final RatingRequestDto passengerRatingNewRequestDto = new RatingRequestDto(1L, 1L, 3, "coolNew");
-
-    private final List<PassengerRating> passengerRatingList = List.of(passengerRating);
-    private final List<RatingResponseDto> passengerRatingResponseDtoList = List.of(passengerRatingResponseDto);
-
     @Test
     void getAllRatings() {
         //Arrange
+        List<PassengerRating> passengerRatingList = getPassengerRatingList();
+        List<RatingResponseDto> passengerRatingResponseDtoList = getRatingResponseDtoList();
         when(passengerRatingRepository.findAllByDeletedIsFalse()).thenReturn(passengerRatingList);
         when(ratingListMapper.toPassengerRatingResponseDtoList(passengerRatingList)).thenReturn(passengerRatingResponseDtoList);
 
@@ -86,16 +89,16 @@ class PassengerRatingServiceImplTest {
     @Test
     void getPageRatings() {
         //Arrange
-        int offset = 0;
-        int limit = 5;
-        PageRequest pageRequest = PageRequest.of(offset, limit);
-        PageDto<RatingResponseDto> expected = new PageDto<>(offset, limit, 1, passengerRatingResponseDtoList.size(), passengerRatingResponseDtoList);
+        List<PassengerRating> passengerRatingList = getPassengerRatingList();
+        List<RatingResponseDto> passengerRatingResponseDtoList = getRatingResponseDtoList();
+        PageRequest pageRequest = PageRequest.of(OFFSET_VALUE, LIMIT_VALUE);
+        PageDto<RatingResponseDto> expected = new PageDto<>(OFFSET_VALUE, LIMIT_VALUE, 1, passengerRatingResponseDtoList.size(), passengerRatingResponseDtoList);
         Page<PassengerRating> ratingPage = new PageImpl<>(passengerRatingList, pageRequest, 1);
         when(passengerRatingRepository.findAllByDeletedIsFalse(pageRequest)).thenReturn(ratingPage);
         when(pageMapper.pageToDto(any(Page.class))).thenReturn(expected);
 
         //Act
-        PageDto<RatingResponseDto> actual = passengerRatingService.getPageRatings(offset, limit);
+        PageDto<RatingResponseDto> actual = passengerRatingService.getPageRatings(OFFSET_VALUE, LIMIT_VALUE);
 
         //Assert
         verify(passengerRatingRepository).findAllByDeletedIsFalse(pageRequest);
@@ -112,14 +115,16 @@ class PassengerRatingServiceImplTest {
     @Test
     void getAllRatingsByUserId() {
         //Arrange
+        List<PassengerRating> passengerRatingList = getPassengerRatingList();
+        List<RatingResponseDto> passengerRatingResponseDtoList = getRatingResponseDtoList();
         when(passengerRatingRepository.findAllByUserIdAndDeletedIsFalse(anyLong())).thenReturn(passengerRatingList);
         when(ratingListMapper.toPassengerRatingResponseDtoList(passengerRatingList)).thenReturn(passengerRatingResponseDtoList);
 
         //Act
-        List<RatingResponseDto> actual = passengerRatingService.getAllRatingsByUserId(passengerRatingRequestDto.userId());
+        List<RatingResponseDto> actual = passengerRatingService.getAllRatingsByUserId(USER_ID);
 
         //Assert
-        verify(passengerRatingRepository).findAllByUserIdAndDeletedIsFalse(passengerRatingRequestDto.userId());
+        verify(passengerRatingRepository).findAllByUserIdAndDeletedIsFalse(USER_ID);
         verify(ratingListMapper).toPassengerRatingResponseDtoList(passengerRatingList);
         assertEquals(passengerRatingResponseDtoList.size(), actual.size());
         assertIterableEquals(passengerRatingResponseDtoList, actual);
@@ -128,19 +133,19 @@ class PassengerRatingServiceImplTest {
     @Test
     void getPageRatingsByUserId() {
         //Arrange
-        int offset = 0;
-        int limit = 5;
-        PageRequest pageRequest = PageRequest.of(offset, limit);
-        PageDto<RatingResponseDto> expected = new PageDto<>(offset, limit, 1, passengerRatingResponseDtoList.size(), passengerRatingResponseDtoList);
+        List<PassengerRating> passengerRatingList = getPassengerRatingList();
+        List<RatingResponseDto> passengerRatingResponseDtoList = getRatingResponseDtoList();
+        PageRequest pageRequest = PageRequest.of(OFFSET_VALUE, LIMIT_VALUE);
+        PageDto<RatingResponseDto> expected = new PageDto<>(OFFSET_VALUE, LIMIT_VALUE, 1, passengerRatingResponseDtoList.size(), passengerRatingResponseDtoList);
         Page<PassengerRating> ratingPage = new PageImpl<>(passengerRatingList, pageRequest, 1);
-        when(passengerRatingRepository.findAllByUserIdAndDeletedIsFalse(passengerRating.getUserId(), pageRequest)).thenReturn(ratingPage);
+        when(passengerRatingRepository.findAllByUserIdAndDeletedIsFalse(USER_ID, pageRequest)).thenReturn(ratingPage);
         when(pageMapper.pageToDto(any(Page.class))).thenReturn(expected);
 
         //Act
-        PageDto<RatingResponseDto> actual = passengerRatingService.getPageRatingsByUserId(passengerRating.getUserId(), offset, limit);
+        PageDto<RatingResponseDto> actual = passengerRatingService.getPageRatingsByUserId(USER_ID, OFFSET_VALUE, LIMIT_VALUE);
 
         //Assert
-        verify(passengerRatingRepository).findAllByUserIdAndDeletedIsFalse(passengerRating.getUserId(), pageRequest);
+        verify(passengerRatingRepository).findAllByUserIdAndDeletedIsFalse(USER_ID, pageRequest);
         verify(ratingMapper, times(actual.content().size())).toRatingResponseDto(any(PassengerRating.class));
         verify(pageMapper).pageToDto(any(Page.class));
 
@@ -154,14 +159,16 @@ class PassengerRatingServiceImplTest {
     @Test
     void getRatingById_ExistingId_ReturnsValidDto() {
         //Arrange
+        PassengerRating passengerRating = getPassengerRating();
+        RatingResponseDto passengerRatingResponseDto = getRatingResponseDto();
         when(passengerRatingRepository.findByIdAndDeletedIsFalse(anyString())).thenReturn(Optional.of(passengerRating));
         when(ratingMapper.toRatingResponseDto(passengerRating)).thenReturn(passengerRatingResponseDto);
 
         //Act
-        RatingResponseDto actual = passengerRatingService.getRatingById(passengerRating.getId());
+        RatingResponseDto actual = passengerRatingService.getRatingById(RATING_ID);
 
         //Assert
-        verify(passengerRatingRepository).findByIdAndDeletedIsFalse(passengerRating.getId());
+        verify(passengerRatingRepository).findByIdAndDeletedIsFalse(RATING_ID);
         verify(ratingMapper).toRatingResponseDto(passengerRating);
         assertEquals(passengerRatingResponseDto, actual);
     }
@@ -169,6 +176,7 @@ class PassengerRatingServiceImplTest {
     @Test
     void getRatingById_NonExistingId_ReturnsNotFoundException() {
         //Arrange
+        PassengerRating passengerRating = getPassengerRating();
         when(passengerRatingRepository.findByIdAndDeletedIsFalse(anyString())).thenReturn(Optional.empty());
 
         //Act
@@ -182,6 +190,9 @@ class PassengerRatingServiceImplTest {
     @Test
     void addRating_UniqueRideIdExistingRideIdCorrectPassengerId_ReturnsValidDto() {
         //Arrange
+        PassengerRating passengerRating = getPassengerRating();
+        RatingRequestDto passengerRatingRequestDto = getRatingRequestDto();
+        RatingResponseDto passengerRatingResponseDto = getRatingResponseDto();
         when(ratingMapper.toPassengerRating(any(RatingRequestDto.class))).thenReturn(passengerRating);
         when(passengerRatingRepository.save(passengerRating)).thenReturn(passengerRating);
         when(ratingMapper.toRatingResponseDto(passengerRating)).thenReturn(passengerRatingResponseDto);
@@ -201,17 +212,20 @@ class PassengerRatingServiceImplTest {
     @Test
     void updateRating_ExistingRatingUniqueRideIdExistingRideIdCorrectPassengerId_ReturnsValidDto() {
         //Arrange
+        PassengerRating passengerRating = getPassengerRating();
+        RatingRequestDto passengerRatingRequestDto = getRatingRequestDto();
+        RatingResponseDto passengerRatingResponseDto = getRatingResponseDto();
         when(passengerRatingRepository.findByIdAndDeletedIsFalse(anyString())).thenReturn(Optional.of(passengerRating));
         when(passengerRatingRepository.save(passengerRating)).thenReturn(passengerRating);
         when(ratingMapper.toRatingResponseDto(passengerRating)).thenReturn(passengerRatingResponseDto);
 
         //Act
-        RatingResponseDto actual = passengerRatingService.updateRating(passengerRating.getId(), passengerRatingNewRequestDto);
+        RatingResponseDto actual = passengerRatingService.updateRating(passengerRating.getId(), passengerRatingRequestDto);
 
         //Assert
         verify(passengerRatingRepository).findByIdAndDeletedIsFalse(passengerRating.getId());
-        verify(validator).rideExistsAndUserIsCorrect(passengerRatingNewRequestDto.rideId(), passengerRatingNewRequestDto.userId());
-        verify(ratingMapper).updatePassengerRating(passengerRatingNewRequestDto, passengerRating);
+        verify(validator).rideExistsAndUserIsCorrect(passengerRatingRequestDto.rideId(), passengerRatingRequestDto.userId());
+        verify(ratingMapper).updatePassengerRating(passengerRatingRequestDto, passengerRating);
         verify(passengerRatingRepository).save(passengerRating);
         verify(ratingMapper).toRatingResponseDto(passengerRating);
     }
@@ -219,19 +233,21 @@ class PassengerRatingServiceImplTest {
     @Test
     void updateRating_NonExistingRating_ReturnsNotFoundException() {
         //Arrange
+        RatingRequestDto passengerRatingRequestDto = getRatingRequestDto();
         when(passengerRatingRepository.findByIdAndDeletedIsFalse(anyString())).thenReturn(Optional.empty());
 
         //Act
         //Assert
         assertThrows(NotFoundException.class,
-                () -> passengerRatingService.updateRating("1", passengerRatingRequestDto),
+                () -> passengerRatingService.updateRating(NON_EXISTING_RATING_ID, passengerRatingRequestDto),
                 AppConstants.RATING_NOT_FOUND);
-        verify(passengerRatingRepository).findByIdAndDeletedIsFalse("1");
+        verify(passengerRatingRepository).findByIdAndDeletedIsFalse(NON_EXISTING_RATING_ID);
     }
 
     @Test
     void deleteRating_ExistingId() {
         //Arrange
+        PassengerRating passengerRating = getPassengerRating();
         when(passengerRatingRepository.findByIdAndDeletedIsFalse(anyString())).thenReturn(Optional.of(passengerRating));
         when(passengerRatingRepository.save(passengerRating)).thenReturn(passengerRating);
 
@@ -239,7 +255,7 @@ class PassengerRatingServiceImplTest {
         passengerRatingService.deleteRating(passengerRating.getId());
 
         //Assert
-        verify(passengerRatingRepository).findByIdAndDeletedIsFalse(passengerRating.getId());
+        verify(passengerRatingRepository).findByIdAndDeletedIsFalse(RATING_ID);
         verify(passengerRatingRepository).save(passengerRating);
         assertTrue(passengerRating.getDeleted());
     }
@@ -252,8 +268,8 @@ class PassengerRatingServiceImplTest {
         //Act
         //Assert
         assertThrows(NotFoundException.class,
-                () -> passengerRatingService.deleteRating("1"),
+                () -> passengerRatingService.deleteRating(NON_EXISTING_RATING_ID),
                 AppConstants.RATING_NOT_FOUND);
-        verify(passengerRatingRepository).findByIdAndDeletedIsFalse("1");
+        verify(passengerRatingRepository).findByIdAndDeletedIsFalse(NON_EXISTING_RATING_ID);
     }
 }
