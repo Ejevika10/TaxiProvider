@@ -24,6 +24,18 @@ import org.springframework.data.domain.PageRequest;
 import java.util.List;
 import java.util.Optional;
 
+import static com.modsen.passengerservice.util.TestData.LIMIT_VALUE;
+import static com.modsen.passengerservice.util.TestData.NEW_RATING;
+import static com.modsen.passengerservice.util.TestData.OFFSET_VALUE;
+import static com.modsen.passengerservice.util.TestData.PASSENGER_ID;
+import static com.modsen.passengerservice.util.TestData.getPassenger;
+import static com.modsen.passengerservice.util.TestData.getPassengerBuilder;
+import static com.modsen.passengerservice.util.TestData.getPassengerList;
+import static com.modsen.passengerservice.util.TestData.getPassengerRequestDto;
+import static com.modsen.passengerservice.util.TestData.getPassengerResponseDto;
+import static com.modsen.passengerservice.util.TestData.getPassengerResponseDtoBuilder;
+import static com.modsen.passengerservice.util.TestData.getPassengerResponseDtoList;
+import static com.modsen.passengerservice.util.TestData.getUserRatingDto;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -50,22 +62,11 @@ class PassengerServiceImplTest {
     @InjectMocks
     private PassengerServiceImpl passengerService;
 
-    private final UserRatingDto passengerRating = new UserRatingDto(1L, 5.0);
-
-    private final Passenger passengerA = new Passenger(1L, "PassengerA", "passengerA@mail.ru", "712345678", 0.0, false);
-    private final PassengerRequestDto passengerARequestDto = new PassengerRequestDto("PassengerA", "passengerA@mail.ru", "712345678", 0.0);
-    private final PassengerResponseDto passengerAResponseDto = new PassengerResponseDto(1L, "PassengerA", "passengerA@mail.ru", "712345678", 0.0);
-
-    private final Passenger passengerB = new Passenger(2L, "PassengerB", "passengerB@mail.ru", "712345678", 0.0, false);
-    private final PassengerRequestDto passengerBRequestDto = new PassengerRequestDto("PassengerB", "passengerB@mail.ru", "712345678", 0.0);
-    private final PassengerResponseDto passengerBResponseDto = new PassengerResponseDto(2L, "PassengerB", "passengerB@mail.ru", "712345678", 0.0);
-
-    private final List<Passenger> passengerList = List.of(passengerA, passengerB);
-    private final List<PassengerResponseDto> passengerResponseDtoList = List.of(passengerAResponseDto, passengerBResponseDto);
-
     @Test
     void getAllPassengers() {
         //Arrange
+        List<Passenger> passengerList = getPassengerList();
+        List<PassengerResponseDto> passengerResponseDtoList = getPassengerResponseDtoList();
         when(passengerRepository.findAllByDeletedIsFalse()).thenReturn(passengerList);
         when(passengerListMapper.toPassengerResponseDTOList(passengerList)).thenReturn(passengerResponseDtoList);
 
@@ -82,16 +83,16 @@ class PassengerServiceImplTest {
     @Test
     void getPagePassengers() {
         //Arrange
-        int offset = 0;
-        int limit = 5;
-        PageRequest pageRequest = PageRequest.of(offset, limit);
-        PageDto<PassengerResponseDto> expected = new PageDto<>(offset, limit, 1, passengerResponseDtoList.size(), passengerResponseDtoList);
+        List<Passenger> passengerList = getPassengerList();
+        List<PassengerResponseDto> passengerResponseDtoList = getPassengerResponseDtoList();
+        PageRequest pageRequest = PageRequest.of(OFFSET_VALUE, LIMIT_VALUE);
+        PageDto<PassengerResponseDto> expected = new PageDto<>(OFFSET_VALUE, LIMIT_VALUE, 1, passengerResponseDtoList.size(), passengerResponseDtoList);
         Page<Passenger> passengerPage = new PageImpl<>(passengerList, pageRequest, 1);
         when(passengerRepository.findAllByDeletedIsFalse(pageRequest)).thenReturn(passengerPage);
         when(pageMapper.pageToDto(any(Page.class))).thenReturn(expected);
 
         //Act
-        PageDto<PassengerResponseDto> actual = passengerService.getPagePassengers(offset, limit);
+        PageDto<PassengerResponseDto> actual = passengerService.getPagePassengers(OFFSET_VALUE, LIMIT_VALUE);
 
         //Assert
         verify(passengerRepository).findAllByDeletedIsFalse(pageRequest);
@@ -108,16 +109,18 @@ class PassengerServiceImplTest {
     @Test
     void getPassengerById_ExistingId_ReturnsValidDto() {
         //Arrange
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passengerA));
-        when(passengerMapper.toPassengerResponseDTO(passengerA)).thenReturn(passengerAResponseDto);
+        Passenger passenger = getPassenger();
+        PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
+        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passenger));
+        when(passengerMapper.toPassengerResponseDTO(passenger)).thenReturn(passengerResponseDto);
 
         //Act
-        PassengerResponseDto actual = passengerService.getPassengerById(passengerA.getId());
+        PassengerResponseDto actual = passengerService.getPassengerById(passenger.getId());
 
         //Assert
-        verify(passengerRepository).findByIdAndDeletedIsFalse(passengerA.getId());
-        verify(passengerMapper).toPassengerResponseDTO(passengerA);
-        assertEquals(actual, passengerAResponseDto);
+        verify(passengerRepository).findByIdAndDeletedIsFalse(passenger.getId());
+        verify(passengerMapper).toPassengerResponseDTO(passenger);
+        assertEquals(actual, passengerResponseDto);
     }
 
     @Test
@@ -136,123 +139,143 @@ class PassengerServiceImplTest {
     @Test
     void getPassengerByEmail_ExistingEmail_ReturnsValidDto() {
         //Arrange
-        when(passengerRepository.findByEmailAndDeletedIsFalse(anyString())).thenReturn(Optional.of(passengerA));
-        when(passengerMapper.toPassengerResponseDTO(passengerA)).thenReturn(passengerAResponseDto);
+        Passenger passenger = getPassenger();
+        PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
+        when(passengerRepository.findByEmailAndDeletedIsFalse(anyString())).thenReturn(Optional.of(passenger));
+        when(passengerMapper.toPassengerResponseDTO(passenger)).thenReturn(passengerResponseDto);
 
         //Act
-        PassengerResponseDto actual = passengerService.getPassengerByEmail(passengerA.getEmail());
+        PassengerResponseDto actual = passengerService.getPassengerByEmail(passenger.getEmail());
 
         //Assert
-        assertEquals(actual, passengerAResponseDto);
-        verify(passengerRepository).findByEmailAndDeletedIsFalse(passengerA.getEmail());
-        verify(passengerMapper).toPassengerResponseDTO(passengerA);
+        assertEquals(actual, passengerResponseDto);
+        verify(passengerRepository).findByEmailAndDeletedIsFalse(passenger.getEmail());
+        verify(passengerMapper).toPassengerResponseDTO(passenger);
     }
 
     @Test
     void getPassengerByEmail_NonExistingEmail_ReturnsNotFoundException() {
         //Arrange
+        Passenger passenger = getPassenger();
         when(passengerRepository.findByEmailAndDeletedIsFalse(anyString())).thenReturn(Optional.empty());
 
         //Act
         //Assert
         assertThrows(NotFoundException.class,
-                () -> passengerService.getPassengerByEmail(passengerA.getEmail()),
+                () -> passengerService.getPassengerByEmail(passenger.getEmail()),
                 AppConstants.PASSENGER_NOT_FOUND);
-        verify(passengerRepository).findByEmailAndDeletedIsFalse(passengerA.getEmail());
+        verify(passengerRepository).findByEmailAndDeletedIsFalse(passenger.getEmail());
     }
 
     @Test
     void addPassenger_UniqueEmail_ReturnsValidDto() {
         //Arrange
+        Passenger passenger = getPassenger();
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
         when(passengerRepository.existsByEmailAndDeletedIsFalse(anyString())).thenReturn(false);
-        when(passengerMapper.toPassenger(passengerARequestDto)).thenReturn(passengerA);
-        when(passengerMapper.toPassengerResponseDTO(passengerA)).thenReturn(passengerAResponseDto);
-        when(passengerRepository.save(passengerA)).thenReturn(passengerA);
+        when(passengerMapper.toPassenger(passengerRequestDto)).thenReturn(passenger);
+        when(passengerMapper.toPassengerResponseDTO(passenger)).thenReturn(passengerResponseDto);
+        when(passengerRepository.save(passenger)).thenReturn(passenger);
 
         //Act
-        PassengerResponseDto actual = passengerService.addPassenger(passengerARequestDto);
+        PassengerResponseDto actual = passengerService.addPassenger(passengerRequestDto);
 
         //Assert
-        verify(passengerRepository).existsByEmailAndDeletedIsFalse(passengerARequestDto.email());
-        verify(passengerMapper).toPassenger(passengerARequestDto);
-        verify(passengerRepository).save(passengerA);
-        verify(passengerMapper).toPassengerResponseDTO(passengerA);
-        assertEquals(actual, passengerAResponseDto);
+        verify(passengerRepository).existsByEmailAndDeletedIsFalse(passengerRequestDto.email());
+        verify(passengerMapper).toPassenger(passengerRequestDto);
+        verify(passengerRepository).save(passenger);
+        verify(passengerMapper).toPassengerResponseDTO(passenger);
+        assertEquals(actual, passengerResponseDto);
     }
 
     @Test
     void addPassenger_NonUniqueEmail_ReturnsDuplicateFieldException() {
         //Arrange
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
         when(passengerRepository.existsByEmailAndDeletedIsFalse(anyString())).thenReturn(true);
 
         //Act
         //Assert
         assertThrows(DuplicateFieldException.class,
-                () -> passengerService.addPassenger(passengerARequestDto),
+                () -> passengerService.addPassenger(passengerRequestDto),
                 AppConstants.PASSENGER_EMAIL_EXISTS);
-        verify(passengerRepository).existsByEmailAndDeletedIsFalse(passengerARequestDto.email());
+        verify(passengerRepository).existsByEmailAndDeletedIsFalse(passengerRequestDto.email());
     }
 
     @Test
     void updatePassenger_ExistingIdUniqueEmail_ReturnsValidDto() {
         //Arrange
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passengerA));
+        Passenger passenger = getPassenger();
+        PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passenger));
         when(passengerRepository.findByEmailAndDeletedIsFalse(anyString())).thenReturn(Optional.empty());
-        when(passengerRepository.save(passengerA)).thenReturn(passengerA);
-        when(passengerMapper.toPassengerResponseDTO(passengerA)).thenReturn(passengerAResponseDto);
+        when(passengerRepository.save(passenger)).thenReturn(passenger);
+        when(passengerMapper.toPassengerResponseDTO(passenger)).thenReturn(passengerResponseDto);
 
         //Act
-        PassengerResponseDto actual = passengerService.updatePassenger(passengerA.getId(), passengerARequestDto);
+        PassengerResponseDto actual = passengerService.updatePassenger(passenger.getId(), passengerRequestDto);
 
         //Assert
-        verify(passengerRepository).findByIdAndDeletedIsFalse(passengerA.getId());
-        verify(passengerRepository).findByEmailAndDeletedIsFalse(passengerARequestDto.email());
-        verify(passengerRepository).save(passengerA);
-        verify(passengerMapper).toPassengerResponseDTO(passengerA);
-        assertEquals(actual, passengerAResponseDto);
+        verify(passengerRepository).findByIdAndDeletedIsFalse(passenger.getId());
+        verify(passengerRepository).findByEmailAndDeletedIsFalse(passengerRequestDto.email());
+        verify(passengerRepository).save(passenger);
+        verify(passengerMapper).toPassengerResponseDTO(passenger);
+        assertEquals(actual, passengerResponseDto);
     }
 
     @Test
     void updatePassenger_NonExistingId_ReturnsNotFoundException() {
         //Arrange
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
         when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
 
         //Act
         //Assert
         assertThrows(NotFoundException.class,
-                () -> passengerService.updatePassenger(3L, passengerARequestDto),
+                () -> passengerService.updatePassenger(PASSENGER_ID, passengerRequestDto),
                 AppConstants.PASSENGER_NOT_FOUND);
-        verify(passengerRepository).findByIdAndDeletedIsFalse(3L);
+        verify(passengerRepository).findByIdAndDeletedIsFalse(PASSENGER_ID);
     }
 
     @Test
     void updatePassenger_ExistingIdNonUniqueEmail_ReturnsDuplicateFieldException() {
         //Arrange
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passengerA));
-        when(passengerRepository.findByEmailAndDeletedIsFalse(anyString())).thenReturn(Optional.of(passengerB));
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        Passenger passenger = getPassenger();
+        Passenger passengerWithSameEmail = getPassengerBuilder()
+                .id(2L)
+                .build();
+
+        PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
+
+        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passenger));
+        when(passengerRepository.findByEmailAndDeletedIsFalse(anyString())).thenReturn(Optional.of(passengerWithSameEmail));
 
         //Act
         //Assert
         assertThrows(DuplicateFieldException.class,
-                () -> passengerService.updatePassenger(passengerA.getId(), passengerBRequestDto),
+                () -> passengerService.updatePassenger(PASSENGER_ID, passengerRequestDto),
                 AppConstants.PASSENGER_EMAIL_EXISTS);
-        verify(passengerRepository).findByIdAndDeletedIsFalse(passengerA.getId());
-        verify(passengerRepository).findByEmailAndDeletedIsFalse(passengerBRequestDto.email());
+        verify(passengerRepository).findByIdAndDeletedIsFalse(PASSENGER_ID);
+        verify(passengerRepository).findByEmailAndDeletedIsFalse(passengerRequestDto.email());
     }
 
     @Test
     void deletePassenger_ExistingId() {
         //Arrange
-        when(passengerRepository.findByIdAndDeletedIsFalse(passengerA.getId())).thenReturn(Optional.of(passengerA));
-        when(passengerRepository.save(passengerA)).thenReturn(passengerA);
+        Passenger passenger = getPassenger();
+        when(passengerRepository.findByIdAndDeletedIsFalse(passenger.getId())).thenReturn(Optional.of(passenger));
+        when(passengerRepository.save(passenger)).thenReturn(passenger);
 
         //Act
-        passengerService.deletePassenger(passengerA.getId());
+        passengerService.deletePassenger(passenger.getId());
 
         //Assert
-        verify(passengerRepository).findByIdAndDeletedIsFalse(passengerA.getId());
-        verify(passengerRepository).save(passengerA);
-        assertTrue(passengerA.getDeleted());
+        verify(passengerRepository).findByIdAndDeletedIsFalse(passenger.getId());
+        verify(passengerRepository).save(passenger);
+        assertTrue(passenger.getDeleted());
     }
 
     @Test
@@ -263,32 +286,37 @@ class PassengerServiceImplTest {
         //Act
         //Assert
         assertThrows(NotFoundException.class,
-                () -> passengerService.deletePassenger(3L),
+                () -> passengerService.deletePassenger(PASSENGER_ID),
                 AppConstants.PASSENGER_NOT_FOUND);
-        verify(passengerRepository).findByIdAndDeletedIsFalse(3L);
+        verify(passengerRepository).findByIdAndDeletedIsFalse(PASSENGER_ID);
     }
 
     @Test
     void updateRating_ExistingId_ReturnsValidDto() {
         //Arrange
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passengerA));
-        when(passengerRepository.save(passengerA)).thenReturn(passengerA);
-        PassengerResponseDto passengerAUpdatedResponseDto = new PassengerResponseDto(1L, "PassengerA", "passengerA@mail.ru", "712345678", 5.0);
-        when(passengerMapper.toPassengerResponseDTO(passengerA)).thenReturn(passengerAUpdatedResponseDto);
+        Passenger passenger = getPassenger();
+        UserRatingDto passengerRating = getUserRatingDto();
+        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passenger));
+        when(passengerRepository.save(passenger)).thenReturn(passenger);
+        PassengerResponseDto passengerUpdatedResponseDto = getPassengerResponseDtoBuilder()
+                .rating(NEW_RATING)
+                .build();
+        when(passengerMapper.toPassengerResponseDTO(passenger)).thenReturn(passengerUpdatedResponseDto);
 
         //Act
         PassengerResponseDto actual = passengerService.updateRating(passengerRating);
 
         //Assert
         verify(passengerRepository).findByIdAndDeletedIsFalse(passengerRating.id());
-        verify(passengerRepository).save(passengerA);
-        verify(passengerMapper).toPassengerResponseDTO(passengerA);
+        verify(passengerRepository).save(passenger);
+        verify(passengerMapper).toPassengerResponseDTO(passenger);
         assertEquals(passengerRating.rating(), actual.rating());
     }
 
     @Test
     void updateRating_NonExistingId_ReturnsNotFoundException() {
         //Arrange
+        UserRatingDto passengerRating = getUserRatingDto();
         when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
 
         //Act

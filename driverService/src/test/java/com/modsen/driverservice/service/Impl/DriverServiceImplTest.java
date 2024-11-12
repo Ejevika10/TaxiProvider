@@ -32,8 +32,10 @@ import static com.modsen.driverservice.util.TestData.getDriverBuilder;
 import static com.modsen.driverservice.util.TestData.getDriverList;
 import static com.modsen.driverservice.util.TestData.getDriverRequestDto;
 import static com.modsen.driverservice.util.TestData.getDriverResponseDto;
+import static com.modsen.driverservice.util.TestData.getDriverResponseDtoBuilder;
 import static com.modsen.driverservice.util.TestData.getDriverResponseDtoList;
 import static com.modsen.driverservice.util.TestData.getUserRatingDto;
+import static com.modsen.driverservice.util.TestData.NEW_RATING;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -294,7 +296,9 @@ class DriverServiceImplTest {
         UserRatingDto driverRating = getUserRatingDto();
         when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(driver));
         when(driverRepository.save(driver)).thenReturn(driver);
-        DriverResponseDto driverUpdatedResponseDto = getDriverResponseDto();
+        DriverResponseDto driverUpdatedResponseDto = getDriverResponseDtoBuilder()
+                .rating(NEW_RATING)
+                .build();
         when(driverMapper.toDriverResponseDTO(driver)).thenReturn(driverUpdatedResponseDto);
 
         //Act

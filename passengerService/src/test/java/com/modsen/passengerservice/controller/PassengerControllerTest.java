@@ -10,12 +10,39 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 
+import static com.modsen.passengerservice.util.TestData.EXCEEDED_LIMIT_VALUE;
+import static com.modsen.passengerservice.util.TestData.EXCEEDED_OFFSET_VALUE;
+import static com.modsen.passengerservice.util.TestData.INSUFFICIENT_LIMIT_VALUE;
+import static com.modsen.passengerservice.util.TestData.INSUFFICIENT_OFFSET_VALUE;
+import static com.modsen.passengerservice.util.TestData.INSUFFICIENT_PASSENGER_ID;
+import static com.modsen.passengerservice.util.TestData.LIMIT;
+import static com.modsen.passengerservice.util.TestData.LIMIT_VALUE;
+import static com.modsen.passengerservice.util.TestData.OFFSET;
+import static com.modsen.passengerservice.util.TestData.OFFSET_VALUE;
+import static com.modsen.passengerservice.util.TestData.PASSENGER_ID;
+import static com.modsen.passengerservice.util.TestData.URL_PASSENGER;
+import static com.modsen.passengerservice.util.TestData.URL_PASSENGER_ID;
+import static com.modsen.passengerservice.util.TestData.getEmptyPassengerRequestDto;
+import static com.modsen.passengerservice.util.TestData.getInvalidPassengerRequestDto;
+import static com.modsen.passengerservice.util.TestData.getPassengerRequestDto;
+import static com.modsen.passengerservice.util.TestData.getPassengerResponseDto;
+import static com.modsen.passengerservice.util.ViolationData.limitExceeded;
+import static com.modsen.passengerservice.util.ViolationData.limitInsufficient;
+import static com.modsen.passengerservice.util.ViolationData.offsetInsufficient;
+import static com.modsen.passengerservice.util.ViolationData.passengerEmailInvalid;
+import static com.modsen.passengerservice.util.ViolationData.passengerEmailMandatory;
+import static com.modsen.passengerservice.util.ViolationData.passengerIdInvalid;
+import static com.modsen.passengerservice.util.ViolationData.passengerNameInvalid;
+import static com.modsen.passengerservice.util.ViolationData.passengerNameMandatory;
+import static com.modsen.passengerservice.util.ViolationData.passengerPhoneInvalid;
+import static com.modsen.passengerservice.util.ViolationData.passengerPhoneMandatory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -29,14 +56,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = PassengerController.class)
 class PassengerControllerTest {
-    private final PassengerRequestDto passengerRequestDto = new PassengerRequestDto("PassengerA", "PassengerA@email.com", "71234567890", 0.0);
-    private final PassengerRequestDto emptyPassengerRequestDto = new PassengerRequestDto(null, null, null, null);
-    private final PassengerRequestDto invalidPassengerRequestDto = new PassengerRequestDto("A", "DriverA", "11", -1.0);
-    private final PassengerResponseDto passengerResponseDto = new PassengerResponseDto(1L, "PassengerA", "PassengerA@email.com", "71234567890", 0.0);
-
-    private final Long passengerId = 1L;
-    private final Long invalidPassengerId = -1L;
-    private final String URL = "/api/v1/passengers";
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,52 +64,50 @@ class PassengerControllerTest {
     @MockBean
     private PassengerService passengerService;
 
-    private final String passengerNameMandatory = "name: Name is mandatory";
-    private final String passengerEmailMandatory = "email: Email is mandatory";
-    private final String passengerPhoneMandatory = "phone: Phone is mandatory";
-    private final String passengerNameInvalid = "name: size must be between 2 and 50";
-    private final String passengerEmailInvalid = "email: Email is invalid";
-    private final String passengerPhoneInvalid = "phone: Phone is invalid";
-    private final String passengerIdInvalid = "id: must be greater than or equal to 0";
-    private final String offsetInvalid = "offset: must be greater than or equal to 0";
-    private final String limitInvalid = "limit: must be greater than or equal to 1";
-    private final String limitBig = "limit: must be less than or equal to 20";
-
-
     @Test
-    void getPagePassengers_withoutParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL))
+    void getPagePassengers_whenEmptyParams_thenReturns201() throws Exception {
+        mockMvc.perform(get(URL_PASSENGER))
                 .andExpect(status().isOk());
-        verify(passengerService, times(1)).getPagePassengers(0,5);
+        verify(passengerService, times(1)).getPagePassengers(OFFSET_VALUE,LIMIT_VALUE);
     }
 
     @Test
-    void getPagePassengers_withValidParams_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL).param("offset", "0").param("limit", "1"))
+    void getPagePassengers_whenValidParams_thenReturns201() throws Exception {
+        mockMvc.perform(get(URL_PASSENGER)
+                        .param(OFFSET, OFFSET_VALUE.toString())
+                        .param(LIMIT, LIMIT_VALUE.toString()))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void getPagePassengers_withInvalidParams_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
-                List.of(offsetInvalid, limitInvalid));
+    void getPagePassengers_whenInsufficientParams_thenReturns400() throws Exception {
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                List.of(offsetInsufficient, limitInsufficient));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL).param("offset", "-1").param("limit", "-1"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER)
+                        .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
+                        .param(LIMIT, INSUFFICIENT_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
-    void getPagePassengers_withBigLimit_thenReturns400() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
-                List.of(limitBig));
+    void getPagePassengers_whenBigLimit_thenReturns400() throws Exception {
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                List.of(limitExceeded));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL).param("offset", "100").param("limit", "100"))
+        MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER)
+                        .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
+                        .param(LIMIT, EXCEEDED_LIMIT_VALUE.toString()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -102,14 +119,15 @@ class PassengerControllerTest {
 
     @Test
     void getPassengerById_whenValidId_thenReturns201() throws Exception {
-        mockMvc.perform(get(URL + "/{passengerId}", passengerId))
+        mockMvc.perform(get(URL_PASSENGER_ID, PASSENGER_ID))
                 .andExpect(status().isOk());
     }
 
     @Test
     void getPassengerById_whenValidInput_thenReturnsResponseDto() throws Exception {
-        when(passengerService.getPassengerById(passengerId)).thenReturn(passengerResponseDto);
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/{passengerId}", passengerId))
+        PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
+        when(passengerService.getPassengerById(PASSENGER_ID)).thenReturn(passengerResponseDto);
+        MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER_ID, PASSENGER_ID))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -119,23 +137,27 @@ class PassengerControllerTest {
     }
 
     @Test
-    void getPassengerById_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+    void getPassengerById_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(passengerIdInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL + "/{passengerId}", invalidPassengerId))
+        MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER_ID, INSUFFICIENT_PASSENGER_ID))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
         ListErrorMessage actualErrorResponse = objectMapper.readValue(actualResponseBody, ListErrorMessage.class);
 
-        assertThat(actualErrorResponse.errorCode()).isEqualTo(expectedErrorResponse.errorCode());
-        assertThat(actualErrorResponse.errorMessages()).containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
     }
 
     @Test
     void createPassenger_whenValidInput_thenReturns201() throws Exception {
-        mockMvc.perform(post(URL)
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        mockMvc.perform(post(URL_PASSENGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passengerRequestDto)))
                 .andExpect(status().isCreated());
@@ -143,7 +165,8 @@ class PassengerControllerTest {
 
     @Test
     void createPassenger_whenValidInput_thenMapsToBusinessModel() throws Exception {
-        mockMvc.perform(post(URL)
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        mockMvc.perform(post(URL_PASSENGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passengerRequestDto)))
                 .andExpect(status().isCreated());
@@ -155,8 +178,10 @@ class PassengerControllerTest {
 
     @Test
     void createPassenger_whenValidInput_thenReturnsResponseDto() throws Exception {
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
         when(passengerService.addPassenger(passengerRequestDto)).thenReturn(passengerResponseDto);
-        MvcResult mvcResult = mockMvc.perform(post(URL)
+        MvcResult mvcResult = mockMvc.perform(post(URL_PASSENGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passengerRequestDto)))
                 .andExpect(status().isCreated())
@@ -169,10 +194,12 @@ class PassengerControllerTest {
 
     @Test
     void createPassenger_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        PassengerRequestDto emptyPassengerRequestDto = getEmptyPassengerRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(passengerPhoneMandatory, passengerNameMandatory, passengerEmailMandatory));
 
-        MvcResult mvcResult = mockMvc.perform(post(URL)
+        MvcResult mvcResult = mockMvc.perform(post(URL_PASSENGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(emptyPassengerRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -186,10 +213,12 @@ class PassengerControllerTest {
 
     @Test
     void createPassenger_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        PassengerRequestDto invalidPassengerRequestDto = getInvalidPassengerRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(passengerPhoneInvalid, passengerNameInvalid, passengerEmailInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(post(URL)
+        MvcResult mvcResult = mockMvc.perform(post(URL_PASSENGER)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidPassengerRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -203,7 +232,9 @@ class PassengerControllerTest {
 
     @Test
     void updatePassenger_whenValidInput_thenReturns200() throws Exception {
-        mockMvc.perform(put(URL + "/{passengerId}", passengerId)
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+
+        mockMvc.perform(put(URL_PASSENGER_ID, PASSENGER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passengerRequestDto)))
                 .andExpect(status().isOk());
@@ -211,7 +242,9 @@ class PassengerControllerTest {
 
     @Test
     void updatePassenger_whenValidInput_thenMapsToBusinessModel() throws Exception {
-        mockMvc.perform(put(URL + "/{passengerId}", passengerId)
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+
+        mockMvc.perform(put(URL_PASSENGER_ID, PASSENGER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passengerRequestDto)))
                 .andExpect(status().isOk());
@@ -224,9 +257,12 @@ class PassengerControllerTest {
 
     @Test
     void updatePassenger_whenValidInput_thenReturnsResponseDto() throws Exception {
-        when(passengerService.updatePassenger(1L, passengerRequestDto))
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
+
+        when(passengerService.updatePassenger(PASSENGER_ID, passengerRequestDto))
                 .thenReturn(passengerResponseDto);
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{passengerId}", passengerId)
+        MvcResult mvcResult = mockMvc.perform(put(URL_PASSENGER_ID, PASSENGER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passengerRequestDto)))
                 .andExpect(status().isOk())
@@ -239,10 +275,13 @@ class PassengerControllerTest {
 
     @Test
     void updatePassenger_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        PassengerRequestDto emptyPassengerRequestDto = getEmptyPassengerRequestDto();
+
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(passengerPhoneMandatory, passengerNameMandatory, passengerEmailMandatory));
 
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{passengerId}", passengerId)
+        MvcResult mvcResult = mockMvc.perform(put(URL_PASSENGER_ID, PASSENGER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(emptyPassengerRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -256,10 +295,12 @@ class PassengerControllerTest {
 
     @Test
     void updatePassenger_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+        PassengerRequestDto invalidPassengerRequestDto = getInvalidPassengerRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(passengerPhoneInvalid, passengerNameInvalid, passengerEmailInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{passengerId}", passengerId)
+        MvcResult mvcResult = mockMvc.perform(put(URL_PASSENGER_ID, PASSENGER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidPassengerRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -272,11 +313,13 @@ class PassengerControllerTest {
     }
 
     @Test
-    void updatePassenger_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+    void updatePassenger_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(passengerIdInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(put(URL + "/{passengerId}", invalidPassengerId)
+        MvcResult mvcResult = mockMvc.perform(put(URL_PASSENGER_ID, INSUFFICIENT_PASSENGER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(passengerRequestDto)))
                 .andExpect(status().isBadRequest())
@@ -290,16 +333,17 @@ class PassengerControllerTest {
 
     @Test
     void deletePassenger_whenValidId_thenReturns204() throws Exception {
-        mockMvc.perform(delete(URL + "/{passengerId}", passengerId))
+        mockMvc.perform(delete(URL_PASSENGER_ID, PASSENGER_ID))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    void deletePassenger_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
-        ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
+    void deletePassenger_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
                 List.of(passengerIdInvalid));
 
-        MvcResult mvcResult = mockMvc.perform(delete(URL + "/{passengerId}", invalidPassengerId))
+        MvcResult mvcResult = mockMvc.perform(delete(URL_PASSENGER_ID, INSUFFICIENT_PASSENGER_ID))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();

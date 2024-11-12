@@ -28,7 +28,6 @@ public class TestData {
     public static final Integer EXCEEDED_OFFSET_VALUE = 100;
     public static final Integer EXCEEDED_LIMIT_VALUE = 100;
 
-
     public static final Long CAR_ID = 1L;
     private static final String color = "red";
     private static final String model = "sedan";
@@ -47,6 +46,7 @@ public class TestData {
     private static final String email = "driver@email.com";
     private static final String phone = "71234567890";
     private static final Double rating = 0.0;
+    public static final Double NEW_RATING = 5.0;
 
     private static final String invalidName = "d";
     private static final String invalidEmail = "driver";
@@ -191,7 +191,7 @@ public class TestData {
     public static UserRatingDto.UserRatingDtoBuilder getUserRatingDtoBuilder() {
         return UserRatingDto.builder()
                 .id(DRIVER_ID)
-                .rating(rating);
+                .rating(NEW_RATING);
     }
 
     public static UserRatingDto getUserRatingDto() {
