@@ -43,6 +43,11 @@ public final class TestData {
     private static final String COMMENT = "This is a comment";
     public static final String NEW_COMMENT = "This is a new comment";
 
+    public static final Integer FIRST_RATING = 1;
+    public static final Integer SECOND_RATING = 2;
+    public static final Integer THIRD_RATING = 3;
+    public static final double AVG_RATING = (double)(FIRST_RATING + SECOND_RATING + THIRD_RATING) / 3;
+    public static final double MIN_RATING = 0.0;
 
     public static DriverRating.DriverRatingBuilder getDriverRatingBuilder() {
         return DriverRating.builder()
@@ -123,6 +128,23 @@ public final class TestData {
 
     public static List<RatingResponseDto> getRatingResponseDtoList() {
         return List.of(getRatingResponseDto());
+    }
+
+    public static List<RatingResponseDto> getRatingResponseDtoListWithDifferentRatings() {
+        return List.of(
+                getRatingResponseDtoBuilder()
+                        .rating(FIRST_RATING)
+                        .build(),
+                getRatingResponseDtoBuilder()
+                        .rating(SECOND_RATING)
+                        .build(),
+                getRatingResponseDtoBuilder()
+                        .rating(THIRD_RATING)
+                        .build());
+    }
+
+    public static List<RatingResponseDto> getRatingResponseDtoListEmpty() {
+        return List.of();
     }
 
     public static RideResponseDto getRideResponseDto() {
