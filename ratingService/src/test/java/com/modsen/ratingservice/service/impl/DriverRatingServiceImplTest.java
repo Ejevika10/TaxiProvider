@@ -34,8 +34,8 @@ import static com.modsen.ratingservice.util.TestData.getRatingRequestDto;
 import static com.modsen.ratingservice.util.TestData.getRatingRequestDtoBuilder;
 import static com.modsen.ratingservice.util.TestData.getRatingResponseDto;
 import static com.modsen.ratingservice.util.TestData.getRatingResponseDtoList;
-import static com.modsen.ratingservice.util.TestData.newComment;
-import static com.modsen.ratingservice.util.TestData.newRating;
+import static com.modsen.ratingservice.util.TestData.NEW_COMMENT;
+import static com.modsen.ratingservice.util.TestData.NEW_RATING;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -218,8 +218,8 @@ class DriverRatingServiceImplTest {
         DriverRating driverRating = getDriverRating();
         RatingResponseDto driverRatingResponseDto = getRatingResponseDto();
         RatingRequestDto driverRatingRequestDto = getRatingRequestDtoBuilder()
-                .rating(newRating)
-                .comment(newComment)
+                .rating(NEW_RATING)
+                .comment(NEW_COMMENT)
                 .build();
         when(driverRatingRepository.findByIdAndDeletedIsFalse(anyString())).thenReturn(Optional.of(driverRating));
         when(driverRatingRepository.save(driverRating)).thenReturn(driverRating);

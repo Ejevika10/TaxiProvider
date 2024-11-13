@@ -33,16 +33,16 @@ import static com.modsen.passengerservice.util.TestData.getEmptyPassengerRequest
 import static com.modsen.passengerservice.util.TestData.getInvalidPassengerRequestDto;
 import static com.modsen.passengerservice.util.TestData.getPassengerRequestDto;
 import static com.modsen.passengerservice.util.TestData.getPassengerResponseDto;
-import static com.modsen.passengerservice.util.ViolationData.limitExceeded;
-import static com.modsen.passengerservice.util.ViolationData.limitInsufficient;
-import static com.modsen.passengerservice.util.ViolationData.offsetInsufficient;
-import static com.modsen.passengerservice.util.ViolationData.passengerEmailInvalid;
-import static com.modsen.passengerservice.util.ViolationData.passengerEmailMandatory;
-import static com.modsen.passengerservice.util.ViolationData.passengerIdInvalid;
-import static com.modsen.passengerservice.util.ViolationData.passengerNameInvalid;
-import static com.modsen.passengerservice.util.ViolationData.passengerNameMandatory;
-import static com.modsen.passengerservice.util.ViolationData.passengerPhoneInvalid;
-import static com.modsen.passengerservice.util.ViolationData.passengerPhoneMandatory;
+import static com.modsen.passengerservice.util.ViolationData.LIMIT_EXCEEDED;
+import static com.modsen.passengerservice.util.ViolationData.LIMIT_INSUFFICIENT;
+import static com.modsen.passengerservice.util.ViolationData.OFFSET_INSUFFICIENT;
+import static com.modsen.passengerservice.util.ViolationData.PASSENGER_EMAIL_INVALID;
+import static com.modsen.passengerservice.util.ViolationData.PASSENGER_EMAIL_MANDATORY;
+import static com.modsen.passengerservice.util.ViolationData.PASSENGER_ID_INVALID;
+import static com.modsen.passengerservice.util.ViolationData.PASSENGER_NAME_INVALID;
+import static com.modsen.passengerservice.util.ViolationData.PASSENGER_NAME_MANDATORY;
+import static com.modsen.passengerservice.util.ViolationData.PASSENGER_PHONE_INVALID;
+import static com.modsen.passengerservice.util.ViolationData.PASSENGER_PHONE_MANDATORY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -83,7 +83,7 @@ class PassengerControllerTest {
     void getPagePassengers_whenInsufficientParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(offsetInsufficient, limitInsufficient));
+                List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER)
                         .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
@@ -103,7 +103,7 @@ class PassengerControllerTest {
     void getPagePassengers_whenBigLimit_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(limitExceeded));
+                List.of(LIMIT_EXCEEDED));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER)
                         .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
@@ -140,7 +140,7 @@ class PassengerControllerTest {
     void getPassengerById_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(passengerIdInvalid));
+                List.of(PASSENGER_ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER_ID, INSUFFICIENT_PASSENGER_ID))
                 .andExpect(status().isBadRequest())
@@ -197,7 +197,7 @@ class PassengerControllerTest {
         PassengerRequestDto emptyPassengerRequestDto = getEmptyPassengerRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(passengerPhoneMandatory, passengerNameMandatory, passengerEmailMandatory));
+                List.of(PASSENGER_PHONE_MANDATORY, PASSENGER_NAME_MANDATORY, PASSENGER_EMAIL_MANDATORY));
 
         MvcResult mvcResult = mockMvc.perform(post(URL_PASSENGER)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -216,7 +216,7 @@ class PassengerControllerTest {
         PassengerRequestDto invalidPassengerRequestDto = getInvalidPassengerRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(passengerPhoneInvalid, passengerNameInvalid, passengerEmailInvalid));
+                List.of(PASSENGER_PHONE_INVALID, PASSENGER_NAME_INVALID, PASSENGER_EMAIL_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(post(URL_PASSENGER)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -279,7 +279,7 @@ class PassengerControllerTest {
 
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(passengerPhoneMandatory, passengerNameMandatory, passengerEmailMandatory));
+                List.of(PASSENGER_PHONE_MANDATORY, PASSENGER_NAME_MANDATORY, PASSENGER_EMAIL_MANDATORY));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_PASSENGER_ID, PASSENGER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -298,7 +298,7 @@ class PassengerControllerTest {
         PassengerRequestDto invalidPassengerRequestDto = getInvalidPassengerRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(passengerPhoneInvalid, passengerNameInvalid, passengerEmailInvalid));
+                List.of(PASSENGER_PHONE_INVALID, PASSENGER_NAME_INVALID, PASSENGER_EMAIL_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_PASSENGER_ID, PASSENGER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -317,7 +317,7 @@ class PassengerControllerTest {
         PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(passengerIdInvalid));
+                List.of(PASSENGER_ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_PASSENGER_ID, INSUFFICIENT_PASSENGER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -341,7 +341,7 @@ class PassengerControllerTest {
     void deletePassenger_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(passengerIdInvalid));
+                List.of(PASSENGER_ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(delete(URL_PASSENGER_ID, INSUFFICIENT_PASSENGER_ID))
                 .andExpect(status().isBadRequest())

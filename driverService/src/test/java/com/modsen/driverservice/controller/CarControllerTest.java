@@ -36,19 +36,19 @@ import static com.modsen.driverservice.util.TestData.getCarResponseDto;
 import static com.modsen.driverservice.util.TestData.getEmptyCarRequestDto;
 import static com.modsen.driverservice.util.TestData.getInvalidCarRequestDto;
 import static com.modsen.driverservice.util.TestData.INSUFFICIENT_CAR_ID;
-import static com.modsen.driverservice.util.ViolationData.carBrandInvalid;
-import static com.modsen.driverservice.util.ViolationData.carBrandMandatory;
-import static com.modsen.driverservice.util.ViolationData.carColorInvalid;
-import static com.modsen.driverservice.util.ViolationData.carColorMandatory;
-import static com.modsen.driverservice.util.ViolationData.carModelInvalid;
-import static com.modsen.driverservice.util.ViolationData.carModelMandatory;
-import static com.modsen.driverservice.util.ViolationData.carNumberInvalid;
-import static com.modsen.driverservice.util.ViolationData.carNumberMandatory;
-import static com.modsen.driverservice.util.ViolationData.driverIdInvalid;
-import static com.modsen.driverservice.util.ViolationData.idInvalid;
-import static com.modsen.driverservice.util.ViolationData.limitExceeded;
-import static com.modsen.driverservice.util.ViolationData.limitInsufficient;
-import static com.modsen.driverservice.util.ViolationData.offsetInsufficient;
+import static com.modsen.driverservice.util.ViolationData.CAR_BRAND_INVALID;
+import static com.modsen.driverservice.util.ViolationData.CAR_BRAND_MANDATORY;
+import static com.modsen.driverservice.util.ViolationData.CAR_COLOR_INVALID;
+import static com.modsen.driverservice.util.ViolationData.CAR_COLOR_MANDATORY;
+import static com.modsen.driverservice.util.ViolationData.CAR_MODEL_INVALID;
+import static com.modsen.driverservice.util.ViolationData.CAR_MODEL_MANDATORY;
+import static com.modsen.driverservice.util.ViolationData.CAR_NUMBER_INVALID;
+import static com.modsen.driverservice.util.ViolationData.CAR_NUMBER_MANDATORY;
+import static com.modsen.driverservice.util.ViolationData.DRIVER_ID_INVALID;
+import static com.modsen.driverservice.util.ViolationData.ID_INVALID;
+import static com.modsen.driverservice.util.ViolationData.LIMIT_EXCEEDED;
+import static com.modsen.driverservice.util.ViolationData.LIMIT_INSUFFICIENT;
+import static com.modsen.driverservice.util.ViolationData.OFFSET_INSUFFICIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -89,7 +89,7 @@ class CarControllerTest {
     void getPageCars_whenInsufficientParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(offsetInsufficient, limitInsufficient));
+                List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR)
                         .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
@@ -109,7 +109,7 @@ class CarControllerTest {
     void getPageCars_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(limitExceeded));
+                List.of(LIMIT_EXCEEDED));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR)
                         .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
@@ -149,7 +149,7 @@ class CarControllerTest {
     void getCar_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(idInvalid));
+                List.of(ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR_ID, INSUFFICIENT_CAR_ID))
                 .andExpect(status().isBadRequest())
@@ -183,7 +183,7 @@ class CarControllerTest {
     void getPageCarsByDriverId_whenInsufficientParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(offsetInsufficient, limitInsufficient));
+                List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR_DRIVER_ID, DRIVER_ID)
                         .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
@@ -203,7 +203,7 @@ class CarControllerTest {
     void getPageCarsByDriverId_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(limitExceeded));
+                List.of(LIMIT_EXCEEDED));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR_DRIVER_ID, DRIVER_ID)
                         .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
@@ -222,7 +222,7 @@ class CarControllerTest {
     @Test
     void getPageCarsByDriverId_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
-                List.of(driverIdInvalid));
+                List.of(DRIVER_ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR_DRIVER_ID, INSUFFICIENT_DRIVER_ID))
                 .andExpect(status().isBadRequest())
@@ -282,7 +282,7 @@ class CarControllerTest {
         CarRequestDto emptyCarRequestDto = getEmptyCarRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(carBrandMandatory,carColorMandatory,carNumberMandatory, carModelMandatory));
+                List.of(CAR_BRAND_MANDATORY, CAR_COLOR_MANDATORY, CAR_NUMBER_MANDATORY, CAR_MODEL_MANDATORY));
 
         MvcResult mvcResult = mockMvc.perform(post(URL_CAR)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -303,7 +303,7 @@ class CarControllerTest {
         CarRequestDto invalidCarRequestDto = getInvalidCarRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(carBrandInvalid, carColorInvalid, carModelInvalid, carNumberInvalid, driverIdInvalid));
+                List.of(CAR_BRAND_INVALID, CAR_COLOR_INVALID, CAR_MODEL_INVALID, CAR_NUMBER_INVALID, DRIVER_ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(post(URL_CAR)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -366,7 +366,7 @@ class CarControllerTest {
         CarRequestDto emptyCarRequestDto = getEmptyCarRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(carBrandMandatory,carColorMandatory,carNumberMandatory, carModelMandatory));
+                List.of(CAR_BRAND_MANDATORY, CAR_COLOR_MANDATORY, CAR_NUMBER_MANDATORY, CAR_MODEL_MANDATORY));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_CAR_ID, CAR_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -387,7 +387,7 @@ class CarControllerTest {
         CarRequestDto invalidCarRequestDto = getInvalidCarRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(carBrandInvalid, carColorInvalid, carModelInvalid, carNumberInvalid, driverIdInvalid));
+                List.of(CAR_BRAND_INVALID, CAR_COLOR_INVALID, CAR_MODEL_INVALID, CAR_NUMBER_INVALID, DRIVER_ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_CAR_ID, CAR_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -407,7 +407,7 @@ class CarControllerTest {
     void updateDriver_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         CarRequestDto carRequestDto = getCarRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(HttpStatus.BAD_REQUEST.value(),
-                List.of(idInvalid));
+                List.of(ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_CAR_ID, INSUFFICIENT_CAR_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -433,7 +433,7 @@ class CarControllerTest {
     void deleteDriver_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(idInvalid));
+                List.of(ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(delete(URL_CAR_ID, INSUFFICIENT_CAR_ID))
                 .andExpect(status().isBadRequest())

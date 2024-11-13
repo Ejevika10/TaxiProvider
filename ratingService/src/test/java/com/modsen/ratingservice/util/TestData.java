@@ -6,11 +6,14 @@ import com.modsen.ratingservice.dto.RideResponseDto;
 import com.modsen.ratingservice.model.DriverRating;
 import com.modsen.ratingservice.model.PassengerRating;
 import com.modsen.ratingservice.model.RideState;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class TestData {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class TestData {
     public static final String RATING_ID = "qwertyuiop1234";
     public static final String NON_EXISTING_RATING_ID = "qwertyuiop1234";
     public static final Long USER_ID = 1L;
@@ -34,11 +37,11 @@ public class TestData {
     public static final Integer EXCEEDED_OFFSET_VALUE = 100;
     public static final Integer EXCEEDED_LIMIT_VALUE = 100;
 
-    private static final Integer rating = 5;
-    public static final Integer newRating = 3;
-    private static final Integer invalidRating = 7;
-    private static final String comment = "This is a comment";
-    public static final String newComment = "This is a new comment";
+    private static final Integer RATING = 5;
+    public static final Integer NEW_RATING = 3;
+    private static final Integer INVALID_RATING = 7;
+    private static final String COMMENT = "This is a comment";
+    public static final String NEW_COMMENT = "This is a new comment";
 
 
     public static DriverRating.DriverRatingBuilder getDriverRatingBuilder() {
@@ -46,8 +49,8 @@ public class TestData {
                 .id(RATING_ID)
                 .userId(USER_ID)
                 .rideId(RIDE_ID)
-                .comment(comment)
-                .rating(rating);
+                .comment(COMMENT)
+                .rating(RATING);
     }
 
     public static DriverRating getDriverRating() {
@@ -59,8 +62,8 @@ public class TestData {
                 .id(RATING_ID)
                 .userId(USER_ID)
                 .rideId(RIDE_ID)
-                .comment(comment)
-                .rating(rating);
+                .comment(COMMENT)
+                .rating(RATING);
     }
 
     public static PassengerRating getPassengerRating() {
@@ -71,8 +74,8 @@ public class TestData {
         return RatingRequestDto.builder()
                 .userId(USER_ID)
                 .rideId(RIDE_ID)
-                .rating(rating)
-                .comment(comment);
+                .rating(RATING)
+                .comment(COMMENT);
     }
 
     public static RatingRequestDto getRatingRequestDto() {
@@ -92,7 +95,7 @@ public class TestData {
         return getRatingRequestDtoBuilder()
                 .userId(INSUFFICIENT_USER_ID)
                 .rideId(INSUFFICIENT_RIDE_ID)
-                .rating(invalidRating)
+                .rating(INVALID_RATING)
                 .comment(null)
                 .build();
     }
@@ -102,8 +105,8 @@ public class TestData {
                 .id(RATING_ID)
                 .userId(USER_ID)
                 .rideId(RIDE_ID)
-                .rating(rating)
-                .comment(comment);
+                .rating(RATING)
+                .comment(COMMENT);
     }
 
     public static RatingResponseDto getRatingResponseDto() {
@@ -123,6 +126,6 @@ public class TestData {
     }
 
     public static RideResponseDto getRideResponseDto() {
-        return new RideResponseDto(1L, USER_ID, USER_ID, "Sourse address", "Destination address", RideState.CREATED, LocalDateTime.now(), 1000);
+        return new RideResponseDto(RIDE_ID, USER_ID, USER_ID, "Sourse address", "Destination address", RideState.CREATED, LocalDateTime.now(), 1000);
     }
 }

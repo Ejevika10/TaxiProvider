@@ -7,10 +7,13 @@ import com.modsen.driverservice.dto.DriverResponseDto;
 import com.modsen.driverservice.dto.UserRatingDto;
 import com.modsen.driverservice.model.Car;
 import com.modsen.driverservice.model.Driver;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-public class TestData {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class TestData {
 
     public static final String URL_CAR = "/api/v1/cars";
     public static final String URL_CAR_ID = URL_CAR + "/{carId}";
@@ -29,37 +32,37 @@ public class TestData {
     public static final Integer EXCEEDED_LIMIT_VALUE = 100;
 
     public static final Long CAR_ID = 1L;
-    private static final String color = "red";
-    private static final String model = "sedan";
-    private static final String brand = "audi";
-    private static final String number = "12345";
+    private static final String COLOR = "red";
+    private static final String MODEL = "sedan";
+    private static final String BRAND = "audi";
+    private static final String NUMBER = "12345";
     public static final Long DRIVER_ID = 1L;
 
     public static final Long INSUFFICIENT_CAR_ID = -1L;
-    private static final String invalidColor = "r";
-    private static final String invalidModel = "s";
-    private static final String invalidBrand = "a";
-    private static final String invalidNumber = "1";
+    private static final String INVALID_COLOR = "r";
+    private static final String INVALID_MODEL = "s";
+    private static final String INVALID_BRAND = "a";
+    private static final String INVALID_NUMBER = "1";
     public static final Long INSUFFICIENT_DRIVER_ID = -1L;
 
-    private static final String name = "Driver";
-    private static final String email = "driver@email.com";
-    private static final String phone = "71234567890";
-    private static final Double rating = 0.0;
+    private static final String NAME = "Driver";
+    private static final String EMAIL = "driver@email.com";
+    private static final String PHONE = "71234567890";
+    private static final Double RATING = 0.0;
     public static final Double NEW_RATING = 5.0;
 
-    private static final String invalidName = "d";
-    private static final String invalidEmail = "driver";
-    private static final String invalidPhone = "11";
-    private static final Double invalidRating = -1.0;
+    private static final String INVALID_NAME = "d";
+    private static final String INVALID_EMAIL = "driver";
+    private static final String INVALID_PHONE = "11";
+    private static final Double INVALID_RATING = -1.0;
 
     public static Car.CarBuilder getCarBuilder() {
         return Car.builder()
                 .id(CAR_ID)
-                .color(color)
-                .model(model)
-                .brand(brand)
-                .number(number)
+                .color(COLOR)
+                .model(MODEL)
+                .brand(BRAND)
+                .number(NUMBER)
                 .deleted(false);
     }
 
@@ -69,10 +72,10 @@ public class TestData {
 
     public static CarRequestDto.CarRequestDtoBuilder getCarRequestDtoBuilder() {
         return CarRequestDto.builder()
-                .brand(brand)
-                .color(color)
-                .model(model)
-                .number(number)
+                .brand(BRAND)
+                .color(COLOR)
+                .model(MODEL)
+                .number(NUMBER)
                 .driverId(DRIVER_ID);
     }
 
@@ -92,10 +95,10 @@ public class TestData {
 
     public static CarRequestDto getInvalidCarRequestDto() {
         return getCarRequestDtoBuilder()
-                .brand(invalidBrand)
-                .color(invalidColor)
-                .model(invalidModel)
-                .number(invalidNumber)
+                .brand(INVALID_BRAND)
+                .color(INVALID_COLOR)
+                .model(INVALID_MODEL)
+                .number(INVALID_NUMBER)
                 .driverId(INSUFFICIENT_DRIVER_ID)
                 .build();
     }
@@ -103,10 +106,10 @@ public class TestData {
     public static CarResponseDto.CarResponseDtoBuilder getCarResponseDtoBuilder() {
         return CarResponseDto.builder()
                 .id(CAR_ID)
-                .brand(brand)
-                .color(color)
-                .model(model)
-                .number(number);
+                .brand(BRAND)
+                .color(COLOR)
+                .model(MODEL)
+                .number(NUMBER);
     }
 
     public static CarResponseDto getCarResponseDto() {
@@ -124,10 +127,10 @@ public class TestData {
     public static Driver.DriverBuilder getDriverBuilder() {
         return Driver.builder()
                 .id(DRIVER_ID)
-                .name(name)
-                .email(email)
-                .phone(phone)
-                .rating(rating)
+                .name(NAME)
+                .email(EMAIL)
+                .phone(PHONE)
+                .rating(RATING)
                 .cars(null)
                 .deleted(false);
     }
@@ -138,11 +141,11 @@ public class TestData {
 
     public static DriverRequestDto.DriverRequestDtoBuilder getDriverRequestDtoBuilder() {
         return DriverRequestDto.builder()
-                .name(name)
-                .name(name)
-                .email(email)
-                .phone(phone)
-                .rating(rating);
+                .name(NAME)
+                .name(NAME)
+                .email(EMAIL)
+                .phone(PHONE)
+                .rating(RATING);
     }
 
     public static DriverRequestDto getDriverRequestDto() {
@@ -151,10 +154,10 @@ public class TestData {
 
     public static DriverRequestDto getInvalidDriverRequestDto() {
         return getDriverRequestDtoBuilder()
-                .name(invalidName)
-                .email(invalidEmail)
-                .phone(invalidPhone)
-                .rating(invalidRating)
+                .name(INVALID_NAME)
+                .email(INVALID_EMAIL)
+                .phone(INVALID_PHONE)
+                .rating(INVALID_RATING)
                 .build();
     }
 
@@ -170,10 +173,10 @@ public class TestData {
     public static DriverResponseDto.DriverResponseDtoBuilder getDriverResponseDtoBuilder() {
         return DriverResponseDto.builder()
                 .id(DRIVER_ID)
-                .name(name)
-                .email(email)
-                .phone(phone)
-                .rating(rating);
+                .name(NAME)
+                .email(EMAIL)
+                .phone(PHONE)
+                .rating(RATING);
     }
 
     public static DriverResponseDto getDriverResponseDto() {

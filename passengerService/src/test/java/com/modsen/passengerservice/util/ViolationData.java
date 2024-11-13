@@ -1,17 +1,20 @@
 package com.modsen.passengerservice.util;
 
-public class ViolationData {
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-    public static final String passengerNameMandatory = "name: Name is mandatory";
-    public static final String passengerEmailMandatory = "email: Email is mandatory";
-    public static final String passengerPhoneMandatory = "phone: Phone is mandatory";
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ViolationData {
+    public static final String PASSENGER_NAME_MANDATORY = "name: Name is mandatory";
+    public static final String PASSENGER_EMAIL_MANDATORY = "email: Email is mandatory";
+    public static final String PASSENGER_PHONE_MANDATORY = "phone: Phone is mandatory";
 
-    public static final String passengerNameInvalid = "name: size must be between 2 and 50";
-    public static final String passengerEmailInvalid = "email: Email is invalid";
-    public static final String passengerPhoneInvalid = "phone: Phone is invalid";
+    public static final String PASSENGER_NAME_INVALID = "name: size must be between 2 and 50";
+    public static final String PASSENGER_EMAIL_INVALID = "email: Email is invalid";
+    public static final String PASSENGER_PHONE_INVALID = "phone: Phone is invalid";
 
-    public static final String passengerIdInvalid = "id: must be greater than or equal to 0";
-    public static final String offsetInsufficient = "offset: must be greater than or equal to 0";
-    public static final String limitInsufficient = "limit: must be greater than or equal to 1";
-    public static final String limitExceeded = "limit: must be less than or equal to 20";
+    public static final String PASSENGER_ID_INVALID = "id: must be greater than or equal to 0";
+    public static final String OFFSET_INSUFFICIENT = "offset: must be greater than or equal to 0";
+    public static final String LIMIT_INSUFFICIENT = "limit: must be greater than or equal to 1";
+    public static final String LIMIT_EXCEEDED = "limit: must be less than or equal to 20";
 }

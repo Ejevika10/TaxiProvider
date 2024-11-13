@@ -4,10 +4,13 @@ import com.modsen.passengerservice.dto.PassengerRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
 import com.modsen.passengerservice.dto.UserRatingDto;
 import com.modsen.passengerservice.model.Passenger;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-public class TestData {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class TestData {
     public static final Long PASSENGER_ID = 1L;
     public static final Long INSUFFICIENT_PASSENGER_ID = -1L;
     public static final String URL_PASSENGER = "/api/v1/passengers";
@@ -21,24 +24,24 @@ public class TestData {
     public static final Integer INSUFFICIENT_LIMIT_VALUE = -1;
     public static final Integer EXCEEDED_OFFSET_VALUE = 100;
     public static final Integer EXCEEDED_LIMIT_VALUE = 100;
-    private static final String name = "passenger";
-    private static final String email = "passenger@mail.ru";
-    private static final String phone = "71234567890";
-    private static final Double rating = 0.0;
+    private static final String NAME = "passenger";
+    private static final String EMAIL = "passenger@mail.ru";
+    private static final String PHONE = "71234567890";
+    private static final Double RATING = 0.0;
     public static final Double NEW_RATING = 5.0;
 
-    private static final String invalidName = "p";
-    private static final String invalidEmail = "passenger";
-    private static final String invalidPhone = "11";
-    private static final Double invalidRating = -1.0;
+    private static final String INVALID_NAME = "p";
+    private static final String INVALID_EMAIL = "passenger";
+    private static final String INVALID_PHONE = "11";
+    private static final Double INVALID_RATING = -1.0;
 
     public static Passenger.PassengerBuilder getPassengerBuilder() {
         return Passenger.builder()
                 .id(PASSENGER_ID)
-                .name(name)
-                .email(email)
-                .phone(phone)
-                .rating(rating)
+                .name(NAME)
+                .email(EMAIL)
+                .phone(PHONE)
+                .rating(RATING)
                 .deleted(false);
     }
 
@@ -48,10 +51,10 @@ public class TestData {
 
     public static PassengerRequestDto.PassengerRequestDtoBuilder getPassengerRequestDtoBuilder() {
         return PassengerRequestDto.builder()
-                .name(name)
-                .email(email)
-                .phone(phone)
-                .rating(rating);
+                .name(NAME)
+                .email(EMAIL)
+                .phone(PHONE)
+                .rating(RATING);
     }
 
     public static PassengerRequestDto getPassengerRequestDto() {
@@ -69,20 +72,20 @@ public class TestData {
 
     public static PassengerRequestDto getInvalidPassengerRequestDto() {
         return getPassengerRequestDtoBuilder()
-                .name(invalidName)
-                .email(invalidEmail)
-                .phone(invalidPhone)
-                .rating(invalidRating)
+                .name(INVALID_NAME)
+                .email(INVALID_EMAIL)
+                .phone(INVALID_PHONE)
+                .rating(INVALID_RATING)
                 .build();
     }
 
     public static PassengerResponseDto.PassengerResponseDtoBuilder getPassengerResponseDtoBuilder() {
         return PassengerResponseDto.builder()
                 .id(PASSENGER_ID)
-                .name(name)
-                .email(email)
-                .phone(phone)
-                .rating(rating);
+                .name(NAME)
+                .email(EMAIL)
+                .phone(PHONE)
+                .rating(RATING);
     }
 
     public static PassengerResponseDto getPassengerResponseDto() {

@@ -33,16 +33,16 @@ import static com.modsen.driverservice.util.TestData.getDriverRequestDto;
 import static com.modsen.driverservice.util.TestData.getDriverResponseDto;
 import static com.modsen.driverservice.util.TestData.getEmptyDriverRequestDto;
 import static com.modsen.driverservice.util.TestData.getInvalidDriverRequestDto;
-import static com.modsen.driverservice.util.ViolationData.driverEmailInvalid;
-import static com.modsen.driverservice.util.ViolationData.driverEmailMandatory;
-import static com.modsen.driverservice.util.ViolationData.driverNameInvalid;
-import static com.modsen.driverservice.util.ViolationData.driverNameMandatory;
-import static com.modsen.driverservice.util.ViolationData.driverPhoneInvalid;
-import static com.modsen.driverservice.util.ViolationData.driverPhoneMandatory;
-import static com.modsen.driverservice.util.ViolationData.idInvalid;
-import static com.modsen.driverservice.util.ViolationData.limitExceeded;
-import static com.modsen.driverservice.util.ViolationData.limitInsufficient;
-import static com.modsen.driverservice.util.ViolationData.offsetInsufficient;
+import static com.modsen.driverservice.util.ViolationData.DRIVER_EMAIL_INVALID;
+import static com.modsen.driverservice.util.ViolationData.DRIVER_EMAIL_MANDATORY;
+import static com.modsen.driverservice.util.ViolationData.DRIVER_NAME_INVALID;
+import static com.modsen.driverservice.util.ViolationData.DRIVER_NAME_MANDATORY;
+import static com.modsen.driverservice.util.ViolationData.DRIVER_PHONE_INVALID;
+import static com.modsen.driverservice.util.ViolationData.DRIVER_PHONE_MANDATORY;
+import static com.modsen.driverservice.util.ViolationData.ID_INVALID;
+import static com.modsen.driverservice.util.ViolationData.LIMIT_EXCEEDED;
+import static com.modsen.driverservice.util.ViolationData.LIMIT_INSUFFICIENT;
+import static com.modsen.driverservice.util.ViolationData.OFFSET_INSUFFICIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -82,7 +82,7 @@ class DriverControllerTest {
     void getPageDrivers_whenInsufficientParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(offsetInsufficient, limitInsufficient));
+                List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER)
                         .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
@@ -102,7 +102,7 @@ class DriverControllerTest {
     void getPageDrivers_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(limitExceeded));
+                List.of(LIMIT_EXCEEDED));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER)
                         .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
@@ -141,7 +141,7 @@ class DriverControllerTest {
     void getDriverById_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(idInvalid));
+                List.of(ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_DRIVER_ID, INSUFFICIENT_DRIVER_ID))
                 .andExpect(status().isBadRequest())
@@ -201,7 +201,7 @@ class DriverControllerTest {
         DriverRequestDto emptyDriverRequestDto = getEmptyDriverRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(driverPhoneMandatory, driverNameMandatory, driverEmailMandatory));
+                List.of(DRIVER_PHONE_MANDATORY, DRIVER_NAME_MANDATORY, DRIVER_EMAIL_MANDATORY));
 
         MvcResult mvcResult = mockMvc.perform(post(URL_DRIVER)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -222,7 +222,7 @@ class DriverControllerTest {
         DriverRequestDto invalidDriverRequestDto = getInvalidDriverRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(driverPhoneInvalid, driverNameInvalid, driverEmailInvalid));
+                List.of(DRIVER_PHONE_INVALID, DRIVER_NAME_INVALID, DRIVER_EMAIL_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(post(URL_DRIVER)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -284,7 +284,7 @@ class DriverControllerTest {
         DriverRequestDto emptyDriverRequestDto = getEmptyDriverRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(driverPhoneMandatory, driverNameMandatory, driverEmailMandatory));
+                List.of(DRIVER_PHONE_MANDATORY, DRIVER_NAME_MANDATORY, DRIVER_EMAIL_MANDATORY));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_DRIVER_ID, DRIVER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -305,7 +305,7 @@ class DriverControllerTest {
         DriverRequestDto invalidDriverRequestDto = getInvalidDriverRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(driverPhoneInvalid, driverNameInvalid, driverEmailInvalid));
+                List.of(DRIVER_PHONE_INVALID, DRIVER_NAME_INVALID, DRIVER_EMAIL_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_DRIVER_ID, DRIVER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -326,7 +326,7 @@ class DriverControllerTest {
         DriverRequestDto driverRequestDto = getDriverRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(idInvalid));
+                List.of(ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_DRIVER_ID, INSUFFICIENT_DRIVER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -352,7 +352,7 @@ class DriverControllerTest {
     void deleteDriver_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(idInvalid));
+                List.of(ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(delete(URL_DRIVER_ID, INSUFFICIENT_DRIVER_ID))
                 .andExpect(status().isBadRequest())

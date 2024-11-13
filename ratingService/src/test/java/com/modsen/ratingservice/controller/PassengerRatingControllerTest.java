@@ -36,15 +36,15 @@ import static com.modsen.ratingservice.util.TestData.getEmptyRatingRequestDto;
 import static com.modsen.ratingservice.util.TestData.getInvalidRatingRequestDto;
 import static com.modsen.ratingservice.util.TestData.getRatingRequestDto;
 import static com.modsen.ratingservice.util.TestData.getRatingResponseDto;
-import static com.modsen.ratingservice.util.ViolationData.limitBig;
-import static com.modsen.ratingservice.util.ViolationData.limitInvalid;
-import static com.modsen.ratingservice.util.ViolationData.offsetInvalid;
-import static com.modsen.ratingservice.util.ViolationData.ratingInvalid;
-import static com.modsen.ratingservice.util.ViolationData.ratingMandatory;
-import static com.modsen.ratingservice.util.ViolationData.rideIdInvalid;
-import static com.modsen.ratingservice.util.ViolationData.rideIdMandatory;
-import static com.modsen.ratingservice.util.ViolationData.userIdInvalid;
-import static com.modsen.ratingservice.util.ViolationData.userIdMandatory;
+import static com.modsen.ratingservice.util.ViolationData.LIMIT_EXCEEDED;
+import static com.modsen.ratingservice.util.ViolationData.LIMIT_INSUFFICIENT;
+import static com.modsen.ratingservice.util.ViolationData.OFFSET_INSUFFICIENT;
+import static com.modsen.ratingservice.util.ViolationData.RATING_INVALID;
+import static com.modsen.ratingservice.util.ViolationData.RATING_MANDATORY;
+import static com.modsen.ratingservice.util.ViolationData.RIDE_ID_INVALID;
+import static com.modsen.ratingservice.util.ViolationData.RIDE_ID_MANDATORY;
+import static com.modsen.ratingservice.util.ViolationData.USER_ID_INVALID;
+import static com.modsen.ratingservice.util.ViolationData.USER_ID_MANDATORY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -105,7 +105,7 @@ class PassengerRatingControllerTest {
     void getPageRatings_withInvalidParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(offsetInvalid, limitInvalid));
+                List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER_RATING)
                         .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
@@ -125,7 +125,7 @@ class PassengerRatingControllerTest {
     void getPageRatings_withBigLimit_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(limitBig));
+                List.of(LIMIT_EXCEEDED));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER_RATING)
                         .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
@@ -160,7 +160,7 @@ class PassengerRatingControllerTest {
     void getPageRatingsByUserId_withInvalidParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(offsetInvalid, limitInvalid));
+                List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER_RATING_USER_ID, USER_ID)
                         .param(OFFSET, INSUFFICIENT_OFFSET_VALUE.toString())
@@ -180,7 +180,7 @@ class PassengerRatingControllerTest {
     void getPageRatingsByUserId_withBigLimit_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(limitBig));
+                List.of(LIMIT_EXCEEDED));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER_RATING_USER_ID, USER_ID)
                         .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
@@ -200,7 +200,7 @@ class PassengerRatingControllerTest {
     void getPageRatingsByUserId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(userIdInvalid));
+                List.of(USER_ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(get(URL_PASSENGER_RATING_USER_ID, INSUFFICIENT_USER_ID))
                 .andExpect(status().isBadRequest())
@@ -257,7 +257,7 @@ class PassengerRatingControllerTest {
         RatingRequestDto emptyRatingRequestDto = getEmptyRatingRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(ratingMandatory,rideIdMandatory,userIdMandatory));
+                List.of(RATING_MANDATORY, RIDE_ID_MANDATORY, USER_ID_MANDATORY));
 
         MvcResult mvcResult = mockMvc.perform(post(URL_PASSENGER_RATING)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -276,7 +276,7 @@ class PassengerRatingControllerTest {
         RatingRequestDto invalidRatingRequestDto = getInvalidRatingRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(ratingInvalid, userIdInvalid, rideIdInvalid));
+                List.of(RATING_INVALID, USER_ID_INVALID, RIDE_ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(post(URL_PASSENGER_RATING)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -334,7 +334,7 @@ class PassengerRatingControllerTest {
         RatingRequestDto emptyRatingRequestDto = getEmptyRatingRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(ratingMandatory,rideIdMandatory,userIdMandatory));
+                List.of(RATING_MANDATORY, RIDE_ID_MANDATORY, USER_ID_MANDATORY));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_PASSENGER_RATING_ID, RATING_ID)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -353,7 +353,7 @@ class PassengerRatingControllerTest {
         RatingRequestDto invalidRatingRequestDto = getInvalidRatingRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(ratingInvalid, userIdInvalid, rideIdInvalid));
+                List.of(RATING_INVALID, USER_ID_INVALID, RIDE_ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_PASSENGER_RATING_ID, RATING_ID)
                         .contentType(MediaType.APPLICATION_JSON)

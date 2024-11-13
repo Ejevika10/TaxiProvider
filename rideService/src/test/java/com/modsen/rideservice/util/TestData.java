@@ -7,11 +7,14 @@ import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
 import com.modsen.rideservice.model.Ride;
 import com.modsen.rideservice.model.RideState;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class TestData {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class TestData {
     public static final Long RIDE_ID = 1L;
     public static final Long INSUFFICIENT_RIDE_ID = -1L;
     public static final String URL_RIDE = "/api/v1/rides";
@@ -35,23 +38,23 @@ public class TestData {
     public static final Long PASSENGER_ID = 1L;
     public static final Long INSUFFICIENT_PASSENGER_ID = -1L;
 
-    private static final Integer rideCost = 1000;
-    private static final String sourceAddress = "Source address";
-    private static final String destinationAddress = "Destination address";
+    private static final Integer RIDE_COST = 1000;
+    private static final String SOURCE_ADDRESS = "Source address";
+    private static final String DESTINATION_ADDRESS = "Destination address";
 
-    private static final Integer invalidRideCost = -1000;
-    private static final String invalidSourceAddress = "addr";
-    private static final String invalidDestinationAddress = "addr";
+    private static final Integer INVALID_RIDE_COST = -1000;
+    private static final String INVALID_SOURCE_ADDRESS = "addr";
+    private static final String INVALID_DESTINATION_ADDRESS = "addr";
 
     public static Ride.RideBuilder getRideBuilder() {
         return Ride.builder()
                 .id(RIDE_ID)
                 .passengerId(PASSENGER_ID)
                 .driverId(DRIVER_ID)
-                .sourceAddress(sourceAddress)
-                .destinationAddress(destinationAddress)
+                .sourceAddress(SOURCE_ADDRESS)
+                .destinationAddress(DESTINATION_ADDRESS)
                 .rideState(RideState.CREATED)
-                .rideCost(rideCost)
+                .rideCost(RIDE_COST)
                 .rideDateTime(LocalDateTime.now());
     }
 
@@ -63,10 +66,10 @@ public class TestData {
         return RideRequestDto.builder()
                 .passengerId(PASSENGER_ID)
                 .driverId(DRIVER_ID)
-                .sourceAddress(sourceAddress)
-                .destinationAddress(destinationAddress)
+                .sourceAddress(SOURCE_ADDRESS)
+                .destinationAddress(DESTINATION_ADDRESS)
                 .rideState(RideState.CREATED)
-                .rideCost(rideCost)
+                .rideCost(RIDE_COST)
                 .rideDateTime(LocalDateTime.now());
     }
 
@@ -78,10 +81,10 @@ public class TestData {
         return getRideRequestDtoBuilder()
                 .passengerId(INSUFFICIENT_PASSENGER_ID)
                 .driverId(INSUFFICIENT_DRIVER_ID)
-                .sourceAddress(invalidSourceAddress)
-                .destinationAddress(invalidDestinationAddress)
+                .sourceAddress(INVALID_SOURCE_ADDRESS)
+                .destinationAddress(INVALID_DESTINATION_ADDRESS)
                 .rideState(null)
-                .rideCost(invalidRideCost)
+                .rideCost(INVALID_RIDE_COST)
                 .rideDateTime(null)
                 .build();
     }
@@ -103,10 +106,10 @@ public class TestData {
                 .id(RIDE_ID)
                 .passengerId(PASSENGER_ID)
                 .driverId(DRIVER_ID)
-                .sourceAddress(sourceAddress)
-                .destinationAddress(destinationAddress)
+                .sourceAddress(SOURCE_ADDRESS)
+                .destinationAddress(DESTINATION_ADDRESS)
                 .rideState(RideState.CREATED)
-                .rideCost(rideCost)
+                .rideCost(RIDE_COST)
                 .rideDateTime(LocalDateTime.now());
     }
 
