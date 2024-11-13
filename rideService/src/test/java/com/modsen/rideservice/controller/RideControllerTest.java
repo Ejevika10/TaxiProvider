@@ -80,14 +80,14 @@ class RideControllerTest {
     private RideService rideService;
 
     @Test
-    void getPageRides_withoutParams_thenReturns201() throws Exception {
+    void getPageRides_whenEmptyParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_RIDE))
                 .andExpect(status().isOk());
         verify(rideService, times(1)).getPageRides(OFFSET_VALUE,LIMIT_VALUE);
     }
 
     @Test
-    void getPageRides_withValidParams_thenReturns201() throws Exception {
+    void getPageRides_whenValidParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_RIDE)
                         .param(OFFSET, OFFSET_VALUE.toString())
                         .param(LIMIT, LIMIT_VALUE.toString()))
@@ -95,7 +95,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRides_withInvalidParams_thenReturns400() throws Exception {
+    void getPageRides_whenInsufficientParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
@@ -113,7 +113,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRides_withBigLimit_thenReturns400() throws Exception {
+    void getPageRides_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(LIMIT_EXCEEDED));
@@ -131,7 +131,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRidesByDriverId_withoutParams_thenReturns201() throws Exception {
+    void getPageRidesByDriverId_whenEmptyParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_RIDE_DRIVER_ID, DRIVER_ID))
                 .andExpect(status().isOk());
         verify(rideService, times(1)).getPageRidesByDriverId(DRIVER_ID, OFFSET_VALUE, LIMIT_VALUE);
@@ -139,7 +139,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRidesByDriverId_withValidParams_thenReturns201() throws Exception {
+    void getPageRidesByDriverId_whenValidParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_RIDE_DRIVER_ID, DRIVER_ID)
                         .param(OFFSET, OFFSET_VALUE.toString())
                         .param(LIMIT, LIMIT_VALUE.toString()))
@@ -147,7 +147,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRidesByDriverId_withInvalidParams_thenReturns400() throws Exception {
+    void getPageRidesByDriverId_whenInvalidParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
@@ -167,7 +167,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRidesByDriverId_withBigLimit_thenReturns400() throws Exception {
+    void getPageRidesByDriverId_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(LIMIT_EXCEEDED));
@@ -187,7 +187,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRidesByDriverId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
+    void getPageRidesByDriverId_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(DRIVER_ID_INVALID));
@@ -203,7 +203,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRidesByPassengerId_withoutParams_thenReturns201() throws Exception {
+    void getPageRidesByPassengerId_whenEmptyParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_RIDE_PASSENGER_ID, PASSENGER_ID))
                 .andExpect(status().isOk());
         verify(rideService, times(1)).getPageRidesByPassengerId(PASSENGER_ID, OFFSET_VALUE,LIMIT_VALUE);
@@ -211,7 +211,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRidesByPassengerId_withValidParams_thenReturns201() throws Exception {
+    void getPageRidesByPassengerId_whenValidParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_RIDE_PASSENGER_ID, PASSENGER_ID)
                         .param(OFFSET, OFFSET_VALUE.toString())
                         .param(LIMIT, LIMIT_VALUE.toString()))
@@ -219,7 +219,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRidesByPassengerId_withInvalidParams_thenReturns400() throws Exception {
+    void getPageRidesByPassengerId_whenInvalidParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
@@ -239,7 +239,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRidesByPassengerId_withBigLimit_thenReturns400() throws Exception {
+    void getPageRidesByPassengerId_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(LIMIT_EXCEEDED));
@@ -257,7 +257,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getPageRidesByPassengerId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
+    void getPageRidesByPassengerId_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(PASSENGER_ID_INVALID));
@@ -292,7 +292,7 @@ class RideControllerTest {
     }
 
     @Test
-    void getRide_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
+    void getRide_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(ID_INVALID));
@@ -464,7 +464,7 @@ class RideControllerTest {
     }
 
     @Test
-    void updateRide_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
+    void updateRide_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         RideRequestDto rideRequestDto = getRideRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),

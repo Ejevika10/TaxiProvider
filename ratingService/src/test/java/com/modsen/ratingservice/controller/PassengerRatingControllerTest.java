@@ -87,14 +87,14 @@ class PassengerRatingControllerTest {
     }
 
     @Test
-    void getPageRatings_withoutParams_thenReturns201() throws Exception {
+    void getPageRatings_whenEmptyParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_PASSENGER_RATING))
                 .andExpect(status().isOk());
         verify(ratingService, times(1)).getPageRatings(OFFSET_VALUE,LIMIT_VALUE);
     }
 
     @Test
-    void getPageRatings_withValidParams_thenReturns201() throws Exception {
+    void getPageRatings_whenValidParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_PASSENGER_RATING)
                         .param(OFFSET, OFFSET_VALUE.toString())
                         .param(LIMIT,  LIMIT_VALUE.toString()))
@@ -102,7 +102,7 @@ class PassengerRatingControllerTest {
     }
 
     @Test
-    void getPageRatings_withInvalidParams_thenReturns400() throws Exception {
+    void getPageRatings_whenInsufficientParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
@@ -122,7 +122,7 @@ class PassengerRatingControllerTest {
     }
 
     @Test
-    void getPageRatings_withBigLimit_thenReturns400() throws Exception {
+    void getPageRatings_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(LIMIT_EXCEEDED));
@@ -142,14 +142,14 @@ class PassengerRatingControllerTest {
     }
 
     @Test
-    void getPageRatingsByUserId_withoutParams_thenReturns201() throws Exception {
+    void getPageRatingsByUserId_whenEmptyParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_PASSENGER_RATING_USER_ID, USER_ID))
                 .andExpect(status().isOk());
         verify(ratingService, times(1)).getPageRatingsByUserId(USER_ID, OFFSET_VALUE,LIMIT_VALUE);
     }
 
     @Test
-    void getPageRatingsByUserId_withValidParams_thenReturns201() throws Exception {
+    void getPageRatingsByUserId_whenValidParams_thenReturns201() throws Exception {
         mockMvc.perform(get(URL_PASSENGER_RATING_USER_ID, USER_ID)
                         .param(OFFSET, OFFSET_VALUE.toString())
                         .param(LIMIT,  LIMIT_VALUE.toString()))
@@ -157,7 +157,7 @@ class PassengerRatingControllerTest {
     }
 
     @Test
-    void getPageRatingsByUserId_withInvalidParams_thenReturns400() throws Exception {
+    void getPageRatingsByUserId_whenInsufficientParams_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
@@ -177,7 +177,7 @@ class PassengerRatingControllerTest {
     }
 
     @Test
-    void getPageRatingsByUserId_withBigLimit_thenReturns400() throws Exception {
+    void getPageRatingsByUserId_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(LIMIT_EXCEEDED));
@@ -197,7 +197,7 @@ class PassengerRatingControllerTest {
     }
 
     @Test
-    void getPageRatingsByUserId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
+    void getPageRatingsByUserId_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(USER_ID_INVALID));

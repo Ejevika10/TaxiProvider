@@ -100,7 +100,7 @@ class PassengerControllerTest {
     }
 
     @Test
-    void getPagePassengers_whenBigLimit_thenReturns400() throws Exception {
+    void getPagePassengers_whenLimitExceeded_thenReturns400() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(LIMIT_EXCEEDED));
