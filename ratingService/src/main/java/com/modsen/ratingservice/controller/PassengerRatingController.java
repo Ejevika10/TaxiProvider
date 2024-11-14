@@ -42,11 +42,11 @@ public class PassengerRatingController {
         return passengerRatingService.getPageRatings(offset, limit);
     }
 
-    @GetMapping("/user/{id}")
-    public PageDto<RatingResponseDto> getPageRatingsByUserId(@PathVariable @Min(0) Long id,
+    @GetMapping("/user/{userId}")
+    public PageDto<RatingResponseDto> getPageRatingsByUserId(@PathVariable @Min(0) Long userId,
                                                              @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                              @RequestParam (defaultValue = "5")  @Min(1) @Max(20) Integer limit) {
-        return passengerRatingService.getPageRatingsByUserId(id, offset, limit);
+        return passengerRatingService.getPageRatingsByUserId(userId, offset, limit);
     }
 
     @PostMapping

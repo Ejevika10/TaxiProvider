@@ -56,6 +56,13 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
+    public PageDto<CarResponseDto> getPageCarsByDriverId(Long driverId, Integer offset, Integer limit) {
+        Page<CarResponseDto> pageCars = carRepository.findAllByDriverIdAndDeletedIsFalse(driverId, PageRequest.of(offset, limit))
+                .map(carMapper::toCarResponseDTO);
+        return pageMapper.pageToDto(pageCars);
+    }
+
+    @Override
     public CarResponseDto getCarById(Long id) {
         Car car = findCarByIdOrThrow(id);
         return carMapper.toCarResponseDTO(car);
@@ -85,8 +92,8 @@ public class CarServiceImpl implements CarService {
     @Override
     @Transactional
     public CarResponseDto updateCar(Long id, CarRequestDto carRequestDTO) {
-        Driver driver = findDriverByIdOrThrow(carRequestDTO.driverId());
         Car carToSave = findCarByIdOrThrow(id);
+        Driver driver = findDriverByIdOrThrow(carRequestDTO.driverId());
         Optional<Car> existingCar = carRepository.findByNumberAndDeletedIsFalse(carRequestDTO.number());
         if(existingCar.isPresent() && !existingCar.get().getId().equals(id)) {
             throw new DuplicateFieldException(AppConstants.CAR_NUMBER_EXIST);

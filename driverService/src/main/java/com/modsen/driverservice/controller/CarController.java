@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.List;
-
 @RestController
 @Validated
 @RequestMapping("/api/v1/cars")
@@ -41,8 +39,10 @@ public class CarController {
     }
 
     @GetMapping("/driver/{driverId}")
-    public List<CarResponseDto> getCarsByDriverId(@PathVariable @Min(0) Long driverId) {
-        return carService.getAllCarsByDriverId(driverId);
+    public PageDto<CarResponseDto> getPageCarsByDriverId(@PathVariable @Min(0) Long driverId,
+                                                      @RequestParam(defaultValue = "0") @Min(0) Integer offset,
+                                                      @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit)  {
+        return carService.getPageCarsByDriverId(driverId, offset, limit);
     }
 
     @PostMapping

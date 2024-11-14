@@ -24,4 +24,6 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     Page<Car> findAllByDeletedIsFalse(Pageable pageable);
 
     List<Car> findAllByDriverIdAndDeletedIsFalse(Long id);
+
+    Page<Car> findAllByDriverIdAndDeletedIsFalse(Long id, Pageable pageable);
 }

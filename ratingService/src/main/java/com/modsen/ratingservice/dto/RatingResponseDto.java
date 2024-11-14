@@ -1,5 +1,8 @@
 package com.modsen.ratingservice.dto;
 
+import lombok.Builder;
+
+@Builder
 public record RatingResponseDto (
         String id,
 
