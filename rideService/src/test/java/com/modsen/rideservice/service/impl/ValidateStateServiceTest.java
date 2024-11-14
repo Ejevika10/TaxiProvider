@@ -1,9 +1,9 @@
 package com.modsen.rideservice.service.impl;
 
 import com.modsen.rideservice.model.RideState;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -11,72 +11,84 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 class ValidateStateServiceTest {
 
-    @InjectMocks
-    private ValidateStateService validator;
+    private final ValidateStateService validator = new ValidateStateService();
 
-    @Test
-    void validateState_whenCreated() {
+    @ParameterizedTest
+    @EnumSource(value = RideState.class, names = {"ACCEPTED", "CANCELLED"})
+    void validateState_whenCurrentStateIsCreatedAndCheckedStateIsValid_thenReturnTrue(RideState rideState) {
         RideState currentState = RideState.CREATED;
 
-        assertFalse(validator.validateState(currentState, RideState.CREATED));
-        assertTrue(validator.validateState(currentState, RideState.ACCEPTED));
-        assertFalse(validator.validateState(currentState, RideState.ON_THE_WAY_TO_PICK_UP_THE_PASSENGER));
-        assertFalse(validator.validateState(currentState, RideState.ON_THE_WAY_TO_THE_DESTINATION));
-        assertFalse(validator.validateState(currentState, RideState.COMPLETED));
+        assertTrue(validator.validateState(currentState, rideState));
     }
 
-    @Test
-    void validateState_whenAccepted() {
-        RideState currentState = RideState.ACCEPTED;
+    @ParameterizedTest
+    @EnumSource(value = RideState.class, names = {"CREATED", "ON_THE_WAY_TO_PICK_UP_THE_PASSENGER", "ON_THE_WAY_TO_THE_DESTINATION", "COMPLETED"})
+    void validateState_whenCurrentStateIsCreatedAndCheckedStateIsInvalid_thenReturnFalse(RideState rideState) {
+        RideState currentState = RideState.CREATED;
 
-        assertFalse(validator.validateState(currentState, RideState.CREATED));
-        assertFalse(validator.validateState(currentState, RideState.ACCEPTED));
-        assertTrue(validator.validateState(currentState, RideState.ON_THE_WAY_TO_PICK_UP_THE_PASSENGER));
-        assertFalse(validator.validateState(currentState, RideState.ON_THE_WAY_TO_THE_DESTINATION));
-        assertFalse(validator.validateState(currentState, RideState.COMPLETED));
+        assertFalse(validator.validateState(currentState, rideState));
     }
 
-    @Test
-    void validateState_whenOnTheWayToPassenger() {
-        RideState currentState = RideState.ON_THE_WAY_TO_PICK_UP_THE_PASSENGER;
+    @ParameterizedTest
+    @EnumSource(value = RideState.class, names = {"ON_THE_WAY_TO_PICK_UP_THE_PASSENGER", "CANCELLED"})
+    void validateState_whenCurrentStateIsAcceptedAndCheckedStateIsValid_thenReturnTrue(RideState rideState) {
+        RideState currentState = RideState.CREATED;
 
-        assertFalse(validator.validateState(currentState, RideState.CREATED));
-        assertFalse(validator.validateState(currentState, RideState.ACCEPTED));
-        assertFalse(validator.validateState(currentState, RideState.ON_THE_WAY_TO_PICK_UP_THE_PASSENGER));
-        assertTrue(validator.validateState(currentState, RideState.ON_THE_WAY_TO_THE_DESTINATION));
-        assertFalse(validator.validateState(currentState, RideState.COMPLETED));
+        assertTrue(validator.validateState(currentState, rideState));
     }
 
-    @Test
-    void validateState_whenOnTheWayToDestination() {
-        RideState currentState = RideState.ON_THE_WAY_TO_THE_DESTINATION;
+    @ParameterizedTest
+    @EnumSource(value = RideState.class, names = {"CREATED", "ACCEPTED", "ON_THE_WAY_TO_THE_DESTINATION", "COMPLETED"})
+    void validateState_whenCurrentStateIsAcceptedAndCheckedStateIsInvalid_thenReturnFalse(RideState rideState) {
+        RideState currentState = RideState.CREATED;
 
-        assertFalse(validator.validateState(currentState, RideState.CREATED));
-        assertFalse(validator.validateState(currentState, RideState.ACCEPTED));
-        assertFalse(validator.validateState(currentState, RideState.ON_THE_WAY_TO_PICK_UP_THE_PASSENGER));
-        assertFalse(validator.validateState(currentState, RideState.ON_THE_WAY_TO_THE_DESTINATION));
-        assertTrue(validator.validateState(currentState, RideState.COMPLETED));
+        assertFalse(validator.validateState(currentState, rideState));
+    }
+    @ParameterizedTest
+    @EnumSource(value = RideState.class, names = {"ON_THE_WAY_TO_THE_DESTINATION", "CANCELLED"})
+    void validateState_whenCurrentStateIsOnTheWayToPassengerAndCheckedStateIsValid_thenReturnTrue(RideState rideState) {
+        RideState currentState = RideState.CREATED;
+
+        assertTrue(validator.validateState(currentState, rideState));
     }
 
-    @Test
-    void validateState_whenCompleted() {
-        RideState currentState = RideState.COMPLETED;
+    @ParameterizedTest
+    @EnumSource(value = RideState.class, names = {"CREATED", "ACCEPTED", "ON_THE_WAY_TO_PICK_UP_THE_PASSENGER", "COMPLETED"})
+    void validateState_whenCurrentStateIsOnTheWayToPassengerAndCheckedStateIsInvalid_thenReturnFalse(RideState rideState) {
+        RideState currentState = RideState.CREATED;
 
-        assertFalse(validator.validateState(currentState, RideState.CREATED));
-        assertFalse(validator.validateState(currentState, RideState.ACCEPTED));
-        assertFalse(validator.validateState(currentState, RideState.ON_THE_WAY_TO_PICK_UP_THE_PASSENGER));
-        assertFalse(validator.validateState(currentState, RideState.ON_THE_WAY_TO_THE_DESTINATION));
-        assertFalse(validator.validateState(currentState, RideState.COMPLETED));
+        assertFalse(validator.validateState(currentState, rideState));
     }
 
-    @Test
-    void validateState_whenCheckedStateIsCancelled() {
-        RideState checkedState = RideState.CANCELLED;
+    @ParameterizedTest
+    @EnumSource(value = RideState.class, names = {"COMPLETED", "CANCELLED"})
+    void validateState_whenCurrentStateIsOnTheWayToDestinationAndCheckedStateIsValid_thenReturnTrue(RideState rideState) {
+        RideState currentState = RideState.CREATED;
 
-        assertTrue(validator.validateState(RideState.CREATED, checkedState));
-        assertTrue(validator.validateState(RideState.ACCEPTED, checkedState));
-        assertTrue(validator.validateState(RideState.ON_THE_WAY_TO_PICK_UP_THE_PASSENGER, checkedState));
-        assertTrue(validator.validateState(RideState.ON_THE_WAY_TO_THE_DESTINATION, checkedState));
-        assertFalse(validator.validateState(RideState.COMPLETED, checkedState));
+        assertTrue(validator.validateState(currentState, rideState));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = RideState.class, names = {"CREATED", "ACCEPTED", "ON_THE_WAY_TO_PICK_UP_THE_PASSENGER", "ON_THE_WAY_TO_THE_DESTINATION"})
+    void validateState_whenCurrentStateIsOnTheWayToDestinationAndCheckedStateIsInvalid_thenReturnFalse(RideState rideState) {
+        RideState currentState = RideState.CREATED;
+
+        assertFalse(validator.validateState(currentState, rideState));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = RideState.class, names = {"CREATED", "ACCEPTED", "ON_THE_WAY_TO_PICK_UP_THE_PASSENGER", "ON_THE_WAY_TO_THE_DESTINATION", "COMPLETED"})
+    void validateState_whenCurrentStateIsCompletedAndCheckedStateIsInvalid_thenReturnFalse(RideState rideState) {
+        RideState currentState = RideState.CREATED;
+
+        assertFalse(validator.validateState(currentState, rideState));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = RideState.class, names = {"CREATED", "ACCEPTED", "ON_THE_WAY_TO_PICK_UP_THE_PASSENGER", "ON_THE_WAY_TO_THE_DESTINATION", "COMPLETED"})
+    void validateState_whenCurrentStateIsCancelledAndCheckedStateIsInvalid_thenReturnFalse(RideState rideState) {
+        RideState currentState = RideState.CANCELLED;
+
+        assertFalse(validator.validateState(currentState, rideState));
     }
 }
