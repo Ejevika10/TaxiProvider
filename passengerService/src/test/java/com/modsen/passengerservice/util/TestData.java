@@ -17,6 +17,8 @@ public final class TestData {
     public static final String URL_PASSENGER_ID = URL_PASSENGER + "/{passengerId}";
     public static final String OFFSET = "offset";
     public static final String LIMIT = "limit";
+    public static final String PAGE_SIZE = "pageSize";
+    public static final String PAGE_NUMBER = "pageNumber";
 
     public static final Integer OFFSET_VALUE = 0;
     public static final Integer LIMIT_VALUE = 5;
@@ -26,6 +28,7 @@ public final class TestData {
     public static final Integer EXCEEDED_LIMIT_VALUE = 100;
     private static final String NAME = "passenger";
     private static final String EMAIL = "passenger@mail.ru";
+    public static final String UNIQUE_EMAIL = "passenger_unique@mail.ru";
     private static final String PHONE = "71234567890";
     private static final Double RATING = 0.0;
     public static final Double NEW_RATING = 5.0;
