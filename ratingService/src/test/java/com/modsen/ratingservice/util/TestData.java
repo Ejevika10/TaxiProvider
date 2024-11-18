@@ -17,9 +17,13 @@ public final class TestData {
     public static final String RATING_ID = "qwertyuiop1234";
     public static final String NON_EXISTING_RATING_ID = "qwertyuiop1234";
     public static final Long USER_ID = 1L;
+    public static final Long INVALID_USER_ID = 2L;
     public static final Long INSUFFICIENT_USER_ID = -1L;
     public static final Long RIDE_ID = 1L;
+    public static final Long UNIQUE_RIDE_ID = 2L;
     public static final Long INSUFFICIENT_RIDE_ID = -1L;
+    public static final String RIDE_SERVICE_NAME = "ride-service";
+    public static final int RIDE_SERVICE_PORT = 8888;
 
     public static final String URL_DRIVER_RATING = "/api/v1/driverratings";
     public static final String URL_DRIVER_RATING_ID = URL_DRIVER_RATING + "/{ratingId}";
@@ -27,7 +31,13 @@ public final class TestData {
     public static final String URL_PASSENGER_RATING = "/api/v1/passengerratings";
     public static final String URL_PASSENGER_RATING_ID = URL_PASSENGER_RATING + "/{ratingId}";
     public static final String URL_PASSENGER_RATING_USER_ID = URL_PASSENGER_RATING + "/user/{userId}";
+    public static final String URL_RIDES =  "/api/v1/rides/";
+    public static final String RIDE_NOT_FOUND = "ride not found";
+    public static final String PASSENGER_ID_INVALID = "There is another passengerId in the ride";
+    public static final String DRIVER_ID_INVALID = "There is another driverId in the ride";
 
+    public static final String PAGE_SIZE = "pageSize";
+    public static final String PAGE_NUMBER = "pageNumber";
     public static final String OFFSET = "offset";
     public static final String LIMIT = "limit";
     public static final Integer OFFSET_VALUE = 0;
@@ -55,7 +65,8 @@ public final class TestData {
                 .userId(USER_ID)
                 .rideId(RIDE_ID)
                 .comment(COMMENT)
-                .rating(RATING);
+                .rating(RATING)
+                .deleted(false);
     }
 
     public static DriverRating getDriverRating() {
@@ -68,7 +79,8 @@ public final class TestData {
                 .userId(USER_ID)
                 .rideId(RIDE_ID)
                 .comment(COMMENT)
-                .rating(RATING);
+                .rating(RATING)
+                .deleted(false);
     }
 
     public static PassengerRating getPassengerRating() {
@@ -148,6 +160,10 @@ public final class TestData {
     }
 
     public static RideResponseDto getRideResponseDto() {
-        return new RideResponseDto(RIDE_ID, USER_ID, USER_ID, "Sourse address", "Destination address", RideState.CREATED, LocalDateTime.now(), 1000);
+        return new RideResponseDto(RIDE_ID, USER_ID, USER_ID, "Sourse address", "Destination address", RideState.COMPLETED, LocalDateTime.now(), 1000);
+    }
+
+    public static RideResponseDto getRideResponseDtoWithInvalidState() {
+        return new RideResponseDto(RIDE_ID, USER_ID, USER_ID, "Sourse address", "Destination address", RideState.ACCEPTED, LocalDateTime.now(), 1000);
     }
 }

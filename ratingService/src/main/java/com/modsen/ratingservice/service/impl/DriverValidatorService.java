@@ -35,7 +35,7 @@ public class DriverValidatorService {
         rideStateIsCorrect(ride.rideState());
     }
 
-    private void ratingDoesntExistsByRideId(long rideId) {
+    public void ratingDoesntExistsByRideId(long rideId) {
         if (driverRatingRepository.existsByRideIdAndDeletedIsFalse(rideId)) {
             throw new DuplicateFieldException(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST);
         }

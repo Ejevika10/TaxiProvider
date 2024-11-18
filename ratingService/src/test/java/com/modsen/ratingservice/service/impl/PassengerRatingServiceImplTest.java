@@ -201,8 +201,7 @@ class PassengerRatingServiceImplTest {
         RatingResponseDto actual = passengerRatingService.addRating(passengerRatingRequestDto);
 
         //Assert
-        verify(validator).ratingExistsByRideId(passengerRating.getRideId());
-        verify(validator).rideExistsAndUserIsCorrect(passengerRating.getRideId(), passengerRating.getUserId());
+        verify(validator).validateForCreate(passengerRatingRequestDto);
         verify(ratingMapper).toPassengerRating(passengerRatingRequestDto);
         verify(passengerRatingRepository).save(passengerRating);
         verify(ratingMapper).toRatingResponseDto(passengerRating);
@@ -224,7 +223,7 @@ class PassengerRatingServiceImplTest {
 
         //Assert
         verify(passengerRatingRepository).findByIdAndDeletedIsFalse(passengerRating.getId());
-        verify(validator).rideExistsAndUserIsCorrect(passengerRatingRequestDto.rideId(), passengerRatingRequestDto.userId());
+        verify(validator).validateForUpdate(passengerRatingRequestDto);
         verify(ratingMapper).updatePassengerRating(passengerRatingRequestDto, passengerRating);
         verify(passengerRatingRepository).save(passengerRating);
         verify(ratingMapper).toRatingResponseDto(passengerRating);
