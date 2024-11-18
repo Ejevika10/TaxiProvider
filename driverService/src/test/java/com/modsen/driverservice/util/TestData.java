@@ -23,7 +23,8 @@ public final class TestData {
     public static final String URL_DRIVER_ID = URL_DRIVER + "/{driverId}";
     public static final String OFFSET = "offset";
     public static final String LIMIT = "limit";
-
+    public static final String PAGE_SIZE = "pageSize";
+    public static final String PAGE_NUMBER = "pageNumber";
     public static final Integer OFFSET_VALUE = 0;
     public static final Integer LIMIT_VALUE = 5;
     public static final Integer INSUFFICIENT_OFFSET_VALUE = -1;
@@ -56,6 +57,9 @@ public final class TestData {
     private static final String INVALID_PHONE = "11";
     private static final Double INVALID_RATING = -1.0;
 
+    public static final String UNIQUE_NUMBER = "11111";
+    public static final String UNIQUE_EMAIL = "driver_unique@email.com";
+
     public static Car.CarBuilder getCarBuilder() {
         return Car.builder()
                 .id(CAR_ID)
@@ -63,6 +67,7 @@ public final class TestData {
                 .model(MODEL)
                 .brand(BRAND)
                 .number(NUMBER)
+                .driver(getDriver())
                 .deleted(false);
     }
 
@@ -109,7 +114,8 @@ public final class TestData {
                 .brand(BRAND)
                 .color(COLOR)
                 .model(MODEL)
-                .number(NUMBER);
+                .number(NUMBER)
+                .driver(getDriverResponseDto());
     }
 
     public static CarResponseDto getCarResponseDto() {
