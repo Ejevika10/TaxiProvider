@@ -25,6 +25,8 @@ public final class TestData {
     public static final String URL_RIDE_PASSENGER_ID = URL_RIDE + "/passenger/{passengerId}";
     public static final String OFFSET = "offset";
     public static final String LIMIT = "limit";
+    public static final String PAGE_SIZE = "pageSize";
+    public static final String PAGE_NUMBER = "pageNumber";
 
     public static final Integer OFFSET_VALUE = 0;
     public static final Integer LIMIT_VALUE = 5;
@@ -37,6 +39,15 @@ public final class TestData {
     public static final Long INSUFFICIENT_DRIVER_ID = -1L;
     public static final Long PASSENGER_ID = 1L;
     public static final Long INSUFFICIENT_PASSENGER_ID = -1L;
+
+    public static final String URL_DRIVER_ID = "/api/v1/drivers/";
+    public static final String URL_PASSENGER_ID = "/api/v1/passengers/";
+    public static final String PASSENGER_NOT_FOUND = "passenger not found";
+    public static final String DRIVER_NOT_FOUND = "driver not found";
+    public static final String PASSENGER_SERVICE_NAME = "passenger-service";
+    public static final int PASSENGER_SERVICE_PORT = 8888;
+    public static final String DRIVER_SERVICE_NAME = "driver-service";
+    public static final int DRIVER_SERVICE_PORT = 8889;
 
     private static final Integer RIDE_COST = 1000;
     private static final String SOURCE_ADDRESS = "Source address";
