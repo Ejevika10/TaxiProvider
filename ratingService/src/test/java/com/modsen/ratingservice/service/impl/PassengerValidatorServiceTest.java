@@ -48,28 +48,4 @@ class PassengerValidatorServiceTest {
                 () -> validator.ratingDoesntExistsByRideId(RIDE_ID),
                 AppConstants.RATING_FOR_RIDE_ALREADY_EXIST);
     }
-
-    /*@Test
-    void rideExistsAndUserIsCorrect_CorrectUser() {
-        //Arrange
-        RideResponseDto rideResponseDto = getRideResponseDto();
-        when(rideClientService.getRideById(anyLong())).thenReturn(rideResponseDto);
-
-        //Act
-        //Assert
-        assertDoesNotThrow(() -> validator.rideExistsAndUserIsCorrect(rideResponseDto.id(), rideResponseDto.passengerId()));
-    }
-
-    @Test
-    void rideExistsAndUserIsCorrect_IncorrectUser_ReturnsInvalidFieldValueException() {
-        //Arrange
-        RideResponseDto rideResponseDto = getRideResponseDto();
-        when(rideClientService.getRideById(anyLong())).thenReturn(rideResponseDto);
-
-        //Act
-        //Assert
-        assertThrows(InvalidFieldValueException.class,
-                () -> validator.rideExistsAndUserIsCorrect(rideResponseDto.id(), rideResponseDto.passengerId() + 1),
-                AppConstants.DIFFERENT_PASSENGERS_ID);
-    }*/
 }

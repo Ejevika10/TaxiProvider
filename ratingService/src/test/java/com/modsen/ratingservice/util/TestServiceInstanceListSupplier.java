@@ -11,17 +11,9 @@ import java.util.Map;
 
 public class TestServiceInstanceListSupplier implements ServiceInstanceListSupplier {
     private final Map<String, int[]> servicePortsMap;
-    List<ServiceInstance> result = new ArrayList<>();
 
     public TestServiceInstanceListSupplier(Map<String, int[]> servicePortsMap) {
         this.servicePortsMap = servicePortsMap;
-        for (Map.Entry<String, int[]> entry : servicePortsMap.entrySet()) {
-            String serviceId = entry.getKey();
-            int[] ports = entry.getValue();
-            for (int i = 0; i < ports.length; i++) {
-                result.add(new DefaultServiceInstance(serviceId + i, serviceId, "localhost", ports[i], false));
-            }
-        }
     }
 
     @Override
@@ -31,14 +23,14 @@ public class TestServiceInstanceListSupplier implements ServiceInstanceListSuppl
 
     @Override
     public Flux<List<ServiceInstance>> get() {
-        /*List<ServiceInstance> result = new ArrayList<>();
+        List<ServiceInstance> result = new ArrayList<>();
         for (Map.Entry<String, int[]> entry : servicePortsMap.entrySet()) {
             String serviceId = entry.getKey();
             int[] ports = entry.getValue();
             for (int i = 0; i < ports.length; i++) {
                 result.add(new DefaultServiceInstance(serviceId + i, serviceId, "localhost", ports[i], false));
             }
-        }*/
+        }
         return Flux.just(result);
     }
 }

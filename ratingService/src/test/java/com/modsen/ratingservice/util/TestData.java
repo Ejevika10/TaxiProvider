@@ -1,5 +1,6 @@
 package com.modsen.ratingservice.util;
 
+import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
 import com.modsen.ratingservice.dto.RideResponseDto;
@@ -140,6 +141,16 @@ public final class TestData {
 
     public static List<RatingResponseDto> getRatingResponseDtoList() {
         return List.of(getRatingResponseDto());
+    }
+
+    public static PageDto<RatingResponseDto> getPageRatingResponseDto() {
+        return new PageDto<>(
+                OFFSET_VALUE,
+                LIMIT_VALUE,
+                1,
+                1,
+                getRatingResponseDtoList()
+        );
     }
 
     public static List<RatingResponseDto> getRatingResponseDtoListWithDifferentRatings() {

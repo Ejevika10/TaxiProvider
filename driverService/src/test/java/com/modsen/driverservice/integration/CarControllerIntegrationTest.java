@@ -1,12 +1,12 @@
 package com.modsen.driverservice.integration;
 
-import com.jayway.jsonpath.JsonPath;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.dto.CarResponseDto;
+import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.exception.ListErrorMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.modsen.driverservice.repository.CarRepository;
-import com.modsen.driverservice.repository.DriverRepository;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,15 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 import static com.modsen.driverservice.util.TestData.CAR_ID;
+import static com.modsen.driverservice.util.TestData.CAR_SCRIPT;
 import static com.modsen.driverservice.util.TestData.DRIVER_ID;
+import static com.modsen.driverservice.util.TestData.DRIVER_SCRIPT;
 import static com.modsen.driverservice.util.TestData.EXCEEDED_LIMIT_VALUE;
 import static com.modsen.driverservice.util.TestData.EXCEEDED_OFFSET_VALUE;
 import static com.modsen.driverservice.util.TestData.INSUFFICIENT_CAR_ID;
@@ -39,15 +38,13 @@ import static com.modsen.driverservice.util.TestData.UNIQUE_NUMBER;
 import static com.modsen.driverservice.util.TestData.URL_CAR;
 import static com.modsen.driverservice.util.TestData.URL_CAR_DRIVER_ID;
 import static com.modsen.driverservice.util.TestData.URL_CAR_ID;
-import static com.modsen.driverservice.util.TestData.getCar;
 import static com.modsen.driverservice.util.TestData.getCarRequestDto;
 import static com.modsen.driverservice.util.TestData.getCarRequestDtoBuilder;
 import static com.modsen.driverservice.util.TestData.getCarResponseDto;
 import static com.modsen.driverservice.util.TestData.getCarResponseDtoBuilder;
-import static com.modsen.driverservice.util.TestData.getCarResponseDtoList;
-import static com.modsen.driverservice.util.TestData.getDriver;
 import static com.modsen.driverservice.util.TestData.getEmptyCarRequestDto;
 import static com.modsen.driverservice.util.TestData.getInvalidCarRequestDto;
+import static com.modsen.driverservice.util.TestData.getPageCarResponseDto;
 import static com.modsen.driverservice.util.ViolationData.CAR_BRAND_INVALID;
 import static com.modsen.driverservice.util.ViolationData.CAR_BRAND_MANDATORY;
 import static com.modsen.driverservice.util.ViolationData.CAR_COLOR_INVALID;
@@ -64,59 +61,33 @@ import static com.modsen.driverservice.util.ViolationData.OFFSET_INSUFFICIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.testcontainers.junit.jupiter.Container;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
+
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
-import java.util.Map;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class CarControllerIntegrationTest {
-
-    @Container
-    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:13.3");
-
-    @DynamicPropertySource
-    static void postgreSQLProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
-    }
-
-    @Autowired
-    private CarRepository carRepository;
-
-    @Autowired
-    private DriverRepository driverRepository;
+@Sql(
+        scripts = {DRIVER_SCRIPT, CAR_SCRIPT},
+        executionPhase = BEFORE_TEST_METHOD
+)
+public class CarControllerIntegrationTest extends ControllerIntegrationTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    static {
-        postgreSQLContainer.start();
-    }
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         RestAssuredMockMvc.mockMvc(MockMvcBuilders.webAppContextSetup(webApplicationContext).build());
-        carRepository.deleteAll();
-        driverRepository.deleteAll();
-        jdbcTemplate.execute("ALTER SEQUENCE driver_id_seq RESTART WITH 1");
-        jdbcTemplate.execute("ALTER SEQUENCE car_id_seq RESTART WITH 1");
-
-        driverRepository.save(getDriver());
-        carRepository.save(getCar());
     }
 
     @Test
-    void getPageCars_whenEmptyParams_thenReturns201() {
+    void getPageCars_whenEmptyParams_thenReturns200() {
         RestAssuredMockMvc
                 .given()
                 .when()
@@ -129,7 +100,7 @@ public class CarControllerIntegrationTest {
     }
 
     @Test
-    void getPageCars_whenValidParams_thenReturns201AndResponseDto() {
+    void getPageCars_whenValidParams_thenReturns200AndResponseDto() throws JsonProcessingException {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .param(OFFSET, OFFSET_VALUE)
@@ -142,10 +113,9 @@ public class CarControllerIntegrationTest {
                 .extract()
                 .asString();
 
-        List<Map<String, Object>> content = JsonPath.parse(responseJson).read("$.content");
-        List<CarResponseDto> actualCarResponseDtoList = objectMapper.convertValue(content,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, CarResponseDto.class));
-        assertEquals(getCarResponseDtoList(), actualCarResponseDtoList);
+        PageDto<CarResponseDto> actualPageCarResponseDto = objectMapper.readValue(responseJson,
+                new TypeReference<PageDto<CarResponseDto>>() {});
+        assertEquals(getPageCarResponseDto(), actualPageCarResponseDto);
     }
 
     @Test
@@ -196,7 +166,7 @@ public class CarControllerIntegrationTest {
     }
 
     @Test
-    void getCar_whenValidId_thenReturns201AndResponseDto() throws Exception {
+    void getCar_whenValidId_thenReturns200AndResponseDto() throws Exception {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .when()
@@ -245,7 +215,7 @@ public class CarControllerIntegrationTest {
     }
 
     @Test
-    void getPageCarsByDriverId_whenValidParams_thenReturns201AndResponseDto() {
+    void getPageCarsByDriverId_whenValidParams_thenReturns200AndResponseDto() throws JsonProcessingException {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .param(OFFSET, OFFSET_VALUE)
@@ -258,10 +228,9 @@ public class CarControllerIntegrationTest {
                 .extract()
                 .asString();
 
-        List<Map<String, Object>> content = JsonPath.parse(responseJson).read("$.content");
-        List<CarResponseDto> actualCarResponseDtoList = objectMapper.convertValue(content,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, CarResponseDto.class));
-        assertEquals(getCarResponseDtoList(), actualCarResponseDtoList);
+        PageDto<CarResponseDto> actualPageCarResponseDto = objectMapper.readValue(responseJson,
+                new TypeReference<PageDto<CarResponseDto>>() {});
+        assertEquals(getPageCarResponseDto(), actualPageCarResponseDto);
     }
 
     @Test
@@ -412,7 +381,7 @@ public class CarControllerIntegrationTest {
     }
 
     @Test
-    void updateCar_whenValidInput_thenReturns201AndResponseDto() throws Exception {
+    void updateCar_whenValidInput_thenReturns200AndResponseDto() throws Exception {
         CarRequestDto carRequestDto = getCarRequestDto();
 
         String responseJson = RestAssuredMockMvc

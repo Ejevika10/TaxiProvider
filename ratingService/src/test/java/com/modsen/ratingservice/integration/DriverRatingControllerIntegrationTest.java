@@ -1,10 +1,11 @@
 package com.modsen.ratingservice.integration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import com.jayway.jsonpath.JsonPath;
+import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
 import com.modsen.ratingservice.exception.ErrorMessage;
@@ -12,7 +13,6 @@ import com.modsen.ratingservice.exception.ListErrorMessage;
 import com.modsen.ratingservice.repository.DriverRatingRepository;
 import com.modsen.ratingservice.util.TestServiceInstanceListSupplier;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -21,23 +21,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.modsen.ratingservice.util.TestData.DRIVER_ID_INVALID;
 import static com.modsen.ratingservice.util.TestData.EXCEEDED_LIMIT_VALUE;
 import static com.modsen.ratingservice.util.TestData.EXCEEDED_OFFSET_VALUE;
@@ -60,16 +52,14 @@ import static com.modsen.ratingservice.util.TestData.UNIQUE_RIDE_ID;
 import static com.modsen.ratingservice.util.TestData.URL_DRIVER_RATING;
 import static com.modsen.ratingservice.util.TestData.URL_DRIVER_RATING_ID;
 import static com.modsen.ratingservice.util.TestData.URL_DRIVER_RATING_USER_ID;
-import static com.modsen.ratingservice.util.TestData.URL_RIDES;
 import static com.modsen.ratingservice.util.TestData.USER_ID;
 import static com.modsen.ratingservice.util.TestData.getDriverRating;
 import static com.modsen.ratingservice.util.TestData.getEmptyRatingRequestDto;
 import static com.modsen.ratingservice.util.TestData.getInvalidRatingRequestDto;
+import static com.modsen.ratingservice.util.TestData.getPageRatingResponseDto;
 import static com.modsen.ratingservice.util.TestData.getRatingRequestDtoBuilder;
 import static com.modsen.ratingservice.util.TestData.getRatingResponseDto;
 import static com.modsen.ratingservice.util.TestData.getRatingResponseDtoBuilder;
-import static com.modsen.ratingservice.util.TestData.getRatingResponseDtoList;
-import static com.modsen.ratingservice.util.TestData.getRideResponseDto;
 import static com.modsen.ratingservice.util.ViolationData.LIMIT_EXCEEDED;
 import static com.modsen.ratingservice.util.ViolationData.LIMIT_INSUFFICIENT;
 import static com.modsen.ratingservice.util.ViolationData.OFFSET_INSUFFICIENT;
@@ -85,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class DriverRatingControllerIntegrationTest {
+public class DriverRatingControllerIntegrationTest extends ControllerIntegrationTest{
 
     @TestConfiguration
     public static class TestConfig {
@@ -103,28 +93,6 @@ public class DriverRatingControllerIntegrationTest {
             .options(WireMockConfiguration.wireMockConfig().port(RIDE_SERVICE_PORT))
             .build();
 
-    @Container
-    public static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:latest").withExposedPorts(27017);
-
-    @Container
-    public static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
-
-    @DynamicPropertySource
-    static void mongoDBProperties(DynamicPropertyRegistry registry) {
-        mongoDBContainer.start();
-        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-        registry.add("spring.data.mongodb.host", mongoDBContainer::getHost);
-        registry.add("spring.data.mongodb.port", mongoDBContainer::getFirstMappedPort);
-    }
-
-    @DynamicPropertySource
-    static void registerProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.rabbitmq.host", rabbitMQContainer::getHost);
-        registry.add("spring.rabbitmq.port", rabbitMQContainer::getAmqpPort);
-        registry.add("spring.rabbitmq.username", rabbitMQContainer::getAdminUsername);
-        registry.add("spring.rabbitmq.password", rabbitMQContainer::getAdminPassword);
-    }
-
     @Autowired
     private DriverRatingRepository ratingRepository;
 
@@ -132,24 +100,20 @@ public class DriverRatingControllerIntegrationTest {
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
-    @BeforeAll
-    static void init() {
-        mongoDBContainer.start();
-        rabbitMQContainer.start();
-    }
+    private FeignClientStubs feignClientStubs;
 
     @BeforeEach
     void setUp() {
         RestAssuredMockMvc.mockMvc(MockMvcBuilders.webAppContextSetup(webApplicationContext).build());
         ratingRepository.deleteAll();
         ratingRepository.save(getDriverRating());
-        RIDE_SERVICE.resetRequests();
+        feignClientStubs = new FeignClientStubs(objectMapper);
     }
 
     @Test
-    void getRating_whenValidId_thenReturns201AndResponseDto() throws Exception {
+    void getRating_whenValidId_thenReturns200AndResponseDto() throws Exception {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .when()
@@ -165,7 +129,7 @@ public class DriverRatingControllerIntegrationTest {
     }
 
     @Test
-    void getPageRatings_whenEmptyParams_thenReturns201(){
+    void getPageRatings_whenEmptyParams_thenReturns200(){
         RestAssuredMockMvc
                 .given()
                 .when()
@@ -178,7 +142,7 @@ public class DriverRatingControllerIntegrationTest {
     }
 
     @Test
-    void getPageRatings_whenValidParams_thenReturns201() {
+    void getPageRatings_whenValidParams_thenReturns200AndResponseDto() throws JsonProcessingException {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .param(OFFSET, OFFSET_VALUE)
@@ -191,14 +155,13 @@ public class DriverRatingControllerIntegrationTest {
                 .extract()
                 .asString();
 
-        List<Map<String, Object>> content = JsonPath.parse(responseJson).read("$.content");
-        List<RatingResponseDto> actualRatingResponseDtoList = objectMapper.convertValue(content,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, RatingResponseDto.class));
-        assertEquals(getRatingResponseDtoList(), actualRatingResponseDtoList);
+        PageDto<RatingResponseDto> actualPageRatingResponseDto = objectMapper.readValue(responseJson,
+                new TypeReference<PageDto<RatingResponseDto>>() {});
+        assertEquals(getPageRatingResponseDto(), actualPageRatingResponseDto);
     }
 
     @Test
-    void getPageRatings_whenInsufficientParams_thenReturns400() throws Exception {
+    void getPageRatings_whenInsufficientParams_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
@@ -223,7 +186,7 @@ public class DriverRatingControllerIntegrationTest {
     }
 
     @Test
-    void getPageRatings_whenLimitExceeded_thenReturns400() throws Exception {
+    void getPageRatings_whenLimitExceeded_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(LIMIT_EXCEEDED));
@@ -245,7 +208,7 @@ public class DriverRatingControllerIntegrationTest {
     }
 
     @Test
-    void getPageRatingsByUserId_whenEmptyParams_thenReturns201() {
+    void getPageRatingsByUserId_whenEmptyParams_thenReturns200() {
         RestAssuredMockMvc
                 .given()
                 .when()
@@ -258,7 +221,7 @@ public class DriverRatingControllerIntegrationTest {
     }
 
     @Test
-    void getPageRatingsByUserId_whenValidParams_thenReturns201() {
+    void getPageRatingsByUserId_whenValidParams_thenReturns200AndResponseDto() throws JsonProcessingException {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .param(OFFSET, OFFSET_VALUE)
@@ -271,14 +234,13 @@ public class DriverRatingControllerIntegrationTest {
                 .extract()
                 .asString();
 
-        List<Map<String, Object>> content = JsonPath.parse(responseJson).read("$.content");
-        List<RatingResponseDto> actualRatingResponseDtoList = objectMapper.convertValue(content,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, RatingResponseDto.class));
-        assertEquals(getRatingResponseDtoList(), actualRatingResponseDtoList);
+        PageDto<RatingResponseDto> actualPageRatingResponseDto = objectMapper.readValue(responseJson,
+                new TypeReference<PageDto<RatingResponseDto>>() {});
+        assertEquals(getPageRatingResponseDto(), actualPageRatingResponseDto);
     }
 
     @Test
-    void getPageRatingsByUserId_whenInsufficientParams_thenReturns400() throws Exception {
+    void getPageRatingsByUserId_whenInsufficientParams_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(OFFSET_INSUFFICIENT, LIMIT_INSUFFICIENT));
@@ -303,7 +265,7 @@ public class DriverRatingControllerIntegrationTest {
     }
 
     @Test
-    void getPageRatingsByUserId_whenLimitExceeded_thenReturns400() throws Exception {
+    void getPageRatingsByUserId_whenLimitExceeded_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(LIMIT_EXCEEDED));
@@ -348,7 +310,7 @@ public class DriverRatingControllerIntegrationTest {
 
     @Test
     void createRating_whenValidInput_thenReturns201AndResponseDto() throws Exception {
-        getRideById_whenRideExists(UNIQUE_RIDE_ID);
+        feignClientStubs.stubForRideServiceWithExistingRide(UNIQUE_RIDE_ID, RIDE_SERVICE);
         RatingRequestDto ratingRequestDto = getRatingRequestDtoBuilder()
                 .rideId(UNIQUE_RIDE_ID)
                 .build();
@@ -372,8 +334,8 @@ public class DriverRatingControllerIntegrationTest {
     }
 
     @Test
-    void createRating_whenRideDoesntExist_thenReturns404() throws Exception {
-        getRideById_whenRideNotExists(UNIQUE_RIDE_ID);
+    void createRating_whenRideDoesntExist_thenReturns404AndErrorResult() throws Exception {
+        feignClientStubs.stubForRideServiceWithNonExistingRide(UNIQUE_RIDE_ID, RIDE_SERVICE);
         RatingRequestDto ratingRequestDto = getRatingRequestDtoBuilder()
                 .rideId(UNIQUE_RIDE_ID)
                 .build();
@@ -396,8 +358,8 @@ public class DriverRatingControllerIntegrationTest {
     }
 
     @Test
-    void createRating_whenUserIdInvalid_thenReturns409() throws Exception {
-        getRideById_whenRideExists(UNIQUE_RIDE_ID);
+    void createRating_whenUserIdInvalid_thenReturns409AndErrorResult() throws Exception {
+        feignClientStubs.stubForRideServiceWithExistingRide(UNIQUE_RIDE_ID, RIDE_SERVICE);
         RatingRequestDto ratingRequestDto = getRatingRequestDtoBuilder()
                 .rideId(UNIQUE_RIDE_ID)
                 .userId(INVALID_USER_ID)
@@ -473,8 +435,8 @@ public class DriverRatingControllerIntegrationTest {
     }
 
     @Test
-    void updateRating_whenValidInput_thenReturns201AndResponseDto() throws Exception {
-        getRideById_whenRideExists(UNIQUE_RIDE_ID);
+    void updateRating_whenValidInput_thenReturns200AndResponseDto() throws Exception {
+        feignClientStubs.stubForRideServiceWithExistingRide(UNIQUE_RIDE_ID, RIDE_SERVICE);
         RatingRequestDto ratingRequestDto = getRatingRequestDtoBuilder()
                 .rideId(UNIQUE_RIDE_ID)
                 .build();
@@ -498,8 +460,8 @@ public class DriverRatingControllerIntegrationTest {
     }
 
     @Test
-    void updateRating_whenRideDoesntExist_thenReturns404() throws Exception {
-        getRideById_whenRideNotExists(UNIQUE_RIDE_ID);
+    void updateRating_whenRideDoesntExist_thenReturns404AndErrorResult() throws Exception {
+        feignClientStubs.stubForRideServiceWithNonExistingRide(UNIQUE_RIDE_ID, RIDE_SERVICE);
         RatingRequestDto ratingRequestDto = getRatingRequestDtoBuilder()
                 .rideId(UNIQUE_RIDE_ID)
                 .build();
@@ -522,8 +484,8 @@ public class DriverRatingControllerIntegrationTest {
     }
 
     @Test
-    void updateRating_whenUserIdInvalid_thenReturns409() throws Exception {
-        getRideById_whenRideExists(RIDE_ID);
+    void updateRating_whenUserIdInvalid_thenReturns409AndErrorResult() throws Exception {
+        feignClientStubs.stubForRideServiceWithExistingRide(RIDE_ID, RIDE_SERVICE);
         RatingRequestDto ratingRequestDto = getRatingRequestDtoBuilder()
                 .userId(INVALID_USER_ID)
                 .build();
@@ -605,25 +567,6 @@ public class DriverRatingControllerIntegrationTest {
                 .delete(URL_DRIVER_RATING_ID, RATING_ID)
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
-    }
-
-    private void getRideById_whenRideExists(Long rideId) throws Exception {
-        RIDE_SERVICE.stubFor(WireMock.get(urlPathEqualTo(URL_RIDES + rideId.toString()))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(getRideResponseDto()))
-                ));
-    }
-
-    private void getRideById_whenRideNotExists(Long rideId) throws Exception {
-        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.NOT_FOUND.value(), RIDE_NOT_FOUND);
-        RIDE_SERVICE.stubFor(WireMock.get(urlPathEqualTo(URL_RIDES + rideId.toString()))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.NOT_FOUND.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(errorMessage))
-                ));
     }
 
     private void assertEqualsWithoutId(RatingResponseDto expected, RatingResponseDto actual) {

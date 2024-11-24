@@ -1,6 +1,7 @@
 package com.modsen.rideservice.util;
 
 import com.modsen.rideservice.dto.DriverResponseDto;
+import com.modsen.rideservice.dto.PageDto;
 import com.modsen.rideservice.dto.PassengerResponseDto;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
@@ -56,6 +57,8 @@ public final class TestData {
     private static final Integer INVALID_RIDE_COST = -1000;
     private static final String INVALID_SOURCE_ADDRESS = "addr";
     private static final String INVALID_DESTINATION_ADDRESS = "addr";
+
+    public static final String RIDE_SCRIPT = "ride-controller-preparation.sql";
 
     public static Ride.RideBuilder getRideBuilder() {
         return Ride.builder()
@@ -143,6 +146,16 @@ public final class TestData {
 
     public static List<RideResponseDto> getRideResponseDtoList() {
         return List.of(getRideResponseDto());
+    }
+
+    public static PageDto<RideResponseDto> getPageRideResponseDto() {
+        return new PageDto<>(
+                OFFSET_VALUE,
+                LIMIT_VALUE,
+                1,
+                1,
+                getRideResponseDtoList()
+        );
     }
 
     public static DriverResponseDto getDriverResponseDto() {

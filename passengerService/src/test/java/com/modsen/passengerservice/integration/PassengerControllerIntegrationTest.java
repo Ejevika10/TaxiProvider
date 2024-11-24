@@ -1,12 +1,15 @@
 package com.modsen.passengerservice.integration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
+import com.modsen.passengerservice.dto.PageDto;
 import com.modsen.passengerservice.dto.PassengerRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
 import com.modsen.passengerservice.exception.ListErrorMessage;
 import com.modsen.passengerservice.repository.PassengerRepository;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -23,7 +27,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
-import java.util.Map;
 
 import static com.modsen.passengerservice.util.TestData.EXCEEDED_LIMIT_VALUE;
 import static com.modsen.passengerservice.util.TestData.EXCEEDED_OFFSET_VALUE;
@@ -37,17 +40,17 @@ import static com.modsen.passengerservice.util.TestData.OFFSET_VALUE;
 import static com.modsen.passengerservice.util.TestData.PAGE_NUMBER;
 import static com.modsen.passengerservice.util.TestData.PAGE_SIZE;
 import static com.modsen.passengerservice.util.TestData.PASSENGER_ID;
+import static com.modsen.passengerservice.util.TestData.PASSENGER_SCRIPT;
 import static com.modsen.passengerservice.util.TestData.UNIQUE_EMAIL;
 import static com.modsen.passengerservice.util.TestData.URL_PASSENGER;
 import static com.modsen.passengerservice.util.TestData.URL_PASSENGER_ID;
 import static com.modsen.passengerservice.util.TestData.getEmptyPassengerRequestDto;
 import static com.modsen.passengerservice.util.TestData.getInvalidPassengerRequestDto;
-import static com.modsen.passengerservice.util.TestData.getPassenger;
+import static com.modsen.passengerservice.util.TestData.getPagePassengerResponseDto;
 import static com.modsen.passengerservice.util.TestData.getPassengerRequestDto;
 import static com.modsen.passengerservice.util.TestData.getPassengerRequestDtoBuilder;
 import static com.modsen.passengerservice.util.TestData.getPassengerResponseDto;
 import static com.modsen.passengerservice.util.TestData.getPassengerResponseDtoBuilder;
-import static com.modsen.passengerservice.util.TestData.getPassengerResponseDtoList;
 import static com.modsen.passengerservice.util.ViolationData.LIMIT_EXCEEDED;
 import static com.modsen.passengerservice.util.ViolationData.LIMIT_INSUFFICIENT;
 import static com.modsen.passengerservice.util.ViolationData.OFFSET_INSUFFICIENT;
@@ -61,9 +64,14 @@ import static com.modsen.passengerservice.util.ViolationData.PASSENGER_PHONE_MAN
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Sql(
+        scripts = PASSENGER_SCRIPT,
+        executionPhase = BEFORE_TEST_METHOD
+)
 public class PassengerControllerIntegrationTest {
     @Container
     public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:13.3");
@@ -76,32 +84,23 @@ public class PassengerControllerIntegrationTest {
     }
 
     @Autowired
-    private PassengerRepository passengerRepository;
-
-    @Autowired
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private ObjectMapper objectMapper;
 
-    @Autowired
-    ObjectMapper objectMapper;
-
-    static {
+    @BeforeAll
+    static void init() {
         postgreSQLContainer.start();
     }
 
     @BeforeEach
     void setUp() {
         RestAssuredMockMvc.mockMvc(MockMvcBuilders.webAppContextSetup(webApplicationContext).build());
-        passengerRepository.deleteAll();
-        jdbcTemplate.execute("ALTER SEQUENCE passenger_id_seq RESTART WITH 1");
-
-        passengerRepository.save(getPassenger());
     }
 
     @Test
-    void getPagePassengers_whenEmptyParams_thenReturns201() {
+    void getPagePassengers_whenEmptyParams_thenReturns200() {
         RestAssuredMockMvc
                 .given()
                 .when()
@@ -114,7 +113,7 @@ public class PassengerControllerIntegrationTest {
     }
 
     @Test
-    void getPagePassengers_whenValidParams_thenReturns201AndResponseDto() {
+    void getPagePassengers_whenValidParams_thenReturns200AndResponseDto() throws JsonProcessingException {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .param(OFFSET, OFFSET_VALUE)
@@ -127,10 +126,9 @@ public class PassengerControllerIntegrationTest {
                 .extract()
                 .asString();
 
-        List<Map<String, Object>> content = JsonPath.parse(responseJson).read("$.content");
-        List<PassengerResponseDto> actualPassengerResponseDtoList = objectMapper.convertValue(content,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, PassengerResponseDto.class));
-        assertEquals(getPassengerResponseDtoList(), actualPassengerResponseDtoList);
+        PageDto<PassengerResponseDto> actualPagePassengerResponseDto = objectMapper.readValue(responseJson,
+                new TypeReference<PageDto<PassengerResponseDto>>() {});
+        assertEquals(getPagePassengerResponseDto(), actualPagePassengerResponseDto);
     }
 
     @Test
@@ -181,7 +179,7 @@ public class PassengerControllerIntegrationTest {
     }
 
     @Test
-    void getPassenger_whenValidId_thenReturns201AndResponseDto() throws Exception {
+    void getPassenger_whenValidId_thenReturns200AndResponseDto() throws Exception {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .when()
@@ -294,7 +292,7 @@ public class PassengerControllerIntegrationTest {
     }
 
     @Test
-    void updatePassenger_whenValidInput_thenReturns201AndResponseDto() throws Exception {
+    void updatePassenger_whenValidInput_thenReturns200AndResponseDto() throws Exception {
         PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
 
         String responseJson = RestAssuredMockMvc

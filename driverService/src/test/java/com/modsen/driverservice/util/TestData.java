@@ -4,6 +4,7 @@ import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.dto.CarResponseDto;
 import com.modsen.driverservice.dto.DriverRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
+import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.dto.UserRatingDto;
 import com.modsen.driverservice.model.Car;
 import com.modsen.driverservice.model.Driver;
@@ -59,6 +60,9 @@ public final class TestData {
 
     public static final String UNIQUE_NUMBER = "11111";
     public static final String UNIQUE_EMAIL = "driver_unique@email.com";
+
+    public static final String DRIVER_SCRIPT = "driver-controller-preparation.sql";
+    public static final String CAR_SCRIPT = "car-controller-preparation.sql";
 
     public static Car.CarBuilder getCarBuilder() {
         return Car.builder()
@@ -128,6 +132,26 @@ public final class TestData {
 
     public static List<CarResponseDto> getCarResponseDtoList() {
         return List.of(getCarResponseDto());
+    }
+
+    public static PageDto<CarResponseDto> getPageCarResponseDto() {
+        return new PageDto<>(
+                OFFSET_VALUE,
+                LIMIT_VALUE,
+                1,
+                1,
+                getCarResponseDtoList()
+        );
+    }
+
+    public static PageDto<DriverResponseDto> getPageDriverResponseDto() {
+        return new PageDto<>(
+                OFFSET_VALUE,
+                LIMIT_VALUE,
+                1,
+                1,
+                getDriverResponseDtoList()
+        );
     }
 
     public static Driver.DriverBuilder getDriverBuilder() {

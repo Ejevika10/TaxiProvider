@@ -1,5 +1,6 @@
 package com.modsen.passengerservice.util;
 
+import com.modsen.passengerservice.dto.PageDto;
 import com.modsen.passengerservice.dto.PassengerRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
 import com.modsen.passengerservice.dto.UserRatingDto;
@@ -37,6 +38,8 @@ public final class TestData {
     private static final String INVALID_EMAIL = "passenger";
     private static final String INVALID_PHONE = "11";
     private static final Double INVALID_RATING = -1.0;
+
+    public static final String PASSENGER_SCRIPT = "passenger-controller-preparation.sql";
 
     public static Passenger.PassengerBuilder getPassengerBuilder() {
         return Passenger.builder()
@@ -101,6 +104,16 @@ public final class TestData {
 
     public static List<PassengerResponseDto> getPassengerResponseDtoList() {
         return List.of(getPassengerResponseDto());
+    }
+
+    public static PageDto<PassengerResponseDto> getPagePassengerResponseDto() {
+        return new PageDto<>(
+                OFFSET_VALUE,
+                LIMIT_VALUE,
+                1,
+                1,
+                getPassengerResponseDtoList()
+        );
     }
 
     public static UserRatingDto.UserRatingDtoBuilder getUserRatingDtoBuilder() {

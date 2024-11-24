@@ -1,19 +1,20 @@
 package com.modsen.rideservice.integration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import com.jayway.jsonpath.JsonPath;
+import com.modsen.rideservice.dto.PageDto;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
 import com.modsen.rideservice.exception.ErrorMessage;
 import com.modsen.rideservice.exception.ListErrorMessage;
 import com.modsen.rideservice.model.RideState;
-import com.modsen.rideservice.repository.RideRepository;
 import com.modsen.rideservice.util.TestServiceInstanceListSupplier;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -22,13 +23,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -38,8 +38,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.modsen.rideservice.util.TestData.DRIVER_ID;
 import static com.modsen.rideservice.util.TestData.DRIVER_NOT_FOUND;
 import static com.modsen.rideservice.util.TestData.DRIVER_SERVICE_NAME;
@@ -62,22 +60,18 @@ import static com.modsen.rideservice.util.TestData.PASSENGER_NOT_FOUND;
 import static com.modsen.rideservice.util.TestData.PASSENGER_SERVICE_NAME;
 import static com.modsen.rideservice.util.TestData.PASSENGER_SERVICE_PORT;
 import static com.modsen.rideservice.util.TestData.RIDE_ID;
-import static com.modsen.rideservice.util.TestData.URL_DRIVER_ID;
-import static com.modsen.rideservice.util.TestData.URL_PASSENGER_ID;
+import static com.modsen.rideservice.util.TestData.RIDE_SCRIPT;
 import static com.modsen.rideservice.util.TestData.URL_RIDE;
 import static com.modsen.rideservice.util.TestData.URL_RIDE_DRIVER_ID;
 import static com.modsen.rideservice.util.TestData.URL_RIDE_ID;
 import static com.modsen.rideservice.util.TestData.URL_RIDE_ID_STATE;
 import static com.modsen.rideservice.util.TestData.URL_RIDE_PASSENGER_ID;
-import static com.modsen.rideservice.util.TestData.getDriverResponseDto;
 import static com.modsen.rideservice.util.TestData.getEmptyRideRequestDto;
 import static com.modsen.rideservice.util.TestData.getInvalidRideRequestDto;
-import static com.modsen.rideservice.util.TestData.getPassengerResponseDto;
-import static com.modsen.rideservice.util.TestData.getRide;
+import static com.modsen.rideservice.util.TestData.getPageRideResponseDto;
 import static com.modsen.rideservice.util.TestData.getRideRequestDto;
 import static com.modsen.rideservice.util.TestData.getRideResponseDto;
 import static com.modsen.rideservice.util.TestData.getRideResponseDtoBuilder;
-import static com.modsen.rideservice.util.TestData.getRideResponseDtoList;
 import static com.modsen.rideservice.util.TestData.getRideStateRequestDto;
 import static com.modsen.rideservice.util.TestData.getRideStateRequestDtoBuilder;
 import static com.modsen.rideservice.util.ViolationData.DESTINATION_ADDRESS_INVALID;
@@ -95,10 +89,15 @@ import static com.modsen.rideservice.util.ViolationData.SOURCE_ADDRESS_MANDATORY
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:test.properties")
+@Sql(
+        scripts = RIDE_SCRIPT,
+        executionPhase = BEFORE_TEST_METHOD
+)
 public class RideControllerIntegrationTest {
 
     @TestConfiguration
@@ -134,34 +133,26 @@ public class RideControllerIntegrationTest {
     }
 
     @Autowired
-    private RideRepository rideRepository;
-
-    @Autowired
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private ObjectMapper objectMapper;
 
-    @Autowired
-    ObjectMapper objectMapper;
+    private FeignClientStubs feignClientStubs;
 
-    static {
+    @BeforeAll
+    static void init() {
         postgreSQLContainer.start();
     }
 
     @BeforeEach
     void setUp() {
         RestAssuredMockMvc.mockMvc(MockMvcBuilders.webAppContextSetup(webApplicationContext).build());
-        rideRepository.deleteAll();
-        jdbcTemplate.execute("ALTER SEQUENCE ride_id_seq RESTART WITH 1");
-
-        rideRepository.save(getRide());
-        DRIVER_SERVICE.resetRequests();
-        PASSENGER_SERVICE.resetRequests();
+        feignClientStubs = new FeignClientStubs(objectMapper);
     }
 
     @Test
-    void getPageRides_whenEmptyParams_thenReturns201() throws Exception {
+    void getPageRides_whenEmptyParams_thenReturns200() {
         RestAssuredMockMvc
                 .given()
                 .when()
@@ -174,7 +165,7 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void getPageRides_whenValidParams_thenReturns201AndResponseDto() {
+    void getPageRides_whenValidParams_thenReturns200AndResponseDto() throws JsonProcessingException {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .param(OFFSET, OFFSET_VALUE)
@@ -187,10 +178,9 @@ public class RideControllerIntegrationTest {
                 .extract()
                 .asString();
 
-        List<Map<String, Object>> content = JsonPath.parse(responseJson).read("$.content");
-        List<RideResponseDto> actualRideResponseDtoList = objectMapper.convertValue(content,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, RideResponseDto.class));
-        assertEqualsForListWithoutTimeAndCost(getRideResponseDtoList(), actualRideResponseDtoList);
+        PageDto<RideResponseDto> actualPageRideResponseDto = objectMapper.readValue(responseJson,
+                new TypeReference<PageDto<RideResponseDto>>() {});
+        assertEqualsForPageWithoutTimeAndCost(getPageRideResponseDto(), actualPageRideResponseDto);
     }
 
     @Test
@@ -254,7 +244,7 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void getPageRidesByDriverId_whenValidParams_thenReturns201AndResponseDto() {
+    void getPageRidesByDriverId_whenValidParams_thenReturns200AndResponseDto() throws JsonProcessingException {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .param(OFFSET, OFFSET_VALUE)
@@ -267,10 +257,9 @@ public class RideControllerIntegrationTest {
                 .extract()
                 .asString();
 
-        List<Map<String, Object>> content = JsonPath.parse(responseJson).read("$.content");
-        List<RideResponseDto> actualRideResponseDtoList = objectMapper.convertValue(content,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, RideResponseDto.class));
-        assertEqualsForListWithoutTimeAndCost(getRideResponseDtoList(), actualRideResponseDtoList);
+        PageDto<RideResponseDto> actualPageRideResponseDto = objectMapper.readValue(responseJson,
+                new TypeReference<PageDto<RideResponseDto>>() {});
+        assertEqualsForPageWithoutTimeAndCost(getPageRideResponseDto(), actualPageRideResponseDto);
     }
 
     @Test
@@ -356,7 +345,7 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void getPageRidesByPassengerId_whenValidParams_thenReturns201AndResponseDto() {
+    void getPageRidesByPassengerId_whenValidParams_thenReturns200AndResponseDto() throws JsonProcessingException {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .param(OFFSET, OFFSET_VALUE)
@@ -369,10 +358,9 @@ public class RideControllerIntegrationTest {
                 .extract()
                 .asString();
 
-        List<Map<String, Object>> content = JsonPath.parse(responseJson).read("$.content");
-        List<RideResponseDto> actualRideResponseDtoList = objectMapper.convertValue(content,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, RideResponseDto.class));
-        assertEqualsForListWithoutTimeAndCost(getRideResponseDtoList(), actualRideResponseDtoList);
+        PageDto<RideResponseDto> actualPageRideResponseDto = objectMapper.readValue(responseJson,
+                new TypeReference<PageDto<RideResponseDto>>() {});
+        assertEqualsForPageWithoutTimeAndCost(getPageRideResponseDto(), actualPageRideResponseDto);
     }
 
     @Test
@@ -445,7 +433,7 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void getRide_whenValidId_thenReturns201AndResponseDto() throws Exception {
+    void getRide_whenValidId_thenReturns200AndResponseDto() throws Exception {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .when()
@@ -483,8 +471,8 @@ public class RideControllerIntegrationTest {
     @Test
     void createRide_whenValidInput_thenReturns201AndResponseDto() throws Exception {
         RideRequestDto rideRequestDto = getRideRequestDto();
-        getPassengerById_whenPassengerExists(PASSENGER_ID);
-        getDriverById_whenDriverExists(DRIVER_ID);
+        feignClientStubs.stubForPassengerServiceWithExistingPassenger(PASSENGER_ID, PASSENGER_SERVICE);
+        feignClientStubs.stubForDriverServiceWithExistingDriver(DRIVER_ID, DRIVER_SERVICE);
         RideResponseDto expectedRideResponseDto = getRideResponseDtoBuilder()
                 .id(2L)
                 .build();
@@ -506,9 +494,9 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void createRide_whenPassengerDoesntExist_thenReturns404() throws Exception {
+    void createRide_whenPassengerDoesntExist_thenReturns404AndErrorResult() throws Exception {
         RideRequestDto rideRequestDto = getRideRequestDto();
-        getPassengerById_whenPassengerNotExists(PASSENGER_ID);
+        feignClientStubs.stubForPassengerServiceWithNonExistingPassenger(PASSENGER_ID, PASSENGER_SERVICE);
         ErrorMessage expectedErrorResponse = new ErrorMessage(
                 HttpStatus.NOT_FOUND.value(), PASSENGER_NOT_FOUND);
 
@@ -529,10 +517,10 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void createRide_whenDriverDoesntExist_thenReturns404() throws Exception {
+    void createRide_whenDriverDoesntExist_thenReturns404AndErrorResult() throws Exception {
         RideRequestDto rideRequestDto = getRideRequestDto();
-        getPassengerById_whenPassengerExists(PASSENGER_ID);
-        getDriverById_whenDriverNotExists(DRIVER_ID);
+        feignClientStubs.stubForPassengerServiceWithExistingPassenger(PASSENGER_ID, PASSENGER_SERVICE);
+        feignClientStubs.stubForDriverServiceWithNonExistingDriver(DRIVER_ID, DRIVER_SERVICE);
         ErrorMessage expectedErrorResponse = new ErrorMessage(
                 HttpStatus.NOT_FOUND.value(), DRIVER_NOT_FOUND);
 
@@ -605,10 +593,10 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void updateRide_whenValidInput_thenReturns201AndResponseDto() throws Exception {
+    void updateRide_whenValidInput_thenReturns200AndResponseDto() throws Exception {
         RideRequestDto rideRequestDto = getRideRequestDto();
-        getPassengerById_whenPassengerExists(PASSENGER_ID);
-        getDriverById_whenDriverExists(DRIVER_ID);
+        feignClientStubs.stubForPassengerServiceWithExistingPassenger(PASSENGER_ID, PASSENGER_SERVICE);
+        feignClientStubs.stubForDriverServiceWithExistingDriver(DRIVER_ID, DRIVER_SERVICE);
         String responseJson = RestAssuredMockMvc
                 .given()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -626,9 +614,9 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void updateRide_whenPassengerDoesntExist_thenReturns404() throws Exception {
+    void updateRide_whenPassengerDoesntExist_thenReturns404AndErrorResult() throws Exception {
         RideRequestDto rideRequestDto = getRideRequestDto();
-        getPassengerById_whenPassengerNotExists(PASSENGER_ID);
+        feignClientStubs.stubForPassengerServiceWithNonExistingPassenger(PASSENGER_ID, PASSENGER_SERVICE);
         ErrorMessage expectedErrorResponse = new ErrorMessage(
                 HttpStatus.NOT_FOUND.value(), PASSENGER_NOT_FOUND);
 
@@ -649,10 +637,10 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void updateRide_whenDriverDoesntExist_thenReturns404() throws Exception {
+    void updateRide_whenDriverDoesntExist_thenReturns404AndErrorResult() throws Exception {
         RideRequestDto rideRequestDto = getRideRequestDto();
-        getPassengerById_whenPassengerExists(PASSENGER_ID);
-        getDriverById_whenDriverNotExists(DRIVER_ID);
+        feignClientStubs.stubForPassengerServiceWithExistingPassenger(PASSENGER_ID, PASSENGER_SERVICE);
+        feignClientStubs.stubForDriverServiceWithNonExistingDriver(DRIVER_ID, DRIVER_SERVICE);
         ErrorMessage expectedErrorResponse = new ErrorMessage(
                 HttpStatus.NOT_FOUND.value(), DRIVER_NOT_FOUND);
 
@@ -751,7 +739,7 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void updateRideState_whenValidInput_thenReturns201AndResponseDto() throws Exception {
+    void updateRideState_whenValidInput_thenReturns200AndResponseDto() throws Exception {
         RideStateRequestDto rideStateRequestDto = getRideStateRequestDto();
         RideResponseDto expectedRideResponseDto = getRideResponseDtoBuilder()
                 .rideState(RideState.ACCEPTED)
@@ -809,47 +797,13 @@ public class RideControllerIntegrationTest {
         assertEquals(expected.rideState(), actual.rideState());
     }
 
-    private void assertEqualsForListWithoutTimeAndCost(List<RideResponseDto> expectedList, List<RideResponseDto> actualList) {
-        assertEquals(expectedList.size(), actualList.size());
-        for(int i = 0; i < expectedList.size(); i++) {
-            assertEqualsWithoutTimeAndCost(expectedList.get(i), actualList.get(i));
+    private void assertEqualsForPageWithoutTimeAndCost(PageDto<RideResponseDto> expectedPage, PageDto<RideResponseDto> actualPage) {
+        assertEquals(expectedPage.pageNumber(), actualPage.pageNumber());
+        assertEquals(expectedPage.pageSize(), actualPage.pageSize());
+        assertEquals(expectedPage.totalPages(), actualPage.totalPages());
+        assertEquals(expectedPage.totalElements(), actualPage.totalElements());
+        for(int i = 0; i < expectedPage.content().size(); i++) {
+            assertEqualsWithoutTimeAndCost(expectedPage.content().get(i), actualPage.content().get(i));
         }
-    }
-
-    private void getPassengerById_whenPassengerExists(Long userId) throws Exception {
-        PASSENGER_SERVICE.stubFor(WireMock.get(urlPathEqualTo(URL_PASSENGER_ID + userId))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(getPassengerResponseDto()))));
-    }
-
-    private void getPassengerById_whenPassengerNotExists(Long userId) throws Exception {
-        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.NOT_FOUND.value(), PASSENGER_NOT_FOUND);
-        PASSENGER_SERVICE.stubFor(WireMock.get(urlPathEqualTo(URL_PASSENGER_ID + userId))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.NOT_FOUND.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(errorMessage))
-                ));
-    }
-
-    private void getDriverById_whenDriverExists(Long userId) throws Exception {
-        DRIVER_SERVICE.stubFor(WireMock.get(urlPathEqualTo(URL_DRIVER_ID + userId))
-        .willReturn(aResponse()
-                .withStatus(HttpStatus.OK.value())
-                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .withBody(objectMapper.writeValueAsString(getDriverResponseDto()))
-        ));
-    }
-
-    private void getDriverById_whenDriverNotExists(Long userId) throws Exception {
-        ErrorMessage errorMessage = new ErrorMessage(HttpStatus.NOT_FOUND.value(), DRIVER_NOT_FOUND);
-        DRIVER_SERVICE.stubFor(WireMock.get(urlPathEqualTo(URL_DRIVER_ID + userId))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.NOT_FOUND.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(errorMessage))
-                ));
     }
 }

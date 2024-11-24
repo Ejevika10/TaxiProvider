@@ -1,11 +1,12 @@
 package com.modsen.driverservice.integration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 import com.modsen.driverservice.dto.DriverRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
+import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.exception.ListErrorMessage;
-import com.modsen.driverservice.repository.DriverRepository;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,19 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
-import java.util.Map;
 
 import static com.modsen.driverservice.util.TestData.DRIVER_ID;
+import static com.modsen.driverservice.util.TestData.DRIVER_SCRIPT;
 import static com.modsen.driverservice.util.TestData.EXCEEDED_LIMIT_VALUE;
 import static com.modsen.driverservice.util.TestData.EXCEEDED_OFFSET_VALUE;
 import static com.modsen.driverservice.util.TestData.INSUFFICIENT_DRIVER_ID;
@@ -40,14 +37,13 @@ import static com.modsen.driverservice.util.TestData.PAGE_SIZE;
 import static com.modsen.driverservice.util.TestData.UNIQUE_EMAIL;
 import static com.modsen.driverservice.util.TestData.URL_DRIVER;
 import static com.modsen.driverservice.util.TestData.URL_DRIVER_ID;
-import static com.modsen.driverservice.util.TestData.getDriver;
 import static com.modsen.driverservice.util.TestData.getDriverRequestDto;
 import static com.modsen.driverservice.util.TestData.getDriverRequestDtoBuilder;
 import static com.modsen.driverservice.util.TestData.getDriverResponseDto;
 import static com.modsen.driverservice.util.TestData.getDriverResponseDtoBuilder;
-import static com.modsen.driverservice.util.TestData.getDriverResponseDtoList;
 import static com.modsen.driverservice.util.TestData.getEmptyDriverRequestDto;
 import static com.modsen.driverservice.util.TestData.getInvalidDriverRequestDto;
+import static com.modsen.driverservice.util.TestData.getPageDriverResponseDto;
 import static com.modsen.driverservice.util.ViolationData.DRIVER_EMAIL_INVALID;
 import static com.modsen.driverservice.util.ViolationData.DRIVER_EMAIL_MANDATORY;
 import static com.modsen.driverservice.util.ViolationData.DRIVER_NAME_INVALID;
@@ -61,48 +57,29 @@ import static com.modsen.driverservice.util.ViolationData.OFFSET_INSUFFICIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class DriverControllerIntegrationTest {
-
-    @Container
-    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:13.3");
-
-    @DynamicPropertySource
-    static void postgreSQLProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
-    }
-
-    @Autowired
-    private DriverRepository driverRepository;
+@Sql(
+        scripts = DRIVER_SCRIPT,
+        executionPhase = BEFORE_TEST_METHOD
+)
+public class DriverControllerIntegrationTest extends ControllerIntegrationTest{
 
     @Autowired
     private WebApplicationContext webApplicationContext;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    static {
-        postgreSQLContainer.start();
-    }
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         RestAssuredMockMvc.mockMvc(MockMvcBuilders.webAppContextSetup(webApplicationContext).build());
-        driverRepository.deleteAll();
-        jdbcTemplate.execute("ALTER SEQUENCE driver_id_seq RESTART WITH 1");
-
-        driverRepository.save(getDriver());
     }
 
     @Test
-    void getPageDrivers_whenEmptyParams_thenReturns201() {
+    void getPageDrivers_whenEmptyParams_thenReturns200() {
         RestAssuredMockMvc
                 .given()
                 .when()
@@ -115,7 +92,7 @@ public class DriverControllerIntegrationTest {
     }
 
     @Test
-    void getPageDrivers_whenValidParams_thenReturns201AndResponseDto() {
+    void getPageDrivers_whenValidParams_thenReturns200AndResponseDto() throws JsonProcessingException {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .param(OFFSET, OFFSET_VALUE)
@@ -128,10 +105,9 @@ public class DriverControllerIntegrationTest {
                 .extract()
                 .asString();
 
-        List<Map<String, Object>> content = JsonPath.parse(responseJson).read("$.content");
-        List<DriverResponseDto> actualDriverResponseDtoList = objectMapper.convertValue(content,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, DriverResponseDto.class));
-        assertEquals(getDriverResponseDtoList(), actualDriverResponseDtoList);
+        PageDto<DriverResponseDto> actualPageDriverResponseDto = objectMapper.readValue(responseJson,
+                new TypeReference<PageDto<DriverResponseDto>>() {});
+        assertEquals(getPageDriverResponseDto(), actualPageDriverResponseDto);
     }
 
     @Test
@@ -182,7 +158,7 @@ public class DriverControllerIntegrationTest {
     }
 
     @Test
-    void getDriver_whenValidId_thenReturns201AndResponseDto() throws Exception {
+    void getDriver_whenValidId_thenReturns200AndResponseDto() throws Exception {
         String responseJson = RestAssuredMockMvc
                 .given()
                 .when()
@@ -295,7 +271,7 @@ public class DriverControllerIntegrationTest {
     }
 
     @Test
-    void updateDriver_whenValidInput_thenReturns201AndResponseDto() throws Exception {
+    void updateDriver_whenValidInput_thenReturns200AndResponseDto() throws Exception {
         DriverRequestDto driverRequestDto = getDriverRequestDto();
 
         String responseJson = RestAssuredMockMvc
