@@ -28,7 +28,6 @@ public class DriverStepsDefinitions {
     private DriverRequestDto driverRequestDto;
     private CarRequestDto carRequestDto;
 
-
     @Given("Car request dto")
     public void carRequestDto(String requestBody) throws JsonProcessingException {
         carRequestDto = objectMapper.readValue(requestBody, CarRequestDto.class);
@@ -49,7 +48,7 @@ public class DriverStepsDefinitions {
     }
 
     @When("Get car by id {long}")
-    public void GetCarById(long id) {
+    public void getCarById(long id) {
         response = given()
                 .when()
                 .get(URL_CAR_ID, id);
@@ -101,7 +100,7 @@ public class DriverStepsDefinitions {
     }
 
     @When("Get driver by id {long}")
-    public void GetDriverById(long id) {
+    public void getDriverById(long id) {
         response = given()
                 .when()
                 .get(URL_DRIVER_ID, id);
@@ -133,7 +132,7 @@ public class DriverStepsDefinitions {
     }
 
     @Then("Response status is {int}")
-    public void ResponseStatus(int status) {
+    public void responseStatus(int status) {
         response
                 .then()
                 .statusCode(status);

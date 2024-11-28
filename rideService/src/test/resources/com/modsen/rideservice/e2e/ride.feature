@@ -20,7 +20,7 @@ Feature: Ride API
         "sourceAddress": "Source address",
         "destinationAddress": "Destination address",
         "rideState": "Created",
-        "rideDateTime": "2024-11-24 19:00",
+        "rideDateTime": "2024-11-26T00:30:13.84088",
         "rideCost": 9884
         }
     """
@@ -48,26 +48,80 @@ Feature: Ride API
           ]
         }
     """
+  Scenario: Get page of ride by driver id
+    When Get page of rides by driver id 1
+    Then Response status is 200
+    And Response body contains Page dto
+    """
+        {
+          "pageNumber": 0,
+          "pageSize": 5,
+          "totalPages": 1,
+          "totalElements": 1,
+          "content": [
+              {
+                  "id": 1,
+                  "driverId": 1,
+                  "passengerId": 1,
+                  "sourceAddress": "Source address",
+                  "destinationAddress": "Destination address",
+                  "rideState": "Created",
+                  "rideDateTime": "2024-11-26T00:30:13.84088",
+                  "rideCost": 1894
+              }
+          ]
+        }
+    """
+
+  Scenario: Get page of ride by passenger id
+    When Get page of rides by passenger id 1
+    Then Response status is 200
+    And Response body contains Page dto
+    """
+        {
+          "pageNumber": 0,
+          "pageSize": 5,
+          "totalPages": 1,
+          "totalElements": 1,
+          "content": [
+              {
+                  "id": 1,
+                  "driverId": 1,
+                  "passengerId": 1,
+                  "sourceAddress": "Source address",
+                  "destinationAddress": "Destination address",
+                  "rideState": "Created",
+                  "rideDateTime": "2024-11-26T00:30:13.84088",
+                  "rideCost": 1894
+              }
+          ]
+        }
+    """
+
   Scenario: Get ride by id
     When Get ride by id 1
     Then Response status is 200
     And Response body contains Ride response dto
     """
         {
-            "id": 1,
-            "name": "passenger",
-            "email": "passenger@mail.ru",
-            "phone": "71234567890",
-            "rating": 0.0
+        "id": 1,
+        "driverId": 1,
+        "passengerId": 1,
+        "sourceAddress": "Source address",
+        "destinationAddress": "Destination address",
+        "rideState": "Created",
+        "rideDateTime": "2024-11-26T00:30:13.84088",
+        "rideCost": 1894
         }
     """
   Scenario: Update ride
     Given Ride request dto
     """
         {
-        "name": "new_passenger",
-        "email": "new_passenger@mail.ru",
-        "phone": "71234567890"
+        "driverId": 1,
+        "passengerId": 1,
+        "sourceAddress": "New source address",
+        "destinationAddress": "New destination address"
         }
     """
     When Update ride with id 1
@@ -75,13 +129,35 @@ Feature: Ride API
     And Response body contains Ride response dto
     """
         {
-          "id": "1",
-          "name": "new_passenger",
-          "email": "new_passenger@mail.ru",
-          "phone": "71234567890",
-          "rating": "0.0"
+        "id": 1,
+        "driverId": 1,
+        "passengerId": 1,
+        "sourceAddress": "New source address",
+        "destinationAddress": "New destination address",
+        "rideState": "Created",
+        "rideDateTime": "2024-11-26T00:30:13.84088",
+        "rideCost": 9884
         }
     """
-  Scenario: Delete ride
-    When Delete ride with id 1
-    Then Response status is 204
+  Scenario: Update ride state
+    Given Ride state request dto
+    """
+        {
+        "rideState": "Accepted"
+        }
+    """
+    When Update ride state with id 1
+    Then Response status is 200
+    And Response body contains Ride response dto
+    """
+        {
+        "id": 1,
+        "driverId": 1,
+        "passengerId": 1,
+        "sourceAddress": "New source address",
+        "destinationAddress": "New destination address",
+        "rideState": "Accepted",
+        "rideDateTime": "2024-11-26T00:30:13.84088",
+        "rideCost": 9884
+        }
+    """

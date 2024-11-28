@@ -6,7 +6,8 @@ import org.junit.runner.RunWith;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(
-        features = {"src/test/resources/com.modsen.ratingservice.e2e/rating.feature"}
+        features = {"src/test/resources/com.modsen.ratingservice.e2e/passengerrating.feature",
+        "src/test/resources/com.modsen.ratingservice.e2e/driverrating.feature"}
 )
 public class CucumberTest {
 }

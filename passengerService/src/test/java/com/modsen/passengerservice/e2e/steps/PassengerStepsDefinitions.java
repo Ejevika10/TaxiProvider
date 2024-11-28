@@ -34,7 +34,7 @@ public class PassengerStepsDefinitions {
     }
 
     @When("Get passenger by id {long}")
-    public void GetPassengerById(long id) {
+    public void getPassengerById(long id) {
         response = given()
                 .when()
                 .get(URL_PASSENGER_ID, id);
@@ -66,7 +66,7 @@ public class PassengerStepsDefinitions {
     }
 
     @Then("Response status is {int}")
-    public void ResponseStatus(int status) {
+    public void responseStatus(int status) {
         response
                 .then()
                 .statusCode(status);
