@@ -204,8 +204,7 @@ class DriverRatingServiceImplTest {
         RatingResponseDto actual = driverRatingService.addRating(driverRatingRequestDto);
 
         //Assert
-        verify(validator).ratingExistsByRideId(driverRating.getRideId());
-        verify(validator).rideExistsAndUserIsCorrect(driverRating.getRideId(), driverRating.getUserId());
+        verify(validator).validateForCreate(driverRatingRequestDto);
         verify(ratingMapper).toDriverRating(driverRatingRequestDto);
         verify(driverRatingRepository).save(driverRating);
         verify(ratingMapper).toRatingResponseDto(driverRating);
@@ -230,7 +229,7 @@ class DriverRatingServiceImplTest {
 
         //Assert
         verify(driverRatingRepository).findByIdAndDeletedIsFalse(driverRating.getId());
-        verify(validator).rideExistsAndUserIsCorrect(driverRatingRequestDto.rideId(), driverRatingRequestDto.userId());
+        verify(validator).validateForUpdate(driverRatingRequestDto);
         verify(ratingMapper).updateDriverRating(driverRatingRequestDto, driverRating);
         verify(driverRatingRepository).save(driverRating);
         verify(ratingMapper).toRatingResponseDto(driverRating);

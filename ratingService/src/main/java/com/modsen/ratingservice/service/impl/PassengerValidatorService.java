@@ -33,7 +33,7 @@ public class PassengerValidatorService {
         rideStateIsCorrect(ride.rideState());
     }
 
-    private void ratingDoesntExistsByRideId(long rideId) {
+    public void ratingDoesntExistsByRideId(long rideId) {
         if (passengerRatingRepository.existsByRideIdAndDeletedIsFalse(rideId)) {
             throw new DuplicateFieldException(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST);
         }
