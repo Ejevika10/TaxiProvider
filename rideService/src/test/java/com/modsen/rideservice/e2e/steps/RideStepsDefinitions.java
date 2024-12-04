@@ -12,6 +12,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
+import org.springframework.http.MediaType;
 
 import static com.modsen.rideservice.util.E2ETestData.URL_RIDE;
 import static com.modsen.rideservice.util.E2ETestData.URL_RIDE_DRIVER_ID;
@@ -71,7 +72,7 @@ public class RideStepsDefinitions {
     @When("Create ride")
     public void createRide() {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(rideRequestDto)
                 .when()
                 .post(URL_RIDE);
@@ -80,7 +81,7 @@ public class RideStepsDefinitions {
     @When("Update ride with id {long}")
     public void updateRideWithId(long id) {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(rideRequestDto)
                 .when()
                 .put(URL_RIDE_ID, id);
@@ -89,7 +90,7 @@ public class RideStepsDefinitions {
     @When("Update ride state with id {long}")
     public void updateRideStateWithId(long id) {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(rideStateRequestDto)
                 .when()
                 .put(URL_RIDE_ID_STATE, id);
@@ -104,8 +105,9 @@ public class RideStepsDefinitions {
 
     @And("Response body contains Ride response dto")
     public void responseBodyContainsRideResponseDto(String responseBody) throws JsonProcessingException {
-        RideResponseDto actual = response.body().as(RideResponseDto.class);
         RideResponseDto expected = objectMapper.readValue(responseBody, RideResponseDto.class);
+        RideResponseDto actual = response.body()
+                .as(RideResponseDto.class);
 
         assertEqualsWithoutTimeAndCost(expected, actual);
     }
@@ -113,7 +115,8 @@ public class RideStepsDefinitions {
     @And("Response body contains Page dto")
     public void responseBodyContainsPageDto(String responseBody) throws JsonProcessingException {
         PageDto expected = objectMapper.readValue(responseBody, PageDto.class);
-        PageDto actual = response.body().as(PageDto.class);
+        PageDto actual = response.body()
+                .as(PageDto.class);
 
         assertEqualsForPageWithoutTimeAndCost(expected, actual);
     }

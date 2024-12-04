@@ -1,4 +1,5 @@
 package com.modsen.passengerservice.e2e.steps;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsen.passengerservice.dto.PageDto;
@@ -9,6 +10,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
+import org.springframework.http.MediaType;
 
 import static com.modsen.passengerservice.util.E2ETestData.URL_PASSENGER;
 import static com.modsen.passengerservice.util.E2ETestData.URL_PASSENGER_ID;
@@ -43,7 +45,7 @@ public class PassengerStepsDefinitions {
     @When("Create passenger")
     public void createPassenger() {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(passengerRequestDto)
                 .when()
                 .post(URL_PASSENGER);
@@ -52,7 +54,7 @@ public class PassengerStepsDefinitions {
     @When("Update passenger with id {long}")
     public void updatePassengerWithId(long id) {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(passengerRequestDto)
                 .when()
                 .put(URL_PASSENGER_ID, id);
@@ -75,7 +77,8 @@ public class PassengerStepsDefinitions {
     @And("Response body contains Passenger response dto")
     public void responseBodyContainsPassengerResponseDto(String responseBody) throws JsonProcessingException {
         PassengerResponseDto expected = objectMapper.readValue(responseBody, PassengerResponseDto.class);
-        PassengerResponseDto actual = response.body().as(PassengerResponseDto.class);
+        PassengerResponseDto actual = response.body()
+                .as(PassengerResponseDto.class);
 
         assertEquals(expected, actual);
     }
@@ -83,7 +86,8 @@ public class PassengerStepsDefinitions {
     @And("Response body contains Page dto")
     public void responseBodyContainsPageDto(String responseBody) throws JsonProcessingException {
         PageDto expected = objectMapper.readValue(responseBody, PageDto.class);
-        PageDto actual = response.body().as(PageDto.class);
+        PageDto actual = response.body()
+                .as(PageDto.class);
 
         assertEquals(expected, actual);
     }

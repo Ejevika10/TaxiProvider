@@ -10,6 +10,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
+import org.springframework.http.MediaType;
 
 import static com.modsen.ratingservice.util.E2ETestData.URL_DRIVER_RATING;
 import static com.modsen.ratingservice.util.E2ETestData.URL_DRIVER_RATING_ID;
@@ -76,7 +77,7 @@ public class RatingStepsDefinitions {
     @When("Create passenger rating")
     public void createPassengerRating() {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(ratingRequestDto)
                 .when()
                 .post(URL_PASSENGER_RATING);
@@ -85,7 +86,7 @@ public class RatingStepsDefinitions {
     @When("Create driver rating")
     public void createDriverRating() {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(ratingRequestDto)
                 .when()
                 .post(URL_DRIVER_RATING);
@@ -94,7 +95,7 @@ public class RatingStepsDefinitions {
     @When("Update passenger rating with id {string}")
     public void updatePassengerRatingWithId(String id) {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(ratingRequestDto)
                 .when()
                 .put(URL_PASSENGER_RATING_ID, id);
@@ -103,7 +104,7 @@ public class RatingStepsDefinitions {
     @When("Update driver rating with id {string}")
     public void updateDriverRatingWithId(String id) {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(ratingRequestDto)
                 .when()
                 .put(URL_DRIVER_RATING_ID, id);
@@ -132,8 +133,9 @@ public class RatingStepsDefinitions {
 
     @And("Response body contains Rating response dto")
     public void responseBodyContainsRideResponseDto(String responseBody) throws JsonProcessingException {
-        RatingResponseDto actual = response.body().as(RatingResponseDto.class);
         RatingResponseDto expected = objectMapper.readValue(responseBody, RatingResponseDto.class);
+        RatingResponseDto actual = response.body()
+                .as(RatingResponseDto.class);
 
         assertEqualsWithoutId(expected, actual);
     }
@@ -141,7 +143,8 @@ public class RatingStepsDefinitions {
     @And("Response body contains Page dto")
     public void responseBodyContainsPageDto(String responseBody) throws JsonProcessingException {
         PageDto expected = objectMapper.readValue(responseBody, PageDto.class);
-        PageDto actual = response.body().as(PageDto.class);
+        PageDto actual = response.body()
+                .as(PageDto.class);
 
         assertEqualsForPageWithoutId(expected, actual);
     }

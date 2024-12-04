@@ -12,6 +12,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
+import org.springframework.http.MediaType;
 
 import static com.modsen.driverservice.util.E2ETestData.URL_CAR;
 import static com.modsen.driverservice.util.E2ETestData.URL_CAR_DRIVER_ID;
@@ -57,7 +58,7 @@ public class DriverStepsDefinitions {
     @When("Create car")
     public void createCar() {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(carRequestDto)
                 .when()
                 .post(URL_CAR);
@@ -66,7 +67,7 @@ public class DriverStepsDefinitions {
     @When("Update car with id {long}")
     public void updateCarWithId(long id) {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(carRequestDto)
                 .when()
                 .put(URL_CAR_ID, id);
@@ -82,7 +83,8 @@ public class DriverStepsDefinitions {
     @And("Response body contains Car response dto")
     public void responseBodyContainsCarResponseDto(String responseBody) throws JsonProcessingException {
         CarResponseDto expected = objectMapper.readValue(responseBody, CarResponseDto.class);
-        CarResponseDto actual = response.body().as(CarResponseDto.class);
+        CarResponseDto actual = response.body()
+                .as(CarResponseDto.class);
 
         assertEquals(expected, actual);
     }
@@ -109,7 +111,7 @@ public class DriverStepsDefinitions {
     @When("Create driver")
     public void createDriver() {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(driverRequestDto)
                 .when()
                 .post(URL_DRIVER);
@@ -118,7 +120,7 @@ public class DriverStepsDefinitions {
     @When("Update driver with id {long}")
     public void updateDriverWithId(long id) {
         response = given()
-                .contentType("application/json")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(driverRequestDto)
                 .when()
                 .put(URL_DRIVER_ID, id);
@@ -141,7 +143,8 @@ public class DriverStepsDefinitions {
     @And("Response body contains Driver response dto")
     public void responseBodyContainsDriverResponseDto(String responseBody) throws JsonProcessingException {
         DriverResponseDto expected = objectMapper.readValue(responseBody, DriverResponseDto.class);
-        DriverResponseDto actual = response.body().as(DriverResponseDto.class);
+        DriverResponseDto actual = response.body()
+                .as(DriverResponseDto.class);
 
         assertEquals(expected, actual);
     }
@@ -149,7 +152,8 @@ public class DriverStepsDefinitions {
     @And("Response body contains Page dto")
     public void responseBodyContainsPageDto(String responseBody) throws JsonProcessingException {
         PageDto expected = objectMapper.readValue(responseBody, PageDto.class);
-        PageDto actual = response.body().as(PageDto.class);
+        PageDto actual = response.body()
+                .as(PageDto.class);
 
         assertEquals(expected, actual);
     }

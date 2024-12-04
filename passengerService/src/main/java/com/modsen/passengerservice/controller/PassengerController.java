@@ -30,6 +30,7 @@ public class PassengerController {
 
     @GetMapping
     public PageDto<PassengerResponseDto> getPagePassengers(@RequestParam(defaultValue = "0") @Min(0) Integer offset, @RequestParam (defaultValue = "5")  @Min(1) @Max(20) Integer limit) {
+        System.out.println("GET");
         return passengerService.getPagePassengers(offset, limit);
     }
 
