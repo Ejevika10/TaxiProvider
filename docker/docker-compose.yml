@@ -1,0 +1,254 @@
+version: '3'
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: 'rabbitmq:management'
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - taxi-provider-network
+
+  discovery-server:
+    container_name: discovery-server
+    build:
+      context: ../discoveryServer
+      dockerfile: ../docker/Dockerfile
+      args:
+        SERVICE_NAME: discovery-server
+    environment:
+      EUREKA_HOSTNAME: discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - taxi-provider-network
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "--location", "http://discovery-server:8761/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  config-server:
+    container_name: config-server
+    build:
+      context: ../configServer
+      dockerfile: ../docker/Dockerfile
+      args:
+        SERVICE_NAME: config-server
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka/
+    ports:
+      - "8084:8084"
+    networks:
+      - taxi-provider-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://config-server:8084/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+
+  gateway-service:
+    container_name: gateway-service
+    build:
+      context: ../gatewayService
+      dockerfile: ../docker/Dockerfile
+      args:
+        SERVICE_NAME: gateway-service
+    environment:
+      EUREKA_URL: http://discovery-server:8761/eureka/
+    ports:
+      - "8079:8079"
+    networks:
+      - taxi-provider-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://gateway-service:8079/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+
+  driver-service-db:
+    image: postgres:13.3
+    container_name: driver-service-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: driver_service_db
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.utf8"
+    ports:
+      - "5442:5432"
+    networks:
+      - taxi-provider-network
+
+  driver-service:
+    container_name: driver-service
+    build:
+      context: ../driverService
+      dockerfile: ../docker/Dockerfile
+      args:
+        SERVICE_NAME: driver-service
+    environment:
+      RABBITMQ_HOSTNAME: rabbitmq
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      JDBC_DATABASE_URL: jdbc:postgresql://driver-service-db:5432/driver_service_db
+    ports:
+      - "8083:8083"
+    networks:
+      - taxi-provider-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://driver-service:8083/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      gateway-service:
+        condition: service_healthy
+      ride-service-db:
+        condition: service_started
+
+  passenger-service-db:
+    image: postgres:13.3
+    container_name: passenger-service-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: passenger_service_db
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.utf8"
+    ports:
+      - "5443:5432"
+    networks:
+      - taxi-provider-network
+
+  passenger-service:
+    container_name: passenger-service
+    build:
+      context: ../passengerService
+      dockerfile: ../docker/Dockerfile
+      args:
+        SERVICE_NAME: passenger-service
+    environment:
+      RABBITMQ_HOSTNAME: rabbitmq
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      JDBC_DATABASE_URL: jdbc:postgresql://passenger-service-db:5432/passenger_service_db
+    ports:
+      - "8082:8082"
+    networks:
+      - taxi-provider-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://passenger-service:8082/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      gateway-service:
+        condition: service_healthy
+      passenger-service-db:
+        condition: service_started
+
+  ride-service-db:
+    image: postgres:13.3
+    container_name: ride-service-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: ride_service_db
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.utf8"
+    ports:
+      - "5444:5432"
+    networks:
+      - taxi-provider-network
+
+  ride-service:
+    container_name: ride-service
+    build:
+      context: ../rideService
+      dockerfile: ../docker/Dockerfile
+      args:
+        SERVICE_NAME: ride-service
+    environment:
+      RABBITMQ_HOSTNAME: rabbitmq
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      JDBC_DATABASE_URL: jdbc:postgresql://ride-service-db:5432/ride_service_db
+    ports:
+      - "8081:8081"
+    networks:
+      - taxi-provider-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://ride-service:8081/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      gateway-service:
+        condition: service_healthy
+      ride-service-db:
+        condition: service_started
+
+  rating-service-db:
+    image: mongodb/mongodb-community-server:latest
+    container_name: rating-service-db
+    ports:
+      - "27017:27017"
+    networks:
+      - taxi-provider-network
+
+  rating-service:
+    container_name: rating-service
+    build:
+      context: ../ratingService
+      dockerfile: ../docker/Dockerfile
+      args:
+        SERVICE_NAME: rating-service
+    environment:
+      RABBITMQ_HOSTNAME: rabbitmq
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      MONGODB_URL: mongodb://rating-service-db:27017/rating_service_db
+    ports:
+      - "8080:8080"
+    networks:
+      - taxi-provider-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://rating-service:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      gateway-service:
+        condition: service_healthy
+      rating-service-db:
+        condition: service_started
+
+networks:
+  taxi-provider-network:
+    driver: bridge
