@@ -22,6 +22,7 @@ public class ExternalErrorDecoder implements ErrorDecoder {
             ObjectMapper mapper = new ObjectMapper();
             ErrorMessage errorMessage = mapper.readValue(bodyIs, ErrorMessage.class);
             log.info("ClientException");
+            log.info(errorMessage.toString());
             return new ClientException(errorMessage);
         } catch (Exception e) {
             log.info("Exception {}", e.getMessage());

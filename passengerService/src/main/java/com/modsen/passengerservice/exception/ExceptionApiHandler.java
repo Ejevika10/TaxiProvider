@@ -3,6 +3,7 @@ package com.modsen.passengerservice.exception;
 import com.modsen.passengerservice.util.AppConstants;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
+@Slf4j
 public class ExceptionApiHandler {
     private final MessageSource messageSource;
 
@@ -58,6 +60,8 @@ public class ExceptionApiHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage defException(Exception exception) {
+        log.info("INTERNAL_SERVER_ERROR");
+        log.info(exception.getMessage());
         return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 messageSource.getMessage(AppConstants.INTERNAL_SERVER_ERROR, new Object[]{}, LocaleContextHolder.getLocale()));
     }
