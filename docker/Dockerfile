@@ -4,10 +4,17 @@ COPY pom.xml .
 COPY src ./src/
 RUN mvn clean package -DskipTests
 
+FROM openjdk:23-slim as optimize
+ARG SERVICE_NAME
+WORKDIR /app
+COPY --from=build /app/target/${SERVICE_NAME}-0.0.1-SNAPSHOT.jar ${SERVICE_NAME}.jar
+RUN java -Djarmode=layertools -jar ${SERVICE_NAME}.jar extract
+
 FROM openjdk:23-slim
 WORKDIR /app
 RUN apt-get update && apt-get install -y curl && apt-get clean
-RUN curl --version
-ARG SERVICE_NAME
-COPY --from=build /app/target/${SERVICE_NAME}-0.0.1-SNAPSHOT.jar app.jar
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
+COPY --from=optimize /app/dependencies/ ./
+COPY --from=optimize /app/spring-boot-loader/ ./
+COPY --from=optimize /app/snapshot-dependencies/ ./
+COPY --from=optimize /app/application/ ./
