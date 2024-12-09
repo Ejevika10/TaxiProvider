@@ -13,8 +13,8 @@ RUN java -Djarmode=layertools -jar ${SERVICE_NAME}.jar extract
 FROM openjdk:23-slim
 WORKDIR /app
 RUN apt-get update && apt-get install -y curl && apt-get clean
-ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
 COPY --from=optimize /app/dependencies/ ./
 COPY --from=optimize /app/spring-boot-loader/ ./
 COPY --from=optimize /app/snapshot-dependencies/ ./
 COPY --from=optimize /app/application/ ./
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
