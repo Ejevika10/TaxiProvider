@@ -249,6 +249,35 @@ services:
       rating-service-db:
         condition: service_started
 
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:9.5.2
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      taxi-provider-network:
+        aliases:
+          - grafana
+
+  prometheus:
+      container_name: prometheus
+      image: prom/prometheus
+      ports:
+        - "9090:9090"
+      volumes:
+        - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        - ./prometheus:/prometheus
+      networks:
+        taxi-provider-network:
+          aliases:
+            - prometheus
+
 networks:
   taxi-provider-network:
     driver: bridge
