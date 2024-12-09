@@ -19,6 +19,8 @@
     <packaging>pom</packaging>
     <properties>
         <java.version>23</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
 </project>
 
