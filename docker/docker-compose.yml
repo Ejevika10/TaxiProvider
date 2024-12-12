@@ -277,7 +277,18 @@ services:
         taxi-provider-network:
           aliases:
             - prometheus
-
+  loki:
+    container_name: loki
+    image: grafana/loki:2.9.0
+    ports:
+        - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+        - ./loki/config:/etc/loki
+    networks:
+      taxi-provider-network:
+        aliases:
+          - loki
 networks:
   taxi-provider-network:
     driver: bridge
