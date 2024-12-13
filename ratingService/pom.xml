@@ -31,6 +31,7 @@
         <spring-cloud-starter-bootstrap.version>4.1.4</spring-cloud-starter-bootstrap.version>
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <cucumber.version>7.19.0</cucumber.version>
+        <loki.version>1.4.1</loki.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -207,6 +208,15 @@
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.loki4j</groupId>
+            <artifactId>loki-logback-appender</artifactId>
+            <version>${loki.version}</version>
         </dependency>
     </dependencies>
     <build>
