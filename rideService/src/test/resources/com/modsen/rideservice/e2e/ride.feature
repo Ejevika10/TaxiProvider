@@ -143,7 +143,7 @@ Feature: Ride API
     Given Ride state request dto
     """
         {
-        "rideState": "Accepted"
+        "rideState": "Cancelled"
         }
     """
     When Update ride state with id 1
@@ -156,7 +156,7 @@ Feature: Ride API
         "passengerId": 1,
         "sourceAddress": "New source address",
         "destinationAddress": "New destination address",
-        "rideState": "Accepted",
+        "rideState": "Cancelled",
         "rideDateTime": "2024-11-26T00:30:13.84088",
         "rideCost": 9884
         }
