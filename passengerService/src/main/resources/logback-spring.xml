@@ -2,7 +2,7 @@
 <configuration>
     <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
         <http>
-            <url>http://loki:3100/loki/api/v1/push</url>
+            <url>${LOKI_URL}</url>
         </http>
         <format>
             <label>
@@ -22,8 +22,14 @@
             </message>
         </format>
     </appender>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
     <root level="INFO">
         <appender-ref ref="LOKI" />
+        <appender-ref ref="CONSOLE" />
     </root>
 </configuration>
