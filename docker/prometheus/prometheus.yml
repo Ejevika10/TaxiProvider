@@ -1,0 +1,8 @@
+scrape_configs:
+  - job_name: 'taxi-provider'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'prometheus:9090' ]
+    scrape_interval: 5s
+    eureka_sd_configs:
+      - server: http://discovery-server:8761/eureka

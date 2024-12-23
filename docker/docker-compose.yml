@@ -98,6 +98,7 @@ services:
       RABBITMQ_HOSTNAME: rabbitmq
       EUREKA_URL: http://discovery-server:8761/eureka/
       JDBC_DATABASE_URL: jdbc:postgresql://driver-service-db:5432/driver_service_db
+      LOKI_URL: http://loki:3100/loki/api/v1/push
     ports:
       - "8083:8083"
     networks:
@@ -143,6 +144,7 @@ services:
       RABBITMQ_HOSTNAME: rabbitmq
       EUREKA_URL: http://discovery-server:8761/eureka/
       JDBC_DATABASE_URL: jdbc:postgresql://passenger-service-db:5432/passenger_service_db
+      LOKI_URL: http://loki:3100/loki/api/v1/push
     ports:
       - "8082:8082"
     networks:
@@ -188,6 +190,7 @@ services:
       RABBITMQ_HOSTNAME: rabbitmq
       EUREKA_URL: http://discovery-server:8761/eureka/
       JDBC_DATABASE_URL: jdbc:postgresql://ride-service-db:5432/ride_service_db
+      LOKI_URL: http://loki:3100/loki/api/v1/push
     ports:
       - "8081:8081"
     networks:
@@ -228,6 +231,7 @@ services:
       RABBITMQ_HOSTNAME: rabbitmq
       EUREKA_URL: http://discovery-server:8761/eureka/
       MONGODB_URL: mongodb://rating-service-db:27017/rating_service_db
+      LOKI_URL: http://loki:3100/loki/api/v1/push
     ports:
       - "8080:8080"
     networks:
@@ -249,6 +253,47 @@ services:
       rating-service-db:
         condition: service_started
 
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:9.5.2
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      taxi-provider-network:
+        aliases:
+          - grafana
+
+  prometheus:
+      container_name: prometheus
+      image: prom/prometheus
+      ports:
+        - "9090:9090"
+      volumes:
+        - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        - ./prometheus:/prometheus
+      networks:
+        taxi-provider-network:
+          aliases:
+            - prometheus
+  loki:
+    container_name: loki
+    image: grafana/loki:2.9.0
+    ports:
+        - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+        - ./loki/config:/etc/loki
+    networks:
+      taxi-provider-network:
+        aliases:
+          - loki
 networks:
   taxi-provider-network:
     driver: bridge
