@@ -96,6 +96,7 @@ services:
         SERVICE_NAME: driver-service
     environment:
       RABBITMQ_HOSTNAME: rabbitmq
+      ZIPKIN_HOSTNAME: zipkin
       EUREKA_URL: http://discovery-server:8761/eureka/
       JDBC_DATABASE_URL: jdbc:postgresql://driver-service-db:5432/driver_service_db
       LOKI_URL: http://loki:3100/loki/api/v1/push
@@ -142,6 +143,7 @@ services:
         SERVICE_NAME: passenger-service
     environment:
       RABBITMQ_HOSTNAME: rabbitmq
+      ZIPKIN_HOSTNAME: zipkin
       EUREKA_URL: http://discovery-server:8761/eureka/
       JDBC_DATABASE_URL: jdbc:postgresql://passenger-service-db:5432/passenger_service_db
       LOKI_URL: http://loki:3100/loki/api/v1/push
@@ -188,6 +190,7 @@ services:
         SERVICE_NAME: ride-service
     environment:
       RABBITMQ_HOSTNAME: rabbitmq
+      ZIPKIN_HOSTNAME: zipkin
       EUREKA_URL: http://discovery-server:8761/eureka/
       JDBC_DATABASE_URL: jdbc:postgresql://ride-service-db:5432/ride_service_db
       LOKI_URL: http://loki:3100/loki/api/v1/push
@@ -229,6 +232,7 @@ services:
         SERVICE_NAME: rating-service
     environment:
       RABBITMQ_HOSTNAME: rabbitmq
+      ZIPKIN_HOSTNAME: zipkin
       EUREKA_URL: http://discovery-server:8761/eureka/
       MONGODB_URL: mongodb://rating-service-db:27017/rating_service_db
       LOKI_URL: http://loki:3100/loki/api/v1/push
@@ -294,6 +298,18 @@ services:
       taxi-provider-network:
         aliases:
           - loki
+
+  zipkin:
+    container_name: zipkin-service
+    image: openzipkin/zipkin:latest
+    restart: always
+    ports:
+      - "9411:9411"
+    networks:
+      taxi-provider-network:
+        aliases:
+          - zipkin
+
 networks:
   taxi-provider-network:
     driver: bridge
