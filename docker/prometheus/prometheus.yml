@@ -3,6 +3,6 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: [ 'prometheus:9090' ]
-    scrape_interval: 5s
+    scrape_interval: 60s
     eureka_sd_configs:
       - server: http://discovery-server:8761/eureka
