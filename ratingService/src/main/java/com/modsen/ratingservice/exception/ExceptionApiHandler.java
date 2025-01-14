@@ -110,6 +110,20 @@ public class ExceptionApiHandler {
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, Locale.getDefault()));
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorMessage forbiddenException(ForbiddenException exception) {
+        return new ErrorMessage(HttpStatus.FORBIDDEN.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorMessage unauthorizedException(UnauthorizedException exception) {
+        return new ErrorMessage(HttpStatus.UNAUTHORIZED.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage defException(Exception exception) {
