@@ -15,6 +15,7 @@
         <module>configServer</module>
         <module>discoveryServer</module>
         <module>gatewayService</module>
+        <module>authService</module>
     </modules>
     <packaging>pom</packaging>
     <properties>
