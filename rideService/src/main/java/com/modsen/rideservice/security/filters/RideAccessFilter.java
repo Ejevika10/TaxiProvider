@@ -2,9 +2,6 @@ package com.modsen.rideservice.security.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsen.rideservice.dto.RideRequestDto;
-import com.modsen.rideservice.exception.ForbiddenException;
-import com.modsen.rideservice.service.RideService;
-import com.modsen.rideservice.util.AppConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.modsen.rideservice.util.SecurityConstants.ROLE_ADMIN;
-import static com.modsen.rideservice.util.SecurityConstants.ROLE_DRIVER;
 import static com.modsen.rideservice.util.SecurityConstants.ROLE_PASSENGER;
 
 @RequiredArgsConstructor
@@ -63,14 +59,16 @@ public class RideAccessFilter extends OncePerRequestFilter {
             RideRequestDto rideRequestDto = getRideRequestDto(request);
             log.info(rideRequestDto.toString());
 
-            if (hasRole(auth, ROLE_PASSENGER) &&
+            // To Do:здесь нужна нормальная проверка id
+
+            /*if (hasRole(auth, ROLE_PASSENGER) &&
                     !Objects.equals(rideRequestDto.passengerId(), id)) {
                 throw new ForbiddenException(AppConstants.FORBIDDEN);
             }
             if (hasRole(auth, ROLE_DRIVER) &&
                     !Objects.equals(rideRequestDto.driverId(), id)) {
                 throw new ForbiddenException(AppConstants.FORBIDDEN);
-            }
+            }*/
         }
         filterChain.doFilter(request, response);
     }

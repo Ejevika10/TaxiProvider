@@ -2,7 +2,6 @@ package com.modsen.rideservice.security;
 
 import com.modsen.rideservice.security.filters.ExceptionHandlingFilter;
 import com.modsen.rideservice.security.filters.RideAccessFilter;
-import com.modsen.rideservice.service.RideService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,15 +30,13 @@ import static com.modsen.rideservice.util.SecurityConstants.TOKEN_ISSUER_URL;
 @RequiredArgsConstructor
 public class WebSecurityConfiguration {
 
-    private final RideService rideService;
-
     private final CustomAuthenticationEntryPoint authEntryPoint;
 
     private final CustomAccessDenied accessDenied;
 
     @Bean
     public RideAccessFilter passengerAccessFilter() {
-        return new RideAccessFilter(rideService);
+        return new RideAccessFilter();
     }
 
     @Bean
