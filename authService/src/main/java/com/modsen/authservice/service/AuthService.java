@@ -13,7 +13,6 @@ public interface AuthService {
 
     LoginResponseDto refreshToken(HttpServletRequest servletRequest, HttpServletResponse servletResponse);
 
-
     DriverResponseDto registerDriver(RegisterRequestDto request, HttpServletRequest servletRequest, HttpServletResponse servletResponse);
 
     PassengerResponseDto registerPassenger(RegisterRequestDto request, HttpServletRequest servletRequest, HttpServletResponse servletResponse);

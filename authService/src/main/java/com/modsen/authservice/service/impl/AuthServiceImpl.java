@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsen.authservice.client.driver.DriverClientService;
 import com.modsen.authservice.client.passenger.PassengerClientService;
-import com.modsen.authservice.dto.DriverRequestDto;
+import com.modsen.authservice.dto.DriverCreateRequestDto;
 import com.modsen.authservice.dto.DriverResponseDto;
 import com.modsen.authservice.dto.LoginRequestDto;
 import com.modsen.authservice.dto.LoginResponseDto;
-import com.modsen.authservice.dto.PassengerRequestDto;
+import com.modsen.authservice.dto.PassengerCreateRequestDto;
 import com.modsen.authservice.dto.PassengerResponseDto;
 import com.modsen.authservice.dto.RegisterRequestDto;
 import com.modsen.authservice.exception.ErrorMessage;
@@ -143,7 +143,7 @@ public class AuthServiceImpl implements AuthService {
 
             String adminClientAccessToken = keycloak.tokenManager().getAccessTokenString();
             try {
-                return createDriver(request, adminClientAccessToken);
+                return createDriver(userId, request, adminClientAccessToken);
             }
             catch (Exception e) {
                 usersResource.delete(userId);
@@ -157,8 +157,8 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private DriverResponseDto createDriver(RegisterRequestDto request, String adminClientAccessToken) {
-        DriverRequestDto driverRequestDto = new DriverRequestDto(request.username(), request.email(), 0.0, request.phone());
+    private DriverResponseDto createDriver(String userId, RegisterRequestDto request, String adminClientAccessToken) {
+        DriverCreateRequestDto driverRequestDto = new DriverCreateRequestDto(userId, request.username(), request.email(), 0.0, request.phone());
         return driverClientService.createDriver(driverRequestDto, "Bearer " + adminClientAccessToken);
     }
 
@@ -181,7 +181,7 @@ public class AuthServiceImpl implements AuthService {
 
             String adminClientAccessToken = keycloak.tokenManager().getAccessTokenString();
             try {
-                return createPassenger(request, adminClientAccessToken);
+                return createPassenger(userId, request, adminClientAccessToken);
             }
             catch (Exception e) {
                 usersResource.delete(userId);
@@ -196,8 +196,8 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private PassengerResponseDto createPassenger(RegisterRequestDto request, String adminClientAccessToken) {
-        PassengerRequestDto passengerRequestDto = new PassengerRequestDto(request.username(), request.email(), request.phone(), 0.0);
+    private PassengerResponseDto createPassenger(String userId, RegisterRequestDto request, String adminClientAccessToken) {
+        PassengerCreateRequestDto passengerRequestDto = new PassengerCreateRequestDto(userId, request.username(), request.email(), request.phone(), 0.0);
         return passengerClientService.createPassenger(passengerRequestDto, "Bearer " + adminClientAccessToken);
     }
 

@@ -1,6 +1,6 @@
 package com.modsen.authservice.client.driver;
 
-import com.modsen.authservice.dto.DriverRequestDto;
+import com.modsen.authservice.dto.DriverCreateRequestDto;
 import com.modsen.authservice.dto.DriverResponseDto;
 import com.modsen.authservice.util.ClientConstants;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -17,7 +17,7 @@ public class DriverClientService {
 
     @CircuitBreaker(name = ClientConstants.DRIVER_CLIENT_CIRCUIT)
     @Retry(name = ClientConstants.DRIVER_CLIENT_RETRY)
-    public DriverResponseDto createDriver(DriverRequestDto driverRequestDto, String authorization) {
+    public DriverResponseDto createDriver(DriverCreateRequestDto driverRequestDto, String authorization) {
         log.info("createDriver");
         return driverClient.createDriver(driverRequestDto, authorization);
     }

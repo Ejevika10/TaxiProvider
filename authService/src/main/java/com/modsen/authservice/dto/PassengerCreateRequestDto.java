@@ -1,9 +1,8 @@
 package com.modsen.authservice.dto;
 
-import lombok.Builder;
+public record PassengerCreateRequestDto(
+    String id,
 
-@Builder
-public record PassengerRequestDto(
     String name,
 
     String email,

@@ -1,6 +1,6 @@
 package com.modsen.authservice.client.passenger;
 
-import com.modsen.authservice.dto.PassengerRequestDto;
+import com.modsen.authservice.dto.PassengerCreateRequestDto;
 import com.modsen.authservice.dto.PassengerResponseDto;
 import com.modsen.authservice.util.ClientConstants;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -17,7 +17,7 @@ public class PassengerClientService {
 
     @Retry(name = ClientConstants.PASSENGER_CLIENT_RETRY)
     @CircuitBreaker(name = ClientConstants.PASSENGER_CLIENT_CIRCUIT)
-    public PassengerResponseDto createPassenger(PassengerRequestDto passengerRequestDto, String authorization) {
+    public PassengerResponseDto createPassenger(PassengerCreateRequestDto passengerRequestDto, String authorization) {
         log.info("createPassenger");
         return passengerClient.createPassenger(passengerRequestDto, authorization);
     }

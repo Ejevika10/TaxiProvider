@@ -1,9 +1,8 @@
 package com.modsen.authservice.dto;
 
-import lombok.Builder;
+public record DriverCreateRequestDto(
+    String id,
 
-@Builder
-public record DriverRequestDto(
     String name,
 
     String email,

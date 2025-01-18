@@ -1,7 +1,9 @@
 package com.modsen.authservice.dto;
 
+import java.util.UUID;
+
 public record PassengerResponseDto(
-        long id,
+        UUID id,
 
         String name,
 
