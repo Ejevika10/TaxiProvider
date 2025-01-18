@@ -97,6 +97,7 @@ services:
     environment:
       RABBITMQ_HOSTNAME: rabbitmq
       ZIPKIN_HOSTNAME: zipkin
+      KEYCLOAK_HOSTNAME: keycloak
       EUREKA_URL: http://discovery-server:8761/eureka/
       JDBC_DATABASE_URL: jdbc:postgresql://driver-service-db:5432/driver_service_db
       LOKI_URL: http://loki:3100/loki/api/v1/push
@@ -256,6 +257,56 @@ services:
         condition: service_healthy
       rating-service-db:
         condition: service_started
+
+  auth-service-db:
+    image: postgres:13.3
+    container_name: auth-service-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: auth_service_db
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.utf8"
+    ports:
+      - "5445:5432"
+    networks:
+      - taxi-provider-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    environment:
+      KC_HOSTNAME_PORT: 8484
+      KC_HOSTNAME_STRICT_BACKCHANNEL: true
+      KC_HTTP_ENABLED: true
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: true
+      KC_LOG_LEVEL: info
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://auth-service-db:5432/auth_service_db
+      KC_DB_USERNAME: user
+      KC_DB_PASSWORD: pass
+    depends_on:
+      - auth-service-db
+    ports:
+      - "8484:8484"
+    networks:
+      - taxi-provider-network
+    command: start-dev --http-port 8484
+
+  auth-service:
+    container_name: auth-service
+    environment:
+      KEYCLOAK_HOSTNAME: keycloak
+    build:
+      context: ../authService
+      dockerfile: ../docker/Dockerfile
+      args:
+        SERVICE_NAME: auth-service
+    ports:
+      - "8085:8085"
+    networks:
+      - taxi-provider-network
 
   grafana:
     container_name: grafana
