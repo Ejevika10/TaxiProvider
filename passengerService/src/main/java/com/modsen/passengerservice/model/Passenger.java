@@ -21,8 +21,6 @@ import java.util.UUID;
 @Builder
 public class Passenger {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(unique = true, nullable = false)
     private UUID id;
 
     @Column(nullable = false)

@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import static com.modsen.passengerservice.util.SecurityConstants.ROLE_ADMIN;
 
@@ -33,9 +34,7 @@ public class PassengerAccessFilter extends OncePerRequestFilter {
         if(request.getRequestURI().startsWith("/api/v1/passengers")) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            if (auth.getAuthorities().stream()
-                    .filter(Objects::nonNull)
-                    .anyMatch(authority -> authority.getAuthority().equals(ROLE_ADMIN))) {
+            if (hasRole(auth, ROLE_ADMIN)) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -48,22 +47,26 @@ public class PassengerAccessFilter extends OncePerRequestFilter {
             JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) auth;
             Map<String, Object> claims = jwtAuth.getToken().getClaims();
 
-            String email = (String) claims.get("email");
-            log.info(email);
-
-            String requestURI = request.getRequestURI();
-            String[] pathParts = requestURI.split("/");
-            String idParam = pathParts[pathParts.length - 1];
-            String passengerEmail;
-            Long driverId = Long.valueOf(idParam);
-            passengerEmail = passengerService.getPassengerById(driverId).email();
-
-            log.info(passengerEmail);
-
-            if (!Objects.equals(passengerEmail, email)) {
+            String userIdParam = (String) claims.get("user_id");
+            log.info(userIdParam);
+            UUID userId = UUID.fromString(userIdParam);
+            UUID passengerId = getPassengerIdFromRequestURI(request.getRequestURI());
+            if (!Objects.equals(userId, passengerId)) {
                 throw new ForbiddenException(AppConstants.FORBIDDEN);
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private boolean hasRole(Authentication auth, String role) {
+        return auth.getAuthorities().stream()
+                .filter(Objects::nonNull)
+                .anyMatch(authority -> authority.getAuthority().equals(role));
+    }
+
+    private UUID getPassengerIdFromRequestURI(String requestURI) {
+        String[] pathParts = requestURI.split("/");
+        String idParam = pathParts[pathParts.length - 1];
+        return UUID.fromString(idParam);
     }
 }

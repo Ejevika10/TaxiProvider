@@ -1,6 +1,7 @@
 package com.modsen.passengerservice.controller;
 
 import com.modsen.passengerservice.dto.PageDto;
+import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
 import com.modsen.passengerservice.dto.PassengerRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
 import com.modsen.passengerservice.service.PassengerService;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import jakarta.validation.constraints.Min;
 
+import java.util.UUID;
+
 @RestController
 @Validated
 @RequestMapping("/api/v1/passengers")
@@ -34,24 +37,24 @@ public class PassengerController {
     }
 
     @GetMapping("/{id}")
-    public PassengerResponseDto getPassenger(@PathVariable @Min(0) Long id) {
-        return passengerService.getPassengerById(id);
+    public PassengerResponseDto getPassenger(@PathVariable String id) {
+        return passengerService.getPassengerById(UUID.fromString(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PassengerResponseDto createPassenger(@Valid @RequestBody PassengerRequestDto passengerRequestDTO) {
+    public PassengerResponseDto createPassenger(@Valid @RequestBody PassengerCreateRequestDto passengerRequestDTO) {
         return passengerService.addPassenger(passengerRequestDTO);
     }
 
     @PutMapping("/{id}")
-    public PassengerResponseDto updatePassenger(@PathVariable @Min(0) Long id, @Valid @RequestBody PassengerRequestDto passengerRequestDTO) {
-        return passengerService.updatePassenger(id, passengerRequestDTO);
+    public PassengerResponseDto updatePassenger(@PathVariable String id, @Valid @RequestBody PassengerRequestDto passengerRequestDTO) {
+        return passengerService.updatePassenger(UUID.fromString(id), passengerRequestDTO);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePassenger(@PathVariable @Min(0) Long id) {
-        passengerService.deletePassenger(id);
+    public void deletePassenger(@PathVariable String id) {
+        passengerService.deletePassenger(UUID.fromString(id));
     }
 }
