@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import static com.modsen.driverservice.util.SecurityConstants.ROLE_ADMIN;
 
@@ -33,9 +34,7 @@ public class CarAccessFilter extends OncePerRequestFilter {
         if(request.getRequestURI().startsWith("/api/v1/cars")) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            if (auth.getAuthorities().stream()
-                    .filter(Objects::nonNull)
-                    .anyMatch(authority -> authority.getAuthority().equals(ROLE_ADMIN))) {
+            if (hasRole(auth, ROLE_ADMIN)) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -48,22 +47,27 @@ public class CarAccessFilter extends OncePerRequestFilter {
             JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) auth;
             Map<String, Object> claims = jwtAuth.getToken().getClaims();
 
-            String email = (String) claims.get("email");
-            log.info(email);
-
-            String requestURI = request.getRequestURI();
-            String[] pathParts = requestURI.split("/");
-            String idParam = pathParts[pathParts.length - 1];
-            String carOwnerEmail = "";
-            Long driverId = Long.valueOf(idParam);
-            carOwnerEmail = carService.getCarById(driverId).driver().email();
-
-            log.info(carOwnerEmail);
-
-            if (!Objects.equals(carOwnerEmail, email)) {
+            String userIdParam = (String) claims.get("user_id");
+            log.info(userIdParam);
+            UUID userId = UUID.fromString(userIdParam);
+            UUID carOwnerId = getCarOwnerIdFromRequestURI(request.getRequestURI());
+            if (!Objects.equals(userId, carOwnerId)) {
                 throw new ForbiddenException(AppConstants.FORBIDDEN);
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private boolean hasRole(Authentication auth, String role) {
+        return auth.getAuthorities().stream()
+                .filter(Objects::nonNull)
+                .anyMatch(authority -> authority.getAuthority().equals(role));
+    }
+
+    private UUID getCarOwnerIdFromRequestURI(String requestURI) {
+        String[] pathParts = requestURI.split("/");
+        String idParam = pathParts[pathParts.length - 1];
+        Long carId = Long.valueOf(idParam);
+        return carService.getCarById(carId).driver().id();
     }
 }

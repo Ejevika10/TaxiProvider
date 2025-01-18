@@ -5,8 +5,15 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
     <changeSet id="5" author="loziukvika10@gmail.com">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+
+        <sql>
+            CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+        </sql>
         <createTable tableName="driver">
-            <column autoIncrement="true" name="id" type="BIGINT">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_driver"/>
             </column>
             <column name="name" type="VARCHAR(255)">

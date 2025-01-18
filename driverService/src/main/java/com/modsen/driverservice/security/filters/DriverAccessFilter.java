@@ -17,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import static com.modsen.driverservice.util.SecurityConstants.ROLE_ADMIN;
 
@@ -33,13 +34,10 @@ public class DriverAccessFilter extends OncePerRequestFilter {
         if(request.getRequestURI().startsWith("/api/v1/drivers")) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            if (auth.getAuthorities().stream()
-                    .filter(Objects::nonNull)
-                    .anyMatch(authority -> authority.getAuthority().equals(ROLE_ADMIN))) {
+            if (hasRole(auth, ROLE_ADMIN)) {
                 filterChain.doFilter(request, response);
                 return;
             }
-
             if (request.getMethod().equals("GET")) {
                 filterChain.doFilter(request, response);
                 return;
@@ -48,22 +46,26 @@ public class DriverAccessFilter extends OncePerRequestFilter {
             JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) auth;
             Map<String, Object> claims = jwtAuth.getToken().getClaims();
 
-            String email = (String) claims.get("email");
-            log.info(email);
-
-            String requestURI = request.getRequestURI();
-            String[] pathParts = requestURI.split("/");
-            String idParam = pathParts[pathParts.length - 1];
-            String driverEmail = "";
-            Long driverId = Long.valueOf(idParam);
-            driverEmail = driverService.getDriverById(driverId).email();
-
-            log.info(driverEmail);
-
-            if (!Objects.equals(driverEmail, email)) {
+            String userIdParam = (String) claims.get("user_id");
+            log.info(userIdParam);
+            UUID userId = UUID.fromString(userIdParam);
+            UUID driverId = getDriverIdFromRequestURI(request.getRequestURI());
+            if (!Objects.equals(driverId, userId)) {
                 throw new ForbiddenException(AppConstants.FORBIDDEN);
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private boolean hasRole(Authentication auth, String role) {
+        return auth.getAuthorities().stream()
+                .filter(Objects::nonNull)
+                .anyMatch(authority -> authority.getAuthority().equals(role));
+    }
+
+    private UUID getDriverIdFromRequestURI(String requestURI) {
+        String[] pathParts = requestURI.split("/");
+        String idParam = pathParts[pathParts.length - 1];
+        return UUID.fromString(idParam);
     }
 }

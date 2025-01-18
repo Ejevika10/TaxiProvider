@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface CarRepository extends JpaRepository<Car, Long> {
@@ -23,7 +24,7 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     Page<Car> findAllByDeletedIsFalse(Pageable pageable);
 
-    List<Car> findAllByDriverIdAndDeletedIsFalse(Long id);
+    List<Car> findAllByDriverIdAndDeletedIsFalse(UUID id);
 
-    Page<Car> findAllByDriverIdAndDeletedIsFalse(Long id, Pageable pageable);
+    Page<Car> findAllByDriverIdAndDeletedIsFalse(UUID id, Pageable pageable);
 }

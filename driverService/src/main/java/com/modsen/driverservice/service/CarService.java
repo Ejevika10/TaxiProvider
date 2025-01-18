@@ -5,15 +5,16 @@ import com.modsen.driverservice.dto.CarResponseDto;
 import com.modsen.driverservice.dto.PageDto;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface CarService {
     List<CarResponseDto> getAllCars();
 
     PageDto<CarResponseDto> getPageCars(Integer offset, Integer limit);
 
-    List<CarResponseDto> getAllCarsByDriverId(Long driverId);
+    List<CarResponseDto> getAllCarsByDriverId(UUID driverId);
 
-    PageDto<CarResponseDto> getPageCarsByDriverId(Long driverId, Integer offset, Integer limit);
+    PageDto<CarResponseDto> getPageCarsByDriverId(UUID driverId, Integer offset, Integer limit);
 
     CarResponseDto getCarById(Long id);
 

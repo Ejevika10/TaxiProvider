@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
 public record CarRequestDto(
     @NotBlank(message = "{car.color.mandatory}")
@@ -24,6 +26,6 @@ public record CarRequestDto(
     String number,
 
     @Min(0)
-    Long driverId){
+    UUID driverId){
 
 }
