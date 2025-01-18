@@ -2,11 +2,9 @@ package com.modsen.passengerservice.dto;
 
 import lombok.Builder;
 
-import java.util.UUID;
-
 @Builder
 public record PassengerResponseDto (
-    UUID id,
+    Long id,
 
     String name,
 

@@ -1,7 +1,8 @@
-package com.modsen.rideservice.security;
+package com.modsen.ratingservice.security;
 
-import com.modsen.rideservice.security.filters.ExceptionHandlingFilter;
-import com.modsen.rideservice.security.filters.RideAccessFilter;
+import com.modsen.ratingservice.security.filters.DriverRatingsAccessFilter;
+import com.modsen.ratingservice.security.filters.ExceptionHandlingFilter;
+import com.modsen.ratingservice.security.filters.PassengerRatingsAccessFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,10 +20,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
-import static com.modsen.rideservice.util.SecurityConstants.KEYCLOAK_CLIENT_ID;
-import static com.modsen.rideservice.util.SecurityConstants.ROLE_ADMIN;
-import static com.modsen.rideservice.util.SecurityConstants.ROLE_PASSENGER;
-import static com.modsen.rideservice.util.SecurityConstants.TOKEN_ISSUER_URL;
+import static com.modsen.ratingservice.util.SecurityConstants.KEYCLOAK_CLIENT_ID;
+import static com.modsen.ratingservice.util.SecurityConstants.ROLE_PASSENGER;
+import static com.modsen.ratingservice.util.SecurityConstants.TOKEN_ISSUER_URL;
 
 
 @Slf4j
@@ -36,8 +36,13 @@ public class WebSecurityConfiguration {
     private final CustomAccessDenied accessDenied;
 
     @Bean
-    public RideAccessFilter passengerAccessFilter() {
-        return new RideAccessFilter();
+    public DriverRatingsAccessFilter driverRatingsAccessFilter() {
+        return new DriverRatingsAccessFilter();
+    }
+
+    @Bean
+    public PassengerRatingsAccessFilter passengerRatingsAccessFilter() {
+        return new PassengerRatingsAccessFilter();
     }
 
     @Bean
@@ -63,7 +68,7 @@ public class WebSecurityConfiguration {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/actuator/health").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/v1/rides").hasAnyRole(ROLE_PASSENGER, ROLE_ADMIN)
+                                .requestMatchers(HttpMethod.POST, "/api/v1/rides").hasRole(ROLE_PASSENGER)
                                 .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
