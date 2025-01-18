@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -48,13 +49,13 @@ public class PassengerRatingServiceImpl implements RatingService {
     }
 
     @Override
-    public List<RatingResponseDto> getAllRatingsByUserId(Long userId) {
+    public List<RatingResponseDto> getAllRatingsByUserId(UUID userId) {
         List<PassengerRating> ratings = passengerRatingRepository.findAllByUserIdAndDeletedIsFalse(userId);
         return ratingListMapper.toPassengerRatingResponseDtoList(ratings);
     }
 
     @Override
-    public PageDto<RatingResponseDto> getPageRatingsByUserId(Long userId, Integer offset, Integer limit) {
+    public PageDto<RatingResponseDto> getPageRatingsByUserId(UUID userId, Integer offset, Integer limit) {
         Page<RatingResponseDto> pageRating = passengerRatingRepository
                 .findAllByUserIdAndDeletedIsFalse(userId, PageRequest.of(offset, limit))
                 .map(ratingMapper::toRatingResponseDto);
@@ -99,7 +100,7 @@ public class PassengerRatingServiceImpl implements RatingService {
                 .orElseThrow(() -> new NotFoundException(AppConstants.RATING_NOT_FOUND));
     }
 
-    private void updateAverageRating(long userId){
+    private void updateAverageRating(UUID userId){
         List<PassengerRating> ratings = passengerRatingRepository.findTop40ByUserIdAndDeletedIsFalse(userId);
         List<RatingResponseDto> ratingDtos = ratingListMapper.toPassengerRatingResponseDtoList(ratings);
         double averageRating = ratingCounterService.countRating(ratingDtos);

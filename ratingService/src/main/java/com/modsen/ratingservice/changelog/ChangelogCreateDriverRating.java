@@ -20,7 +20,7 @@ public class ChangelogCreateDriverRating {
                         .required("rideId", "userId", "rating")
                         .properties(
                                 JsonSchemaProperty.int64("rideId"),
-                                JsonSchemaProperty.int64("userId"),
+                                JsonSchemaProperty.string("userId").description("UUID in string format"),
                                 JsonSchemaProperty.int32("rating"),
                                 JsonSchemaProperty.string("comment").description("may be null"),
                                 JsonSchemaProperty.bool("deleted")

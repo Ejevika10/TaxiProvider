@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,13 +26,13 @@ public class DriverValidatorService {
         Long rideId = ratingRequestDto.rideId();
         ratingDoesntExistsByRideId(rideId);
         RideResponseDto ride = rideExistsById(rideId);
-        userIdIsCorrect(ride, ratingRequestDto.userId());
+        userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
 
     public void validateForUpdate(RatingRequestDto ratingRequestDto){
         RideResponseDto ride = rideExistsById(ratingRequestDto.rideId());
-        userIdIsCorrect(ride, ratingRequestDto.userId());
+        userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
 
@@ -45,7 +46,7 @@ public class DriverValidatorService {
         return rideClientService.getRideById(rideId);
     }
 
-    private void userIdIsCorrect(RideResponseDto rideResponseDto, Long userId) {
+    private void userIdIsCorrect(RideResponseDto rideResponseDto, UUID userId) {
         if (!Objects.equals(rideResponseDto.driverId(), userId)) {
             throw new InvalidFieldValueException(AppConstants.DIFFERENT_DRIVERS_ID);
         }

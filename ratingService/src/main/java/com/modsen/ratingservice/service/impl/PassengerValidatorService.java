@@ -12,6 +12,8 @@ import com.modsen.ratingservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class PassengerValidatorService {
@@ -23,13 +25,13 @@ public class PassengerValidatorService {
         Long rideId = ratingRequestDto.rideId();
         ratingDoesntExistsByRideId(rideId);
         RideResponseDto ride = rideExistsByRideId(rideId);
-        userIdIsCorrect(ride, ratingRequestDto.userId());
+        userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
 
     public void validateForUpdate(RatingRequestDto ratingRequestDto){
         RideResponseDto ride = rideExistsByRideId(ratingRequestDto.rideId());
-        userIdIsCorrect(ride, ratingRequestDto.userId());
+        userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
 
@@ -43,7 +45,7 @@ public class PassengerValidatorService {
         return rideClientService.getRideById(rideId);
     }
 
-    private void userIdIsCorrect(RideResponseDto rideResponseDto, long userId) {
+    private void userIdIsCorrect(RideResponseDto rideResponseDto, UUID userId) {
         if (!(rideResponseDto.passengerId() == userId)) {
             throw new InvalidFieldValueException(AppConstants.DIFFERENT_PASSENGERS_ID);
         }

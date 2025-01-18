@@ -5,6 +5,7 @@ import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface RatingService {
     String EXCHANGE_NAME = "ratingservice";
@@ -15,9 +16,9 @@ public interface RatingService {
 
     PageDto<RatingResponseDto> getPageRatings(Integer offset, Integer limit);
 
-    List<RatingResponseDto> getAllRatingsByUserId(Long userID);
+    List<RatingResponseDto> getAllRatingsByUserId(UUID userID);
 
-    PageDto<RatingResponseDto> getPageRatingsByUserId(Long userId, Integer offset, Integer limit);
+    PageDto<RatingResponseDto> getPageRatingsByUserId(UUID userId, Integer offset, Integer limit);
 
     RatingResponseDto getRatingById(String id);
 

@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/passengerratings")
 @RequiredArgsConstructor
@@ -43,10 +45,10 @@ public class PassengerRatingController {
     }
 
     @GetMapping("/user/{userId}")
-    public PageDto<RatingResponseDto> getPageRatingsByUserId(@PathVariable @Min(0) Long userId,
+    public PageDto<RatingResponseDto> getPageRatingsByUserId(@PathVariable String userId,
                                                              @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                              @RequestParam (defaultValue = "5")  @Min(1) @Max(20) Integer limit) {
-        return passengerRatingService.getPageRatingsByUserId(userId, offset, limit);
+        return passengerRatingService.getPageRatingsByUserId(UUID.fromString(userId), offset, limit);
     }
 
     @PostMapping
