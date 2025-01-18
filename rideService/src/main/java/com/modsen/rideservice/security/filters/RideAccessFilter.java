@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import static com.modsen.rideservice.util.SecurityConstants.ROLE_ADMIN;
 import static com.modsen.rideservice.util.SecurityConstants.ROLE_DRIVER;
@@ -48,28 +49,25 @@ public class RideAccessFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (request.getMethod().equals("POST") &&
-                    hasRole(auth, ROLE_PASSENGER)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
             JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) auth;
             Map<String, Object> claims = jwtAuth.getToken().getClaims();
 
-            String id = (String) claims.get("user_id");
-            log.info(id);
-
+            String userIdParam = (String) claims.get("user_id");
+            log.info(userIdParam);
+            UUID userId = UUID.fromString(userIdParam);
             RideRequestDto rideRequestDto = getRideRequestDto(request);
             log.info(rideRequestDto.toString());
+            UUID passengerId = UUID.fromString(rideRequestDto.passengerId());
 
-            if (hasRole(auth, ROLE_PASSENGER) &&
-                    !Objects.equals(rideRequestDto.passengerId(), id)) {
+            if (hasRole(auth, ROLE_PASSENGER) && rideRequestDto.driverId() == null &&
+                    !Objects.equals(userId, passengerId)) {
                 throw new ForbiddenException(AppConstants.FORBIDDEN);
             }
-            if (hasRole(auth, ROLE_DRIVER) &&
-                    !Objects.equals(rideRequestDto.driverId(), id)) {
-                throw new ForbiddenException(AppConstants.FORBIDDEN);
+            if (hasRole(auth, ROLE_DRIVER) && rideRequestDto.driverId() != null){
+                UUID driverId = UUID.fromString(rideRequestDto.driverId());
+                if(!Objects.equals(userId, driverId)) {
+                    throw new ForbiddenException(AppConstants.FORBIDDEN);
+                }
             }
         }
         filterChain.doFilter(request, response);

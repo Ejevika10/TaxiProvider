@@ -16,10 +16,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RestController
 @Validated
@@ -35,17 +38,17 @@ public class RideController {
     }
 
     @GetMapping("/driver/{driverId}")
-    public PageDto<RideResponseDto> getPageRidesByDriverId(@Valid @PathVariable @Min(0) Long driverId,
+    public PageDto<RideResponseDto> getPageRidesByDriverId(@Valid @PathVariable String driverId,
                                                            @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                            @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit) {
-        return rideService.getPageRidesByDriverId(driverId, offset, limit);
+        return rideService.getPageRidesByDriverId(UUID.fromString(driverId), offset, limit);
     }
 
     @GetMapping("/passenger/{passengerId}")
-    public PageDto<RideResponseDto> getPageRidesByPassengerId(@Valid @PathVariable @Min(0) Long passengerId,
+    public PageDto<RideResponseDto> getPageRidesByPassengerId(@Valid @PathVariable String passengerId,
                                                               @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                               @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit) {
-        return rideService.getPageRidesByPassengerId(passengerId, offset, limit);
+        return rideService.getPageRidesByPassengerId(UUID.fromString(passengerId), offset, limit);
     }
 
     @GetMapping("/{id}")
@@ -55,14 +58,16 @@ public class RideController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RideResponseDto createRide(@Valid @RequestBody RideRequestDto rideRequestDto) {
-        return rideService.createRide(rideRequestDto);
+    public RideResponseDto createRide(@Valid @RequestBody RideRequestDto rideRequestDto,
+                                      @RequestHeader("Authorization") String authorizationToken) {
+        return rideService.createRide(rideRequestDto, authorizationToken);
     }
 
     @PutMapping("/{id}")
     public RideResponseDto updateRide(@PathVariable @Min(0) Long id,
-                                      @Valid @RequestBody RideRequestDto rideRequestDto) {
-        return rideService.updateRide(id, rideRequestDto);
+                                      @Valid @RequestBody RideRequestDto rideRequestDto,
+                                      @RequestHeader("Authorization") String authorizationToken) {
+        return rideService.updateRide(id, rideRequestDto, authorizationToken);
     }
 
     @PutMapping("/{id}/state")

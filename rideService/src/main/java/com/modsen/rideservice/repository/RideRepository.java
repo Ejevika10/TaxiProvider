@@ -6,17 +6,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface RideRepository extends JpaRepository<Ride, Long> {
 
     Page<Ride> findAll(Pageable pageable);
 
-    List<Ride> findAllByDriverId(Long driverId);
+    List<Ride> findAllByDriverId(UUID driverId);
 
-    Page<Ride> findAllByDriverId(Long driverId, Pageable pageable);
+    Page<Ride> findAllByDriverId(UUID driverId, Pageable pageable);
 
-    List<Ride> findAllByPassengerId(Long passengerId);
+    List<Ride> findAllByPassengerId(UUID passengerId);
 
-    Page<Ride> findAllByPassengerId(Long passengerId, Pageable pageable);
+    Page<Ride> findAllByPassengerId(UUID passengerId, Pageable pageable);
 
 }

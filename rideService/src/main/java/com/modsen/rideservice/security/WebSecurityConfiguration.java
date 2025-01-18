@@ -21,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 import static com.modsen.rideservice.util.SecurityConstants.KEYCLOAK_CLIENT_ID;
+import static com.modsen.rideservice.util.SecurityConstants.ROLE_ADMIN;
 import static com.modsen.rideservice.util.SecurityConstants.ROLE_PASSENGER;
 import static com.modsen.rideservice.util.SecurityConstants.TOKEN_ISSUER_URL;
 
@@ -39,7 +40,7 @@ public class WebSecurityConfiguration {
 
     @Bean
     public RideAccessFilter passengerAccessFilter() {
-        return new RideAccessFilter(rideService);
+        return new RideAccessFilter();
     }
 
     @Bean
@@ -65,7 +66,7 @@ public class WebSecurityConfiguration {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/actuator/health").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/v1/rides").hasRole(ROLE_PASSENGER)
+                                .requestMatchers(HttpMethod.POST, "/api/v1/rides").hasAnyRole(ROLE_PASSENGER, ROLE_ADMIN)
                                 .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
