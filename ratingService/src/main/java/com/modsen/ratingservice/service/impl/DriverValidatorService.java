@@ -12,7 +12,6 @@ import com.modsen.ratingservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -22,16 +21,16 @@ public class DriverValidatorService {
     private final DriverRatingRepository driverRatingRepository;
     private final RideClientService rideClientService;
 
-    public void validateForCreate(RatingRequestDto ratingRequestDto){
+    public void validateForCreate(RatingRequestDto ratingRequestDto, String authorizationToken){
         Long rideId = ratingRequestDto.rideId();
         ratingDoesntExistsByRideId(rideId);
-        RideResponseDto ride = rideExistsById(rideId);
+        RideResponseDto ride = rideExistsById(rideId, authorizationToken);
         userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
 
-    public void validateForUpdate(RatingRequestDto ratingRequestDto){
-        RideResponseDto ride = rideExistsById(ratingRequestDto.rideId());
+    public void validateForUpdate(RatingRequestDto ratingRequestDto, String authorizationToken){
+        RideResponseDto ride = rideExistsById(ratingRequestDto.rideId(), authorizationToken);
         userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
@@ -42,12 +41,12 @@ public class DriverValidatorService {
         }
     }
 
-    private RideResponseDto rideExistsById(long rideId) {
-        return rideClientService.getRideById(rideId);
+    private RideResponseDto rideExistsById(long rideId, String authorizationToken) {
+        return rideClientService.getRideById(rideId, authorizationToken);
     }
 
     private void userIdIsCorrect(RideResponseDto rideResponseDto, UUID userId) {
-        if (!Objects.equals(rideResponseDto.driverId(), userId)) {
+        if (!rideResponseDto.driverId().equals(userId)) {
             throw new InvalidFieldValueException(AppConstants.DIFFERENT_DRIVERS_ID);
         }
     }

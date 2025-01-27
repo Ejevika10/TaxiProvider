@@ -16,8 +16,8 @@ public class RideClientService {
 
     @Retry(name = ClientConstants.RIDE_CLIENT_RETRY)
     @CircuitBreaker(name = ClientConstants.RIDE_CLIENT_CIRCUIT)
-    public RideResponseDto getRideById(long rideId) {
+    public RideResponseDto getRideById(long rideId, String authorizationToken) {
         log.info("getRideById");
-        return rideClient.getRideById(rideId);
+        return rideClient.getRideById(rideId, authorizationToken);
     }
 }

@@ -21,16 +21,16 @@ public class PassengerValidatorService {
     private final PassengerRatingRepository passengerRatingRepository;
     private final RideClientService rideClientService;
 
-    public void validateForCreate(RatingRequestDto ratingRequestDto){
+    public void validateForCreate(RatingRequestDto ratingRequestDto, String authorizationToken){
         Long rideId = ratingRequestDto.rideId();
         ratingDoesntExistsByRideId(rideId);
-        RideResponseDto ride = rideExistsByRideId(rideId);
+        RideResponseDto ride = rideExistsByRideId(rideId, authorizationToken);
         userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
 
-    public void validateForUpdate(RatingRequestDto ratingRequestDto){
-        RideResponseDto ride = rideExistsByRideId(ratingRequestDto.rideId());
+    public void validateForUpdate(RatingRequestDto ratingRequestDto, String authorizationToken){
+        RideResponseDto ride = rideExistsByRideId(ratingRequestDto.rideId(), authorizationToken);
         userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
@@ -41,12 +41,12 @@ public class PassengerValidatorService {
         }
     }
 
-    private RideResponseDto rideExistsByRideId(long rideId) {
-        return rideClientService.getRideById(rideId);
+    private RideResponseDto rideExistsByRideId(long rideId, String authorizationToken) {
+        return rideClientService.getRideById(rideId, authorizationToken);
     }
 
     private void userIdIsCorrect(RideResponseDto rideResponseDto, UUID userId) {
-        if (!(rideResponseDto.passengerId() == userId)) {
+        if (!rideResponseDto.passengerId().equals(userId)) {
             throw new InvalidFieldValueException(AppConstants.DIFFERENT_PASSENGERS_ID);
         }
     }

@@ -4,6 +4,7 @@ import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
 import com.modsen.ratingservice.service.RatingService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -28,6 +30,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/passengerratings")
 @RequiredArgsConstructor
 @Validated
+@SecurityRequirement(name = "JWT")
 public class PassengerRatingController {
 
     @Qualifier("PassengerRatingServiceImpl")
@@ -53,14 +56,16 @@ public class PassengerRatingController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RatingResponseDto createRating(@Valid @RequestBody RatingRequestDto rideRequestDto) {
-        return passengerRatingService.addRating(rideRequestDto);
+    public RatingResponseDto createRating(@Valid @RequestBody RatingRequestDto rideRequestDto,
+                                          @RequestHeader("Authorization") String authorizationToken) {
+        return passengerRatingService.addRating(rideRequestDto, authorizationToken);
     }
 
     @PutMapping("/{id}")
     public RatingResponseDto updateRating(@PathVariable String id,
-                                          @Valid @RequestBody RatingRequestDto ratingRequestDTO) {
-        return passengerRatingService.updateRating(id, ratingRequestDTO);
+                                          @Valid @RequestBody RatingRequestDto ratingRequestDTO,
+                                          @RequestHeader("Authorization") String authorizationToken) {
+        return passengerRatingService.updateRating(id, ratingRequestDTO, authorizationToken);
     }
 
     @DeleteMapping("/{id}")

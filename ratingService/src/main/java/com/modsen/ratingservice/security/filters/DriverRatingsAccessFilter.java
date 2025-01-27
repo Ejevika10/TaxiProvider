@@ -1,7 +1,11 @@
 package com.modsen.ratingservice.security.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.modsen.ratingservice.client.ride.RideClientService;
 import com.modsen.ratingservice.dto.RatingRequestDto;
+import com.modsen.ratingservice.dto.RideResponseDto;
+import com.modsen.ratingservice.exception.ForbiddenException;
+import com.modsen.ratingservice.util.AppConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import static com.modsen.ratingservice.util.SecurityConstants.ROLE_ADMIN;
 
@@ -25,6 +30,8 @@ import static com.modsen.ratingservice.util.SecurityConstants.ROLE_ADMIN;
 public class DriverRatingsAccessFilter extends OncePerRequestFilter {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final RideClientService rideClientService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -47,21 +54,14 @@ public class DriverRatingsAccessFilter extends OncePerRequestFilter {
             Map<String, Object> claims = jwtAuth.getToken().getClaims();
 
             String id = (String) claims.get("user_id");
-            log.info(id);
+            UUID userId = UUID.fromString(id);
 
             RatingRequestDto ratingRequestDto = getRatingRequestDto(request);
-            log.info(ratingRequestDto.toString());
+            RideResponseDto ride = getRideById(ratingRequestDto.rideId(), jwtAuth.getName());
 
-            /*
-              To Do: проверка id
-              роль - PASSENGER
-              user_id - id пассажира в поездке, за которую ставится оценка
-              ratingRequestDto.userId() - id водителя, которому ставится оценка
-
-              как получить id пассажира в поездке, за которую ставится оценка - ?
-             */
-
-            filterChain.doFilter(request, response);
+            if(!ride.passengerId().equals(userId)) {
+                throw new ForbiddenException(AppConstants.FORBIDDEN);
+            }
         }
         filterChain.doFilter(request, response);
     }
@@ -69,7 +69,7 @@ public class DriverRatingsAccessFilter extends OncePerRequestFilter {
     private RatingRequestDto getRatingRequestDto(HttpServletRequest request) {
         StringBuilder stringBuilder = new StringBuilder();
         String line;
-
+        log.info("driver rating filter");
         try (BufferedReader reader = request.getReader()) {
             while ((line = reader.readLine()) != null) {
                 stringBuilder.append(line);
@@ -85,5 +85,9 @@ public class DriverRatingsAccessFilter extends OncePerRequestFilter {
         return auth.getAuthorities().stream()
                 .filter(Objects::nonNull)
                 .anyMatch(authority -> authority.getAuthority().equals(role));
+    }
+
+    private RideResponseDto getRideById(Long rideId, String accessToken) {
+        return rideClientService.getRideById(rideId, accessToken);
     }
 }

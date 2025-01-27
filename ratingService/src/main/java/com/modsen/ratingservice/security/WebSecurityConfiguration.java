@@ -1,5 +1,7 @@
 package com.modsen.ratingservice.security;
 
+import com.modsen.ratingservice.client.ride.RideClientService;
+import com.modsen.ratingservice.security.filters.CacheBodyHttpServletFilter;
 import com.modsen.ratingservice.security.filters.DriverRatingsAccessFilter;
 import com.modsen.ratingservice.security.filters.ExceptionHandlingFilter;
 import com.modsen.ratingservice.security.filters.PassengerRatingsAccessFilter;
@@ -21,6 +23,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 import static com.modsen.ratingservice.util.SecurityConstants.KEYCLOAK_CLIENT_ID;
+import static com.modsen.ratingservice.util.SecurityConstants.ROLE_ADMIN;
+import static com.modsen.ratingservice.util.SecurityConstants.ROLE_DRIVER;
 import static com.modsen.ratingservice.util.SecurityConstants.ROLE_PASSENGER;
 import static com.modsen.ratingservice.util.SecurityConstants.TOKEN_ISSUER_URL;
 
@@ -33,21 +37,28 @@ public class WebSecurityConfiguration {
 
     private final CustomAuthenticationEntryPoint authEntryPoint;
 
-    private final CustomAccessDenied accessDenied;
+    private final CustomAccessDeniedHandler accessDenied;
+
+    private final RideClientService rideClientService;
 
     @Bean
     public DriverRatingsAccessFilter driverRatingsAccessFilter() {
-        return new DriverRatingsAccessFilter();
+        return new DriverRatingsAccessFilter(rideClientService);
     }
 
     @Bean
     public PassengerRatingsAccessFilter passengerRatingsAccessFilter() {
-        return new PassengerRatingsAccessFilter();
+        return new PassengerRatingsAccessFilter(rideClientService);
     }
 
     @Bean
     public ExceptionHandlingFilter exceptionHandlingFilter() {
         return new ExceptionHandlingFilter();
+    }
+
+    @Bean
+    public CacheBodyHttpServletFilter cacheBodyHttpServletFilter() {
+        return new CacheBodyHttpServletFilter();
     }
 
     @Value(KEYCLOAK_CLIENT_ID)
@@ -65,11 +76,15 @@ public class WebSecurityConfiguration {
 
         http
                 .addFilterBefore(exceptionHandlingFilter(), WebAsyncManagerIntegrationFilter.class)
+                .addFilterAfter(cacheBodyHttpServletFilter(), ExceptionHandlingFilter.class)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/actuator/health").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/v1/rides").hasRole(ROLE_PASSENGER)
-                                .anyRequest().authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/v1/driverratings").hasAnyRole(ROLE_PASSENGER, ROLE_ADMIN)
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/driverratings/*").hasAnyRole(ROLE_PASSENGER, ROLE_ADMIN)
+                                .requestMatchers(HttpMethod.POST, "/api/v1/passengerratings").hasAnyRole(ROLE_DRIVER, ROLE_ADMIN)
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/passengerratings/*").hasAnyRole(ROLE_DRIVER, ROLE_ADMIN)
+                                .requestMatchers("/api/*").authenticated()
+                                .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .authenticationEntryPoint(authEntryPoint)
