@@ -7,5 +7,5 @@ public record LoginResponseDto (
     String refresh_expires_in,
     String token_type,
     String session_state,
-    String scope){
+    String scope) {
 }

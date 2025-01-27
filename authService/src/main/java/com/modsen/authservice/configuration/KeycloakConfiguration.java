@@ -1,32 +1,32 @@
 package com.modsen.authservice.configuration;
 
+import com.modsen.authservice.util.KeycloakConstants;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import static com.modsen.authservice.util.KeycloakConstants.CLIENT_ID;
-import static com.modsen.authservice.util.KeycloakConstants.CLIENT_SECRET;
-import static com.modsen.authservice.util.KeycloakConstants.GRANT_TYPE_CLIENT_CREDENTIALS;
-import static com.modsen.authservice.util.KeycloakConstants.PASSWORD;
-import static com.modsen.authservice.util.KeycloakConstants.REALM_NAME;
-import static com.modsen.authservice.util.KeycloakConstants.SERVER_URL;
-import static com.modsen.authservice.util.KeycloakConstants.USERNAME;
 
 @Configuration
 @Slf4j
+@RequiredArgsConstructor
 public class KeycloakConfiguration {
+
+    private final KeycloakConstants keycloakConstants;
+
     @Bean
     public Keycloak keycloak() {
-        log.info(SERVER_URL);
+        log.info(keycloakConstants.getServerUrl());
         return KeycloakBuilder.builder()
-            .serverUrl(SERVER_URL)
-            .realm(REALM_NAME)
-            .grantType(GRANT_TYPE_CLIENT_CREDENTIALS)
-            .clientId(CLIENT_ID)
-            .clientSecret(CLIENT_SECRET)
-            .username(USERNAME)
-            .password(PASSWORD)
+            .serverUrl(keycloakConstants.getServerUrl())
+            .realm(keycloakConstants.getRealmName())
+            .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
+            .clientId(keycloakConstants.getClientId())
+            .clientSecret(keycloakConstants.getClientSecret())
+            .username(keycloakConstants.getUsername())
+            .password(keycloakConstants.getPassword())
             .build();
     }
 }

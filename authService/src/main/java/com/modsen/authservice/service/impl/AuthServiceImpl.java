@@ -13,12 +13,15 @@ import com.modsen.authservice.dto.PassengerResponseDto;
 import com.modsen.authservice.dto.RegisterRequestDto;
 import com.modsen.authservice.exception.ErrorMessage;
 import com.modsen.authservice.exception.KeycloakException;
+import com.modsen.authservice.model.Role;
 import com.modsen.authservice.service.AuthService;
+import com.modsen.authservice.util.KeycloakConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 
@@ -40,25 +43,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.List;
-import static com.modsen.authservice.util.AppConstants.ACCESS_TOKEN;
-import static com.modsen.authservice.util.AppConstants.CLIENT_ID_PARAM;
-import static com.modsen.authservice.util.AppConstants.CLIENT_SECRET_PARAM;
 import static com.modsen.authservice.util.AppConstants.ERROR_MESSAGE_FIELD;
-import static com.modsen.authservice.util.AppConstants.GRANT_TYPE_PARAM;
-import static com.modsen.authservice.util.AppConstants.PASSWORD_PARAM;
-import static com.modsen.authservice.util.AppConstants.REFRESH_TOKEN_PARAM;
 import static com.modsen.authservice.util.AppConstants.UNKNOWN_ERROR;
-import static com.modsen.authservice.util.AppConstants.USERNAME_PARAM;
-import static com.modsen.authservice.util.KeycloakConstants.CLIENT_ID;
-import static com.modsen.authservice.util.KeycloakConstants.CLIENT_SECRET;
-import static com.modsen.authservice.util.AppConstants.EXPIRES_IN;
-import static com.modsen.authservice.util.KeycloakConstants.DRIVER_ROLE;
-import static com.modsen.authservice.util.KeycloakConstants.GET_TOKEN_URL;
-import static com.modsen.authservice.util.KeycloakConstants.GRANT_TYPE_PASSWORD;
-import static com.modsen.authservice.util.KeycloakConstants.GRANT_TYPE_REFRESH_TOKEN;
-import static com.modsen.authservice.util.KeycloakConstants.PASSENGER_ROLE;
-import static com.modsen.authservice.util.KeycloakConstants.REALM_NAME;
-import static com.modsen.authservice.util.AppConstants.REFRESH_TOKEN;
 
 @Service
 @Slf4j
@@ -69,14 +55,14 @@ public class AuthServiceImpl implements AuthService {
     private final Keycloak keycloak;
     private final PassengerClientService passengerClientService;
     private final DriverClientService driverClientService;
-
+    private final KeycloakConstants keycloakConstants;
 
     @Override
     public LoginResponseDto login(LoginRequestDto request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
         LoginResponseDto responseDto = getAccessToken(request);
 
-        servletResponse.addHeader(ACCESS_TOKEN, responseDto.access_token());
-        servletResponse.addHeader(EXPIRES_IN, String.valueOf(responseDto.expires_in()));
+        servletResponse.addHeader(OAuth2Constants.ACCESS_TOKEN, responseDto.access_token());
+        servletResponse.addHeader(OAuth2Constants.EXPIRES_IN, String.valueOf(responseDto.expires_in()));
 
         return responseDto;
     }
@@ -86,13 +72,13 @@ public class AuthServiceImpl implements AuthService {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add(GRANT_TYPE_PARAM, GRANT_TYPE_PASSWORD);
-        requestBody.add(CLIENT_ID_PARAM, CLIENT_ID);
-        requestBody.add(CLIENT_SECRET_PARAM, CLIENT_SECRET);
-        requestBody.add(USERNAME_PARAM, request.username());
-        requestBody.add(PASSWORD_PARAM, request.password());
-        log.info(GET_TOKEN_URL);
-        ResponseEntity<LoginResponseDto> response = restTemplate.postForEntity (GET_TOKEN_URL,
+        requestBody.add(OAuth2Constants.GRANT_TYPE, OAuth2Constants.PASSWORD);
+        requestBody.add(OAuth2Constants.CLIENT_ID, keycloakConstants.getClientId());
+        requestBody.add(OAuth2Constants.CLIENT_SECRET, keycloakConstants.getClientSecret());
+        requestBody.add(OAuth2Constants.USERNAME, request.username());
+        requestBody.add(OAuth2Constants.PASSWORD, request.password());
+        log.info(keycloakConstants.getGetTokenUrl());
+        ResponseEntity<LoginResponseDto> response = restTemplate.postForEntity (keycloakConstants.getGetTokenUrl(),
                 new HttpEntity<>(requestBody, headers), LoginResponseDto.class);
 
         return response.getBody();
@@ -100,11 +86,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponseDto refreshToken(HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-        String refreshToken = servletRequest.getHeader(REFRESH_TOKEN);
+        String refreshToken = servletRequest.getHeader(OAuth2Constants.REFRESH_TOKEN);
         LoginResponseDto responseDto = getRefreshToken(refreshToken);
 
-        servletResponse.addHeader(ACCESS_TOKEN, responseDto.access_token());
-        servletResponse.addHeader(EXPIRES_IN, String.valueOf(responseDto.expires_in()));
+        servletResponse.addHeader(OAuth2Constants.ACCESS_TOKEN, responseDto.access_token());
+        servletResponse.addHeader(OAuth2Constants.EXPIRES_IN, String.valueOf(responseDto.expires_in()));
 
         return responseDto;
     }
@@ -114,15 +100,18 @@ public class AuthServiceImpl implements AuthService {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add(GRANT_TYPE_PARAM, GRANT_TYPE_REFRESH_TOKEN);
-        requestBody.add(REFRESH_TOKEN_PARAM, refreshToken);
-        requestBody.add(CLIENT_ID_PARAM, CLIENT_ID);
-        requestBody.add(CLIENT_SECRET_PARAM, CLIENT_SECRET);
-
-        ResponseEntity<LoginResponseDto> response = restTemplate.postForEntity (GET_TOKEN_URL,
-                new HttpEntity<>(requestBody, headers), LoginResponseDto.class);
-
-        return response.getBody();
+        requestBody.add(OAuth2Constants.GRANT_TYPE, OAuth2Constants.REFRESH_TOKEN);
+        requestBody.add(OAuth2Constants.REFRESH_TOKEN, refreshToken);
+        requestBody.add(OAuth2Constants.CLIENT_ID, keycloakConstants.getClientId());
+        requestBody.add(OAuth2Constants.CLIENT_SECRET, keycloakConstants.getClientSecret());
+        try {
+            ResponseEntity<LoginResponseDto> response = restTemplate.postForEntity (keycloakConstants.getGetTokenUrl(),
+                    new HttpEntity<>(requestBody, headers), LoginResponseDto.class);
+            return response.getBody();
+        }catch (Exception e){
+            throw new KeycloakException(
+                    new ErrorMessage(404,e.getMessage()));
+        }
     }
 
     @Override
@@ -131,14 +120,14 @@ public class AuthServiceImpl implements AuthService {
                                             HttpServletResponse servletResponse) {
         UserRepresentation user = getUserRepresentation(request);
 
-        RealmResource realmResource = keycloak.realm(REALM_NAME);
+        RealmResource realmResource = keycloak.realm(keycloakConstants.getRealmName());
         UsersResource usersResource = realmResource.users();
         Response response = usersResource.create(user);
 
         if(response.getStatus() == HttpStatus.CREATED.value()) {
             String userId = CreatedResponseUtil.getCreatedId(response);
             UserResource createdUser = realmResource.users().get(userId);
-            RoleRepresentation role = realmResource.roles().get(DRIVER_ROLE).toRepresentation();
+            RoleRepresentation role = realmResource.roles().get(Role.DRIVER.getRole()).toRepresentation();
             createdUser.roles().realmLevel().add(List.of(role));
 
             String adminClientAccessToken = keycloak.tokenManager().getAccessTokenString();
@@ -152,7 +141,8 @@ public class AuthServiceImpl implements AuthService {
         }
         else {
             throw new KeycloakException(
-                    new ErrorMessage(response.getStatus(), getErrorMessage(response))
+                    new ErrorMessage(response.getStatus(), getErrorMessage(
+                            response.readEntity(String.class)))
             );
         }
     }
@@ -168,7 +158,7 @@ public class AuthServiceImpl implements AuthService {
                                                   HttpServletResponse servletResponse) {
         UserRepresentation user = getUserRepresentation(request);
 
-        RealmResource realmResource = keycloak.realm(REALM_NAME);
+        RealmResource realmResource = keycloak.realm(keycloakConstants.getRealmName());
         UsersResource usersResource = realmResource.users();
         Response response = usersResource.create(user);
 
@@ -176,7 +166,7 @@ public class AuthServiceImpl implements AuthService {
             String userId = CreatedResponseUtil.getCreatedId(response);
             UserResource createdUser = realmResource.users().get(userId);
 
-            RoleRepresentation role = realmResource.roles().get(PASSENGER_ROLE).toRepresentation();
+            RoleRepresentation role = realmResource.roles().get(Role.PASSENGER.getRole()).toRepresentation();
             createdUser.roles().realmLevel().add(List.of(role));
 
             String adminClientAccessToken = keycloak.tokenManager().getAccessTokenString();
@@ -185,13 +175,14 @@ public class AuthServiceImpl implements AuthService {
             }
             catch (Exception e) {
                 usersResource.delete(userId);
+                log.error(e.getMessage());
                 throw e;
             }
-
         }
         else {
             throw new KeycloakException(
-                    new ErrorMessage(response.getStatus(), getErrorMessage(response))
+                    new ErrorMessage(response.getStatus(), getErrorMessage(
+                            response.readEntity(String.class)))
             );
         }
     }
@@ -218,11 +209,10 @@ public class AuthServiceImpl implements AuthService {
         return user;
     }
 
-    private static String getErrorMessage(Response response) {
-        String entity = response.readEntity(String.class);
+    private static String getErrorMessage(String exception) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(entity);
+            JsonNode jsonNode = objectMapper.readTree(exception);
             return jsonNode.get(ERROR_MESSAGE_FIELD).asText();
         } catch (Exception e) {
             log.error(e.getMessage());

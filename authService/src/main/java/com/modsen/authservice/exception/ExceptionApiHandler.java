@@ -12,9 +12,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.Locale;
+
+import static com.modsen.authservice.util.AppConstants.USER_DOESNT_EXIST;
 
 @Slf4j
 @RestControllerAdvice
@@ -61,12 +64,18 @@ public class ExceptionApiHandler {
                 .body(exception.getErrorMessage());
     }
 
-    //any unknown exception from feign client
     @ExceptionHandler(ServiceUnavailableException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorMessage serviceUnavailableException(ServiceUnavailableException exception) {
         return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(),
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, Locale.getDefault()));
+    }
+
+    @ExceptionHandler(HttpClientErrorException.Unauthorized.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorMessage unauthorizedException(HttpClientErrorException.Unauthorized exception) {
+        return new ErrorMessage(HttpStatus.NOT_FOUND.value(),
+                messageSource.getMessage(USER_DOESNT_EXIST, new Object[]{}, Locale.getDefault()));
     }
 
     @ExceptionHandler(KeycloakException.class)
