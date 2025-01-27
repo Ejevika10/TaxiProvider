@@ -35,7 +35,7 @@ public class WebSecurityConfiguration {
 
     private final CustomAuthenticationEntryPoint authEntryPoint;
 
-    private final CustomAccessDenied accessDenied;
+    private final CustomAccessDeniedHandler accessDenied;
 
     @Bean
     public PassengerAccessFilter passengerAccessFilter() {
@@ -64,11 +64,11 @@ public class WebSecurityConfiguration {
                 .addFilterBefore(exceptionHandlingFilter(), WebAsyncManagerIntegrationFilter.class)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/actuator/health").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/passengers").hasRole(ROLE_ADMIN)
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/passengers/*").hasAnyRole(ROLE_ADMIN, ROLE_PASSENGER)
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/drivers/*").hasAnyRole(ROLE_ADMIN, ROLE_PASSENGER)
-                                .anyRequest().authenticated()
+                                .requestMatchers("/api/*").authenticated()
+                                .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .authenticationEntryPoint(authEntryPoint)

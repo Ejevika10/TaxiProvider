@@ -5,6 +5,7 @@ import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
 import com.modsen.passengerservice.dto.PassengerRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
 import com.modsen.passengerservice.service.PassengerService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import java.util.UUID;
 @Validated
 @RequestMapping("/api/v1/passengers")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "JWT")
 public class PassengerController {
     private final PassengerService passengerService;
 
