@@ -1,7 +1,9 @@
 package com.modsen.rideservice.security;
 
+import com.modsen.rideservice.security.filters.CacheBodyHttpServletFilter;
 import com.modsen.rideservice.security.filters.ExceptionHandlingFilter;
 import com.modsen.rideservice.security.filters.RideAccessFilter;
+import com.modsen.rideservice.service.RideService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,18 +33,25 @@ import static com.modsen.rideservice.util.SecurityConstants.TOKEN_ISSUER_URL;
 @RequiredArgsConstructor
 public class WebSecurityConfiguration {
 
+    private final RideService rideService;
+
     private final CustomAuthenticationEntryPoint authEntryPoint;
 
-    private final CustomAccessDenied accessDenied;
+    private final CustomAccessDeniedHandler accessDenied;
 
     @Bean
-    public RideAccessFilter passengerAccessFilter() {
-        return new RideAccessFilter();
+    public RideAccessFilter rideAccessFilter() {
+        return new RideAccessFilter(rideService);
     }
 
     @Bean
     public ExceptionHandlingFilter exceptionHandlingFilter() {
         return new ExceptionHandlingFilter();
+    }
+
+    @Bean
+    public CacheBodyHttpServletFilter cacheBodyHttpServletFilter() {
+        return new CacheBodyHttpServletFilter();
     }
 
     @Value(KEYCLOAK_CLIENT_ID)
@@ -60,11 +69,12 @@ public class WebSecurityConfiguration {
 
         http
                 .addFilterBefore(exceptionHandlingFilter(), WebAsyncManagerIntegrationFilter.class)
+                .addFilterAfter(cacheBodyHttpServletFilter(), ExceptionHandlingFilter.class)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/actuator/health").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/rides").hasAnyRole(ROLE_PASSENGER, ROLE_ADMIN)
-                                .anyRequest().authenticated()
+                                .requestMatchers("/api/*").authenticated()
+                                .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .authenticationEntryPoint(authEntryPoint)

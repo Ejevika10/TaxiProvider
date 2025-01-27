@@ -30,6 +30,8 @@ import static com.modsen.rideservice.util.SecurityConstants.ROLE_PASSENGER;
 @Slf4j
 public class RideAccessFilter extends OncePerRequestFilter {
 
+    private final RideService rideService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -55,18 +57,46 @@ public class RideAccessFilter extends OncePerRequestFilter {
             String userIdParam = (String) claims.get("user_id");
             log.info(userIdParam);
             UUID userId = UUID.fromString(userIdParam);
-            RideRequestDto rideRequestDto = getRideRequestDto(request);
-            log.info(rideRequestDto.toString());
-            UUID passengerId = UUID.fromString(rideRequestDto.passengerId());
 
-            if (hasRole(auth, ROLE_PASSENGER) && rideRequestDto.driverId() == null &&
-                    !Objects.equals(userId, passengerId)) {
-                throw new ForbiddenException(AppConstants.FORBIDDEN);
+            if(request.getRequestURI().endsWith("state")) {
+                if (hasRole(auth, ROLE_PASSENGER)) {
+                    UUID passengerId = getPassengerIdFromStatusRequestURI(request.getRequestURI());
+                    if (!Objects.equals(userId, passengerId)) {
+                        throw new ForbiddenException(AppConstants.FORBIDDEN);
+                    }
+                }
+                if (hasRole(auth, ROLE_DRIVER)) {
+                    UUID driverId = getDriverIdFromStatusRequestURI(request.getRequestURI());
+                    if (!Objects.equals(userId, driverId)) {
+                        throw new ForbiddenException(AppConstants.FORBIDDEN);
+                    }
+                }
             }
-            if (hasRole(auth, ROLE_DRIVER) && rideRequestDto.driverId() != null){
-                UUID driverId = UUID.fromString(rideRequestDto.driverId());
-                if(!Objects.equals(userId, driverId)) {
+            else {
+                RideRequestDto rideRequestDto = getRideRequestDto(request);
+                log.info(rideRequestDto.toString());
+                UUID passengerId;
+                try {
+                    passengerId = UUID.fromString(rideRequestDto.passengerId());
+                }
+                catch (Exception e) {
                     throw new ForbiddenException(AppConstants.FORBIDDEN);
+                }
+                if (hasRole(auth, ROLE_PASSENGER) &&
+                        (rideRequestDto.driverId() != null || !Objects.equals(userId, passengerId))) {
+                    throw new ForbiddenException(AppConstants.FORBIDDEN);
+                }
+                if (hasRole(auth, ROLE_DRIVER)){
+                    UUID driverId;
+                    try {
+                        driverId = UUID.fromString(rideRequestDto.driverId());
+                    }
+                    catch (Exception e) {
+                        throw new ForbiddenException(AppConstants.FORBIDDEN);
+                    }
+                    if(!Objects.equals(userId, driverId)) {
+                        throw new ForbiddenException(AppConstants.FORBIDDEN);
+                    }
                 }
             }
         }
@@ -92,5 +122,19 @@ public class RideAccessFilter extends OncePerRequestFilter {
         return auth.getAuthorities().stream()
                 .filter(Objects::nonNull)
                 .anyMatch(authority -> authority.getAuthority().equals(role));
+    }
+
+    private UUID getDriverIdFromStatusRequestURI(String requestURI) {
+        String[] pathParts = requestURI.split("/");
+        String idParam = pathParts[pathParts.length - 2];
+        Long rideId = Long.valueOf(idParam);
+        return rideService.getRideById(rideId).driverId();
+    }
+
+    private UUID getPassengerIdFromStatusRequestURI(String requestURI) {
+        String[] pathParts = requestURI.split("/");
+        String idParam = pathParts[pathParts.length - 2];
+        Long rideId = Long.valueOf(idParam);
+        return rideService.getRideById(rideId).passengerId();
     }
 }

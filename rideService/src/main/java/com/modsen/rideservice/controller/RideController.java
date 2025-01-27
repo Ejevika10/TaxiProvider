@@ -5,10 +5,12 @@ import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
 import com.modsen.rideservice.service.RideService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +30,8 @@ import java.util.UUID;
 @Validated
 @RequestMapping("/api/v1/rides")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "JWT")
+@Slf4j
 public class RideController {
     private final RideService rideService;
 
