@@ -61,6 +61,7 @@ public class ExceptionApiHandler {
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorMessage forbiddenException(ForbiddenException exception) {
+        log.info("ForbiddenException handling");
         return new ErrorMessage(HttpStatus.FORBIDDEN.value(),
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
@@ -68,6 +69,7 @@ public class ExceptionApiHandler {
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorMessage unauthorizedException(UnauthorizedException exception) {
+        log.info("UnauthorizedException handling");
         return new ErrorMessage(HttpStatus.UNAUTHORIZED.value(),
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }

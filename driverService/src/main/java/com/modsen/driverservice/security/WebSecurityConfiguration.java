@@ -38,7 +38,7 @@ public class WebSecurityConfiguration {
 
     private final CustomAuthenticationEntryPoint authEntryPoint;
 
-    private final CustomAccessDenied accessDenied;
+    private final CustomAccessDeniedHandler accessDenied;
 
     @Bean
     public DriverAccessFilter driverAccessFilter() {
@@ -72,14 +72,14 @@ public class WebSecurityConfiguration {
                 .addFilterBefore(exceptionHandlingFilter(), WebAsyncManagerIntegrationFilter.class)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/actuator/health").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/drivers").hasRole(ROLE_ADMIN)
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/drivers/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/drivers/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
-                                .requestMatchers(HttpMethod.POST, "/api/v1/cars").hasRole(ROLE_ADMIN)
+                                .requestMatchers(HttpMethod.POST, "/api/v1/cars").hasAnyRole(ROLE_ADMIN)
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/cars/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/cars/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
-                                .anyRequest().authenticated()
+                                .requestMatchers("/api/*").authenticated()
+                                .anyRequest().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .authenticationEntryPoint(authEntryPoint)

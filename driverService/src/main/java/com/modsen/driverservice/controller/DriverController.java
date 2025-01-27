@@ -5,6 +5,7 @@ import com.modsen.driverservice.dto.DriverRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.service.DriverService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -28,6 +29,7 @@ import java.util.UUID;
 @Validated
 @RequestMapping("/api/v1/drivers")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "JWT")
 public class DriverController {
     private final DriverService driverService;
 

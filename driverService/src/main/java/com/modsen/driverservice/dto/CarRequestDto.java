@@ -1,6 +1,5 @@
 package com.modsen.driverservice.dto;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -25,7 +24,6 @@ public record CarRequestDto(
     @Size(min = 2, max = 20)
     String number,
 
-    @Min(0)
     UUID driverId){
 
 }
