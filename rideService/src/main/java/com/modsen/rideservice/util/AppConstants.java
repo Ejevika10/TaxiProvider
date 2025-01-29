@@ -15,4 +15,8 @@ public final class AppConstants {
     public static final String STATE_VALUE_ERROR = "ride.state.error";
 
     public static final String SERVICE_UNAVAILABLE = "service.unavailable";
+
+    public static final String FORBIDDEN = "forbidden";
+
+    public static final String UNAUTHORIZED = "unauthorized";
 }

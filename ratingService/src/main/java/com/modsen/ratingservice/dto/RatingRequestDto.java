@@ -12,9 +12,8 @@ public record RatingRequestDto (
     @NotNull(message = "{rating.ride.mandatory}")
     Long rideId,
 
-    @Min(0)
     @NotNull(message = "{rating.user.mandatory}")
-    Long userId,
+    String userId,
 
     @Min(0)
     @Max(5)

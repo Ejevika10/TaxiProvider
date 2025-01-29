@@ -1,9 +1,11 @@
 package com.modsen.driverservice.controller;
 
+import com.modsen.driverservice.dto.DriverCreateRequestDto;
 import com.modsen.driverservice.dto.DriverRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.service.DriverService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -21,10 +23,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.util.UUID;
+
 @RestController
 @Validated
 @RequestMapping("/api/v1/drivers")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "JWT")
 public class DriverController {
     private final DriverService driverService;
 
@@ -34,25 +39,25 @@ public class DriverController {
     }
 
     @GetMapping("/{id}")
-    public DriverResponseDto getDriverById(@PathVariable @Min(0) Long id) {
-        return driverService.getDriverById(id);
+    public DriverResponseDto getDriverById(@PathVariable String id) {
+        return driverService.getDriverById(UUID.fromString(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public DriverResponseDto createDriver(@Valid @RequestBody DriverRequestDto driverRequestDTO) {
+    public DriverResponseDto createDriver(@Valid @RequestBody DriverCreateRequestDto driverRequestDTO) {
         return driverService.createDriver(driverRequestDTO);
     }
 
     @PutMapping("/{id}")
-    public DriverResponseDto updateDriver(@PathVariable @Min(0) Long id,@Valid @RequestBody DriverRequestDto driverRequestDTO) {
-        return driverService.updateDriver(id, driverRequestDTO);
+    public DriverResponseDto updateDriver(@PathVariable String id,@Valid @RequestBody DriverRequestDto driverRequestDTO) {
+        return driverService.updateDriver(UUID.fromString(id), driverRequestDTO);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteDriver(@PathVariable @Min(0) Long id) {
-        driverService.deleteDriver(id);
+    public void deleteDriver(@PathVariable String id) {
+        driverService.deleteDriver(UUID.fromString(id));
     }
 
 }

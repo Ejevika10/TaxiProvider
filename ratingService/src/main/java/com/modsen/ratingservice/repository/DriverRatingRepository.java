@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface DriverRatingRepository extends MongoRepository<DriverRating, String> {
     boolean existsByIdAndDeletedIsFalse(String id);
@@ -21,9 +22,9 @@ public interface DriverRatingRepository extends MongoRepository<DriverRating, St
 
     Optional<DriverRating> findByRideIdAndDeletedIsFalse(Long rideId);
 
-    List<DriverRating> findAllByUserIdAndDeletedIsFalse(Long userId);
+    List<DriverRating> findAllByUserIdAndDeletedIsFalse(UUID userId);
 
-    Page<DriverRating> findAllByUserIdAndDeletedIsFalse(Long userId, Pageable pageable);
+    Page<DriverRating> findAllByUserIdAndDeletedIsFalse(UUID userId, Pageable pageable);
 
-    List<DriverRating> findTop100ByUserIdAndDeletedIsFalse(Long id);
+    List<DriverRating> findTop100ByUserIdAndDeletedIsFalse(UUID userId);
 }

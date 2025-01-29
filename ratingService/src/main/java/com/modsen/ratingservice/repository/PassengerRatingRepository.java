@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface PassengerRatingRepository extends MongoRepository<PassengerRating, String> {
     boolean existsByIdAndDeletedIsFalse(String id);
@@ -21,9 +22,9 @@ public interface PassengerRatingRepository extends MongoRepository<PassengerRati
 
     Optional<PassengerRating> findByRideIdAndDeletedIsFalse(Long rideId);
 
-    List<PassengerRating> findAllByUserIdAndDeletedIsFalse(Long userId);
+    List<PassengerRating> findAllByUserIdAndDeletedIsFalse(UUID userId);
 
-    Page<PassengerRating> findAllByUserIdAndDeletedIsFalse(Long userId, Pageable pageable);
+    Page<PassengerRating> findAllByUserIdAndDeletedIsFalse(UUID userId, Pageable pageable);
 
-    List<PassengerRating> findTop40ByUserIdAndDeletedIsFalse(Long userId);
+    List<PassengerRating> findTop40ByUserIdAndDeletedIsFalse(UUID userId);
 }

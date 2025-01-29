@@ -9,6 +9,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.UUID;
+
 @Document(collection = "driver_ratings")
 @Getter
 @Setter
@@ -22,7 +24,7 @@ public class DriverRating {
     @Indexed(unique=true)
     private Long rideId;
 
-    private Long userId;
+    private UUID userId;
 
     private Integer rating;
 

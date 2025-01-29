@@ -2,9 +2,11 @@ package com.modsen.driverservice.dto;
 
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
 public record DriverResponseDto(
-        Long id,
+        UUID id,
 
         String name,
 

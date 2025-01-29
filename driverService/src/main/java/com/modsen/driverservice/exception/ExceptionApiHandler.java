@@ -3,6 +3,7 @@ package com.modsen.driverservice.exception;
 import com.modsen.driverservice.util.AppConstants;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import java.util.Locale;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
+@Slf4j
 public class ExceptionApiHandler {
     private final MessageSource messageSource;
 
@@ -56,9 +58,26 @@ public class ExceptionApiHandler {
         return new ListErrorMessage(HttpStatus.BAD_REQUEST.value(), errors);
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorMessage forbiddenException(ForbiddenException exception) {
+        log.info("ForbiddenException handling");
+        return new ErrorMessage(HttpStatus.FORBIDDEN.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorMessage unauthorizedException(UnauthorizedException exception) {
+        log.info("UnauthorizedException handling");
+        return new ErrorMessage(HttpStatus.UNAUTHORIZED.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage defException(Exception exception) {
+        log.info(exception.getMessage());
         return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 messageSource.getMessage(AppConstants.INTERNAL_SERVER_ERROR, new Object[]{}, Locale.getDefault()));
     }

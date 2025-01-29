@@ -6,25 +6,26 @@ import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface RideService {
     List<RideResponseDto> getAllRides();
 
     PageDto<RideResponseDto> getPageRides(Integer offset, Integer limit);
 
-    List<RideResponseDto> getAllRidesByDriverId(Long driverId);
+    List<RideResponseDto> getAllRidesByDriverId(UUID driverId);
 
-    PageDto<RideResponseDto> getPageRidesByDriverId(Long driverId, Integer offset, Integer limit);
+    PageDto<RideResponseDto> getPageRidesByDriverId(UUID driverId, Integer offset, Integer limit);
 
-    List<RideResponseDto> getRidesByPassengerId(Long passengerId);
+    List<RideResponseDto> getRidesByPassengerId(UUID passengerId);
 
-    PageDto<RideResponseDto> getPageRidesByPassengerId(Long passengerId, Integer offset, Integer limit);
+    PageDto<RideResponseDto> getPageRidesByPassengerId(UUID passengerId, Integer offset, Integer limit);
 
     RideResponseDto getRideById(Long id);
 
-    RideResponseDto createRide(RideRequestDto ride);
+    RideResponseDto createRide(RideRequestDto ride, String authorizationToken);
 
-    RideResponseDto updateRide(Long id, RideRequestDto ride);
+    RideResponseDto updateRide(Long id, RideRequestDto ride, String authorizationToken);
 
     RideResponseDto setNewState(Long id, RideStateRequestDto newState);
 }

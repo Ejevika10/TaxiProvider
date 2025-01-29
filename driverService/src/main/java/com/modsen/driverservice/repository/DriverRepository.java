@@ -8,14 +8,15 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface DriverRepository extends JpaRepository<Driver, Long> {
-    boolean existsByIdAndDeletedIsFalse(Long id);
+public interface DriverRepository extends JpaRepository<Driver, UUID> {
+    boolean existsByIdAndDeletedIsFalse(UUID id);
 
     boolean existsByEmailAndDeletedIsFalse(String email);
 
-    Optional<Driver> findByIdAndDeletedIsFalse(Long id);
+    Optional<Driver> findByIdAndDeletedIsFalse(UUID id);
 
     Optional<Driver> findByEmailAndDeletedIsFalse(String email);
 

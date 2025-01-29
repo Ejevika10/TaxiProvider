@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -54,26 +55,26 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public List<RideResponseDto> getAllRidesByDriverId(Long driverId) {
+    public List<RideResponseDto> getAllRidesByDriverId(UUID driverId) {
         List<Ride> rides = rideRepository.findAllByDriverId(driverId);
         return rideListMapper.toRideResponseDtoList(rides);
     }
 
     @Override
-    public PageDto<RideResponseDto> getPageRidesByDriverId(Long driverId, Integer offset, Integer limit) {
+    public PageDto<RideResponseDto> getPageRidesByDriverId(UUID driverId, Integer offset, Integer limit) {
         Page<RideResponseDto> rides = rideRepository.findAllByDriverId(driverId, PageRequest.of(offset, limit))
                 .map(rideMapper::toRideResponseDto);
         return pageMapper.pageToDto(rides);
     }
 
     @Override
-    public List<RideResponseDto> getRidesByPassengerId(Long passengerId) {
+    public List<RideResponseDto> getRidesByPassengerId(UUID passengerId) {
         List<Ride> rides = rideRepository.findAllByPassengerId(passengerId);
         return rideListMapper.toRideResponseDtoList(rides);
     }
 
     @Override
-    public PageDto<RideResponseDto> getPageRidesByPassengerId(Long passengerId, Integer offset, Integer limit) {
+    public PageDto<RideResponseDto> getPageRidesByPassengerId(UUID passengerId, Integer offset, Integer limit) {
         Page<RideResponseDto> rides = rideRepository.findAllByPassengerId(passengerId, PageRequest.of(offset, limit))
                 .map(rideMapper::toRideResponseDto);
         return pageMapper.pageToDto(rides);
@@ -87,10 +88,10 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    public RideResponseDto createRide(RideRequestDto rideRequestDto) {
-        PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId());
+    public RideResponseDto createRide(RideRequestDto rideRequestDto, String authorizationToken) {
+        PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId(), authorizationToken);
         if(rideRequestDto.driverId() != null) {
-            DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId());
+            DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId(), authorizationToken);
         }
         Ride rideToSave = rideMapper.toRide(rideRequestDto);
         rideToSave.setRideState(RideState.CREATED);
@@ -102,11 +103,11 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    public RideResponseDto updateRide(Long id, RideRequestDto rideRequestDto) {
+    public RideResponseDto updateRide(Long id, RideRequestDto rideRequestDto, String authorizationToken) {
         Ride rideToSave = findByIdOrThrow(id);
-        PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId());
+        PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId(), authorizationToken);
         if(rideRequestDto.driverId() != null) {
-            DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId());
+            DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId(), authorizationToken);
         }
         rideMapper.updateRide(rideToSave, rideRequestDto);
         Ride ride = rideRepository.save(rideToSave);

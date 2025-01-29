@@ -20,7 +20,7 @@
             <column name="number" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="driver_id" type="BIGINT"/>
+            <column name="driver_id" type="UUID"/>
             <column name="deleted" type="BOOLEAN">
                 <constraints nullable="false"/>
             </column>

@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -50,13 +51,13 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public List<CarResponseDto> getAllCarsByDriverId(Long driverId) {
+    public List<CarResponseDto> getAllCarsByDriverId(UUID driverId) {
         List<Car> cars = carRepository.findAllByDriverIdAndDeletedIsFalse(driverId);
         return carListMapper.toCarResponseDTOList(cars);
     }
 
     @Override
-    public PageDto<CarResponseDto> getPageCarsByDriverId(Long driverId, Integer offset, Integer limit) {
+    public PageDto<CarResponseDto> getPageCarsByDriverId(UUID driverId, Integer offset, Integer limit) {
         Page<CarResponseDto> pageCars = carRepository.findAllByDriverIdAndDeletedIsFalse(driverId, PageRequest.of(offset, limit))
                 .map(carMapper::toCarResponseDTO);
         return pageMapper.pageToDto(pageCars);
@@ -117,7 +118,7 @@ public class CarServiceImpl implements CarService {
                 .orElseThrow(() -> new NotFoundException(AppConstants.CAR_NOT_FOUND));
     }
 
-    private Driver findDriverByIdOrThrow(Long id) {
+    private Driver findDriverByIdOrThrow(UUID id) {
         return driverRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
     }

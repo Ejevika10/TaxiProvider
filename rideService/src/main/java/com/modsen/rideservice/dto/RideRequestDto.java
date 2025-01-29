@@ -8,14 +8,14 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Builder
 public record RideRequestDto(
-        @Min(0)
-        Long driverId,
+        String driverId,
 
-        @Min(0) @NotNull(message = "{ride.passenger.mandatory}")
-        Long passengerId,
+        @NotNull(message = "{ride.passenger.mandatory}")
+        String passengerId,
 
         @NotBlank(message = "{ride.sourceaddress.mandatory}")
         @Size(min = 10, max = 255)

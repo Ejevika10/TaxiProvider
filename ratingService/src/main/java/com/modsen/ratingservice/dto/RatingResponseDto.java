@@ -2,13 +2,15 @@ package com.modsen.ratingservice.dto;
 
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
 public record RatingResponseDto (
         String id,
 
         Long rideId,
 
-        Long userId,
+        UUID userId,
 
         Integer rating,
 
