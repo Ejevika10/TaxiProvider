@@ -6,9 +6,9 @@ import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
 import com.modsen.rideservice.service.RideService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
+import static com.modsen.rideservice.util.AppConstants.UUID_REGEXP;
+
 @RestController
 @Validated
 @RequestMapping("/api/v1/rides")
@@ -42,14 +44,16 @@ public class RideController {
     }
 
     @GetMapping("/driver/{driverId}")
-    public PageDto<RideResponseDto> getPageRidesByDriverId(@Valid @PathVariable String driverId,
+    public PageDto<RideResponseDto> getPageRidesByDriverId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                                               String driverId,
                                                            @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                            @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit) {
         return rideService.getPageRidesByDriverId(UUID.fromString(driverId), offset, limit);
     }
 
     @GetMapping("/passenger/{passengerId}")
-    public PageDto<RideResponseDto> getPageRidesByPassengerId(@Valid @PathVariable String passengerId,
+    public PageDto<RideResponseDto> getPageRidesByPassengerId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                                                  String passengerId,
                                                               @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                               @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit) {
         return rideService.getPageRidesByPassengerId(UUID.fromString(passengerId), offset, limit);
@@ -62,21 +66,21 @@ public class RideController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RideResponseDto createRide(@Valid @RequestBody RideRequestDto rideRequestDto,
+    public RideResponseDto createRide(@RequestBody RideRequestDto rideRequestDto,
                                       @RequestHeader("Authorization") String authorizationToken) {
         return rideService.createRide(rideRequestDto, authorizationToken);
     }
 
     @PutMapping("/{id}")
     public RideResponseDto updateRide(@PathVariable @Min(0) Long id,
-                                      @Valid @RequestBody RideRequestDto rideRequestDto,
+                                      @RequestBody RideRequestDto rideRequestDto,
                                       @RequestHeader("Authorization") String authorizationToken) {
         return rideService.updateRide(id, rideRequestDto, authorizationToken);
     }
 
     @PutMapping("/{id}/state")
     public RideResponseDto updateRideState(@PathVariable @Min(0) Long id,
-                                           @Valid @RequestBody RideStateRequestDto state) {
+                                           @RequestBody RideStateRequestDto state) {
         return rideService.setNewState(id, state);
     }
 }

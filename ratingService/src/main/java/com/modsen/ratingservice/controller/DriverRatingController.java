@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
+
+import static com.modsen.ratingservice.util.AppConstants.UUID_REGEXP;
 
 @RestController
 @RequestMapping("/api/v1/driverratings")
@@ -50,7 +53,8 @@ public class DriverRatingController {
     }
 
     @GetMapping("/user/{userId}")
-    public PageDto<RatingResponseDto> getPageRatingsByUserId(@PathVariable String userId,
+    public PageDto<RatingResponseDto> getPageRatingsByUserId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                                                 String userId,
                                                              @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                              @RequestParam (defaultValue = "5")  @Min(1) @Max(20) Integer limit) {
         return driverRatingService.getPageRatingsByUserId(UUID.fromString(userId), offset, limit);

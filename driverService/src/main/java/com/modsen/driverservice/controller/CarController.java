@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.UUID;
+
+import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
 
 @RestController
 @Validated
@@ -43,7 +46,8 @@ public class CarController {
     }
 
     @GetMapping("/driver/{driverId}")
-    public PageDto<CarResponseDto> getPageCarsByDriverId(@PathVariable String driverId,
+    public PageDto<CarResponseDto> getPageCarsByDriverId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                                             String driverId,
                                                       @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                       @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit)  {
         return carService.getPageCarsByDriverId(UUID.fromString(driverId), offset, limit);

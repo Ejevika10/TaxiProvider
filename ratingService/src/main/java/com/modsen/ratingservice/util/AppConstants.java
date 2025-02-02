@@ -6,11 +6,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AppConstants {
 
+    public static final String UUID_REGEXP = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+
     public static final String RATING_NOT_FOUND = "rating.notfound";
 
     public static final String RATING_FOR_RIDE_ALREADY_EXIST = "rating.ride.id";
 
     public static final String INVALID_STATE_VALUE = "Invalid value for State";
+
+    public static final String INVALID_ROLE_VALUE = "Invalid value for User Role";
 
     public static final String DIFFERENT_DRIVERS_ID = "rating.drivers.different";
 

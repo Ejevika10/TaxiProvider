@@ -8,6 +8,7 @@ import com.modsen.passengerservice.service.PassengerService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -24,6 +25,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import jakarta.validation.constraints.Min;
 
 import java.util.UUID;
+
+import static com.modsen.passengerservice.util.AppConstants.UUID_REGEXP;
 
 @RestController
 @Validated
@@ -50,13 +53,16 @@ public class PassengerController {
     }
 
     @PutMapping("/{id}")
-    public PassengerResponseDto updatePassenger(@PathVariable String id, @Valid @RequestBody PassengerRequestDto passengerRequestDTO) {
+    public PassengerResponseDto updatePassenger(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                                    String id,
+                                                @Valid @RequestBody PassengerRequestDto passengerRequestDTO) {
         return passengerService.updatePassenger(UUID.fromString(id), passengerRequestDTO);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePassenger(@PathVariable String id) {
+    public void deletePassenger(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                    String id) {
         passengerService.deletePassenger(UUID.fromString(id));
     }
 }

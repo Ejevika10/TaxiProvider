@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.UUID;
 
+import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
+
 @RestController
 @Validated
 @RequestMapping("/api/v1/drivers")
@@ -34,12 +37,14 @@ public class DriverController {
     private final DriverService driverService;
 
     @GetMapping
-    public PageDto<DriverResponseDto> getPageDrivers(@RequestParam (defaultValue = "0") @Min(0) Integer offset, @RequestParam (defaultValue = "5") @Min(1) @Max(20) Integer limit) {
+    public PageDto<DriverResponseDto> getPageDrivers(@RequestParam (defaultValue = "0") @Min(0) Integer offset,
+                                                     @RequestParam (defaultValue = "5") @Min(1) @Max(20) Integer limit) {
         return driverService.getPageDrivers(offset, limit);
     }
 
     @GetMapping("/{id}")
-    public DriverResponseDto getDriverById(@PathVariable String id) {
+    public DriverResponseDto getDriverById(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                               String id) {
         return driverService.getDriverById(UUID.fromString(id));
     }
 
@@ -50,13 +55,16 @@ public class DriverController {
     }
 
     @PutMapping("/{id}")
-    public DriverResponseDto updateDriver(@PathVariable String id,@Valid @RequestBody DriverRequestDto driverRequestDTO) {
+    public DriverResponseDto updateDriver(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                              String id,
+                                          @Valid @RequestBody DriverRequestDto driverRequestDTO) {
         return driverService.updateDriver(UUID.fromString(id), driverRequestDTO);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteDriver(@PathVariable String id) {
+    public void deleteDriver(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                 String id) {
         driverService.deleteDriver(UUID.fromString(id));
     }
 
