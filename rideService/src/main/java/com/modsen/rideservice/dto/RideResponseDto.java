@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Builder
-public record RideResponseDto (
+public record RideResponseDto(
 
         Long id,
 

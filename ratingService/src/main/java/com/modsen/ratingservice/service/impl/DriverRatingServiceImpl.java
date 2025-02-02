@@ -14,8 +14,6 @@ import com.modsen.ratingservice.service.RabbitService;
 import com.modsen.ratingservice.service.RatingService;
 import com.modsen.ratingservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,7 +27,6 @@ import java.util.UUID;
 @Qualifier("DriverRatingServiceImpl")
 public class DriverRatingServiceImpl implements RatingService {
 
-    private static final Logger log = LoggerFactory.getLogger(DriverRatingServiceImpl.class);
     private final DriverRatingRepository driverRatingRepository;
     private final RatingMapper ratingMapper;
     private final RatingListMapper ratingListMapper;
@@ -73,15 +70,11 @@ public class DriverRatingServiceImpl implements RatingService {
 
     @Override
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto, String authorizationToken) {
-        log.info("addRating start");
         validator.validateForCreate(ratingRequestDto, authorizationToken);
         DriverRating ratingToSave = ratingMapper.toDriverRating(ratingRequestDto);
         ratingToSave.setDeleted(false);
-        log.info("write in db");
         DriverRating rating = driverRatingRepository.save(ratingToSave);
-        log.info("write in db");
         updateAverageRating(rating.getUserId());
-        log.info("addRating finish");
         return ratingMapper.toRatingResponseDto(rating);
     }
 

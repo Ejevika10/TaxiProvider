@@ -9,7 +9,7 @@ import lombok.Builder;
 import static com.modsen.driverservice.util.AppConstants.PHONE_REGEXP;
 
 @Builder
-public record DriverRequestDto (
+public record DriverRequestDto(
     @NotBlank(message = "{driver.name.mandatory}")
     @Size(min = 4, max = 100)
     String name,
@@ -22,5 +22,5 @@ public record DriverRequestDto (
 
     @NotBlank(message = "{driver.phone.mandatory}")
     @Pattern(regexp = PHONE_REGEXP, message = "{driver.phone.invalid}")
-    String phone ) {
+    String phone) {
 }

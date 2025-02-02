@@ -5,7 +5,7 @@ import lombok.Builder;
 import java.util.UUID;
 
 @Builder
-public record RatingResponseDto (
+public record RatingResponseDto(
         String id,
 
         Long rideId,

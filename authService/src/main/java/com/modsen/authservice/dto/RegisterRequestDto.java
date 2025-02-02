@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import static com.modsen.authservice.util.AppConstants.PHONE_REGEXP;
 
 @Schema(description = "Register entity")
-public record RegisterRequestDto (
+public record RegisterRequestDto(
         @Schema(description = "Your username", example = "username")
         @NotBlank(message = "{user.username.required}")
         @Size(min = 4, max = 100)

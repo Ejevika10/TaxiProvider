@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RequestMapping(value = "/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthController implements AuthEndpoints{
+public class AuthController implements AuthEndpoints {
     private final AuthService authService;
 
     @Override

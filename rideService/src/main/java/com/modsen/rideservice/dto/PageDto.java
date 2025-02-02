@@ -2,7 +2,7 @@ package com.modsen.rideservice.dto;
 
 import java.util.List;
 
-public record PageDto<T> (
+public record PageDto<T>(
         int pageNumber,
         int pageSize,
         int totalPages,

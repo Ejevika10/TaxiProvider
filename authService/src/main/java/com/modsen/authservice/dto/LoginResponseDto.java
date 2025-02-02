@@ -1,6 +1,6 @@
 package com.modsen.authservice.dto;
 
-public record LoginResponseDto (
+public record LoginResponseDto(
     String access_token,
     String refresh_token,
     String expires_in,

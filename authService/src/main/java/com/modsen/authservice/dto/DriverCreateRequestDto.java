@@ -23,5 +23,5 @@ public record DriverCreateRequestDto(
 
         @NotBlank(message = "{user.phone.mandatory}")
         @Pattern(regexp = PHONE_REGEXP, message = "{user.phone.invalid}")
-        String phone ) {
+        String phone) {
 }

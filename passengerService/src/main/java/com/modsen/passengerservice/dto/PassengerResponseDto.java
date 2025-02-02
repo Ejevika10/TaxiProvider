@@ -5,7 +5,7 @@ import lombok.Builder;
 import java.util.UUID;
 
 @Builder
-public record PassengerResponseDto (
+public record PassengerResponseDto(
     UUID id,
 
     String name,

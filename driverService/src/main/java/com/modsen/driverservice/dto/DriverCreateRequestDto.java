@@ -5,11 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import java.util.UUID;
-
 import static com.modsen.driverservice.util.AppConstants.PHONE_REGEXP;
 
-public record DriverCreateRequestDto (
+public record DriverCreateRequestDto(
     @NotBlank
     String id,
 
@@ -25,5 +23,5 @@ public record DriverCreateRequestDto (
 
     @NotBlank(message = "{driver.phone.mandatory}")
     @Pattern(regexp = PHONE_REGEXP, message = "{driver.phone.invalid}")
-    String phone ) {
+    String phone) {
 }

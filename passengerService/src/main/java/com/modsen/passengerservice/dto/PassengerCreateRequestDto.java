@@ -1,6 +1,6 @@
 package com.modsen.passengerservice.dto;
 
-public record PassengerCreateRequestDto (
+public record PassengerCreateRequestDto(
     String id,
 
     String name,

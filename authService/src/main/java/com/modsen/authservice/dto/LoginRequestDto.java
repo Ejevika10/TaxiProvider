@@ -11,5 +11,5 @@ public record LoginRequestDto(
 
         @Schema(description = "Your password", example = "password")
         @NotBlank(message = "{user.password.required}")
-        String password ) {
+        String password) {
 }
