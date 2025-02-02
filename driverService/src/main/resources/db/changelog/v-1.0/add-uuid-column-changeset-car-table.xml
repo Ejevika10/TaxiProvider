@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="8" author="loziukvika10@gmail.com">
+        <addColumn tableName="car">
+            <column name="new_driver_id" type="UUID"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="new_driver_id" baseTableName="car" constraintName="FK_NEW_CAR_ON_DRIVER"
+                                 referencedColumnNames="new_id" referencedTableName="driver"/>
+        <update tableName="car">
+            <column name="new_driver_id" valueComputed="(SELECT new_id FROM driver WHERE driver.id = car.driver_id)"/>
+        </update>
+
+        <rollback>
+            <dropForeignKeyConstraint constraintName="FK_NEW_CAR_ON_DRIVER" baseTableName="car"/>
+            <dropColumn tableName="car" columnName="new_driver_id"/>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

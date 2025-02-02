@@ -1,20 +1,30 @@
 package com.modsen.ratingservice.changelog;
 
-import io.mongock.api.annotations.ChangeUnit;
+import com.mongodb.MongoNamespace;
 import io.mongock.api.annotations.Execution;
+import io.mongock.api.annotations.ChangeUnit;
 import io.mongock.api.annotations.RollbackExecution;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.CollectionOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.Index;
-import org.springframework.data.mongodb.core.schema.JsonSchemaProperty;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.mongodb.core.schema.MongoJsonSchema;
 import org.springframework.data.mongodb.core.validation.Validator;
+import org.springframework.data.mongodb.core.schema.JsonSchemaProperty;
 
-@ChangeUnit(order = "001", id = "0", author = "loziukvika10@gmail.com")
-public class ChangelogCreatePassengerRating {
+@ChangeUnit(order = "110", id = "6", author = "loziukvika10@gmail.com")
+public class ChangelogDeleteAndRenamePassengerRating {
     @Execution
     public void executionMethodName(final MongoTemplate mongoTemplate) {
+        mongoTemplate.dropCollection("passenger_ratings");
+
+        mongoTemplate.getDb().getCollection("new_passenger_ratings").renameCollection(new MongoNamespace(mongoTemplate.getDb().getName(), "passenger_ratings"));
+    }
+
+    @RollbackExecution
+    public void rollbackMethodName(final MongoTemplate mongoTemplate) {
+        mongoTemplate.getDb().getCollection("passenger_ratings").renameCollection(new MongoNamespace(mongoTemplate.getDb().getName(), "new_passenger_ratings"));
+
         mongoTemplate.createCollection("passenger_ratings", CollectionOptions.empty()
                 .validator(Validator.schema(MongoJsonSchema.builder()
                         .required("rideId", "userId", "rating")
@@ -28,12 +38,7 @@ public class ChangelogCreatePassengerRating {
                 )
         );
         mongoTemplate.indexOps("passenger_ratings")
-                .ensureIndex(new Index("rideId", Sort.Direction.ASC)
+                .ensureIndex(new Index("rideId", Direction.ASC)
                         .unique());
-    }
-    @RollbackExecution
-    public void rollbackMethodName(final MongoTemplate mongoTemplate) {
-        mongoTemplate.indexOps("passenger_ratings").dropIndex("rideId");
-        mongoTemplate.dropCollection("passenger_ratings");
     }
 }

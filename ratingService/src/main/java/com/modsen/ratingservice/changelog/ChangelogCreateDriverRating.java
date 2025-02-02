@@ -20,7 +20,7 @@ public class ChangelogCreateDriverRating {
                         .required("rideId", "userId", "rating")
                         .properties(
                                 JsonSchemaProperty.int64("rideId"),
-                                JsonSchemaProperty.string("userId").description("UUID in string format"),
+                                JsonSchemaProperty.int64("userId"),
                                 JsonSchemaProperty.int32("rating"),
                                 JsonSchemaProperty.string("comment").description("may be null"),
                                 JsonSchemaProperty.bool("deleted")
@@ -29,7 +29,7 @@ public class ChangelogCreateDriverRating {
         );
         mongoTemplate.indexOps("driver_ratings")
                 .ensureIndex(new Index("rideId", Direction.ASC)
-                .unique());
+                        .unique());
     }
 
     @RollbackExecution
@@ -38,4 +38,3 @@ public class ChangelogCreateDriverRating {
         mongoTemplate.dropCollection("driver_ratings");
     }
 }
-
