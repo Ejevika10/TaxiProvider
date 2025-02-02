@@ -3,6 +3,7 @@ package com.modsen.rideservice.security.filters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.exception.ForbiddenException;
+import com.modsen.rideservice.model.Role;
 import com.modsen.rideservice.service.RideService;
 import com.modsen.rideservice.util.AppConstants;
 import jakarta.servlet.FilterChain;
@@ -22,10 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.modsen.rideservice.util.SecurityConstants.ROLE_ADMIN;
-import static com.modsen.rideservice.util.SecurityConstants.ROLE_DRIVER;
-import static com.modsen.rideservice.util.SecurityConstants.ROLE_PASSENGER;
-
 @RequiredArgsConstructor
 @Slf4j
 public class RideAccessFilter extends OncePerRequestFilter {
@@ -41,7 +38,7 @@ public class RideAccessFilter extends OncePerRequestFilter {
         if(request.getRequestURI().startsWith("/api/v1/rides")) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            if (hasRole(auth, ROLE_ADMIN)) {
+            if (hasRole(auth, Role.ADMIN.getRole())) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -59,13 +56,13 @@ public class RideAccessFilter extends OncePerRequestFilter {
             UUID userId = UUID.fromString(userIdParam);
 
             if(request.getRequestURI().endsWith("state")) {
-                if (hasRole(auth, ROLE_PASSENGER)) {
+                if (hasRole(auth, Role.PASSENGER.getRole())) {
                     UUID passengerId = getPassengerIdFromStatusRequestURI(request.getRequestURI());
                     if (!Objects.equals(userId, passengerId)) {
                         throw new ForbiddenException(AppConstants.FORBIDDEN);
                     }
                 }
-                if (hasRole(auth, ROLE_DRIVER)) {
+                if (hasRole(auth, Role.DRIVER.getRole())) {
                     UUID driverId = getDriverIdFromStatusRequestURI(request.getRequestURI());
                     if (!Objects.equals(userId, driverId)) {
                         throw new ForbiddenException(AppConstants.FORBIDDEN);
@@ -75,25 +72,13 @@ public class RideAccessFilter extends OncePerRequestFilter {
             else {
                 RideRequestDto rideRequestDto = getRideRequestDto(request);
                 log.info(rideRequestDto.toString());
-                UUID passengerId;
-                try {
-                    passengerId = UUID.fromString(rideRequestDto.passengerId());
-                }
-                catch (Exception e) {
-                    throw new ForbiddenException(AppConstants.FORBIDDEN);
-                }
-                if (hasRole(auth, ROLE_PASSENGER) &&
+                UUID passengerId = UUID.fromString(rideRequestDto.passengerId());
+                if (hasRole(auth, Role.PASSENGER.getRole()) &&
                         (rideRequestDto.driverId() != null || !Objects.equals(userId, passengerId))) {
                     throw new ForbiddenException(AppConstants.FORBIDDEN);
                 }
-                if (hasRole(auth, ROLE_DRIVER)){
-                    UUID driverId;
-                    try {
-                        driverId = UUID.fromString(rideRequestDto.driverId());
-                    }
-                    catch (Exception e) {
-                        throw new ForbiddenException(AppConstants.FORBIDDEN);
-                    }
+                if (hasRole(auth, Role.DRIVER.getRole()) && rideRequestDto.driverId() != null) {
+                    UUID driverId = UUID.fromString(rideRequestDto.driverId());
                     if(!Objects.equals(userId, driverId)) {
                         throw new ForbiddenException(AppConstants.FORBIDDEN);
                     }

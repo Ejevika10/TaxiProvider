@@ -9,10 +9,6 @@ public final class SecurityConstants {
     public static final String KEYCLOAK_CLIENT_ID = "${keycloak.client-id}";
     public static final String TOKEN_ISSUER_URL = "${keycloak.issuer-url}";
 
-    public static final String ROLE_ADMIN = "ADMIN";
-    public static final String ROLE_PASSENGER = "PASSENGER";
-    public static final String ROLE_DRIVER = "DRIVER";
-
     public static final String CLAIM_REALM_ACCESS = "realm_access";
     public static final String CLAIM_RESOURCE_ACCESS = "resource_access";
     public static final String CLAIM_ROLES = "roles";

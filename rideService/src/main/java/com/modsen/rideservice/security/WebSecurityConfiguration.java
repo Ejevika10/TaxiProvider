@@ -1,5 +1,6 @@
 package com.modsen.rideservice.security;
 
+import com.modsen.rideservice.model.Role;
 import com.modsen.rideservice.security.filters.CacheBodyHttpServletFilter;
 import com.modsen.rideservice.security.filters.ExceptionHandlingFilter;
 import com.modsen.rideservice.security.filters.RideAccessFilter;
@@ -22,8 +23,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 import static com.modsen.rideservice.util.SecurityConstants.KEYCLOAK_CLIENT_ID;
-import static com.modsen.rideservice.util.SecurityConstants.ROLE_ADMIN;
-import static com.modsen.rideservice.util.SecurityConstants.ROLE_PASSENGER;
 import static com.modsen.rideservice.util.SecurityConstants.TOKEN_ISSUER_URL;
 
 
@@ -72,7 +71,7 @@ public class WebSecurityConfiguration {
                 .addFilterAfter(cacheBodyHttpServletFilter(), ExceptionHandlingFilter.class)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers(HttpMethod.POST, "/api/v1/rides").hasAnyRole(ROLE_PASSENGER, ROLE_ADMIN)
+                                .requestMatchers(HttpMethod.POST, "/api/v1/rides").hasAnyRole(Role.PASSENGER.getRole(), Role.ADMIN.getRole())
                                 .requestMatchers("/api/*").authenticated()
                                 .anyRequest().permitAll()
                 )

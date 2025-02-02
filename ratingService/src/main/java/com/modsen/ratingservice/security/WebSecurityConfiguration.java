@@ -1,6 +1,7 @@
 package com.modsen.ratingservice.security;
 
 import com.modsen.ratingservice.client.ride.RideClientService;
+import com.modsen.ratingservice.model.Role;
 import com.modsen.ratingservice.security.filters.CacheBodyHttpServletFilter;
 import com.modsen.ratingservice.security.filters.DriverRatingsAccessFilter;
 import com.modsen.ratingservice.security.filters.ExceptionHandlingFilter;
@@ -23,11 +24,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 import static com.modsen.ratingservice.util.SecurityConstants.KEYCLOAK_CLIENT_ID;
-import static com.modsen.ratingservice.util.SecurityConstants.ROLE_ADMIN;
-import static com.modsen.ratingservice.util.SecurityConstants.ROLE_DRIVER;
-import static com.modsen.ratingservice.util.SecurityConstants.ROLE_PASSENGER;
 import static com.modsen.ratingservice.util.SecurityConstants.TOKEN_ISSUER_URL;
-
 
 @Slf4j
 @Configuration
@@ -79,10 +76,10 @@ public class WebSecurityConfiguration {
                 .addFilterAfter(cacheBodyHttpServletFilter(), ExceptionHandlingFilter.class)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers(HttpMethod.POST, "/api/v1/driverratings").hasAnyRole(ROLE_PASSENGER, ROLE_ADMIN)
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/driverratings/*").hasAnyRole(ROLE_PASSENGER, ROLE_ADMIN)
-                                .requestMatchers(HttpMethod.POST, "/api/v1/passengerratings").hasAnyRole(ROLE_DRIVER, ROLE_ADMIN)
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/passengerratings/*").hasAnyRole(ROLE_DRIVER, ROLE_ADMIN)
+                                .requestMatchers(HttpMethod.POST, "/api/v1/driverratings").hasAnyRole(Role.PASSENGER.getRole(), Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/driverratings/*").hasAnyRole(Role.PASSENGER.getRole(), Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.POST, "/api/v1/passengerratings").hasAnyRole(Role.DRIVER.getRole(), Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/passengerratings/*").hasAnyRole(Role.DRIVER.getRole(), Role.ADMIN.getRole())
                                 .requestMatchers("/api/*").authenticated()
                                 .anyRequest().permitAll()
                 )

@@ -15,7 +15,7 @@ import com.modsen.authservice.exception.ErrorMessage;
 import com.modsen.authservice.exception.KeycloakException;
 import com.modsen.authservice.model.Role;
 import com.modsen.authservice.service.AuthService;
-import com.modsen.authservice.util.KeycloakConstants;
+import com.modsen.authservice.configuration.KeycloakProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.Response;
@@ -55,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
     private final Keycloak keycloak;
     private final PassengerClientService passengerClientService;
     private final DriverClientService driverClientService;
-    private final KeycloakConstants keycloakConstants;
+    private final KeycloakProperties keycloakProperties;
 
     @Override
     public LoginResponseDto login(LoginRequestDto request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
@@ -73,12 +73,12 @@ public class AuthServiceImpl implements AuthService {
 
         MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
         requestBody.add(OAuth2Constants.GRANT_TYPE, OAuth2Constants.PASSWORD);
-        requestBody.add(OAuth2Constants.CLIENT_ID, keycloakConstants.getClientId());
-        requestBody.add(OAuth2Constants.CLIENT_SECRET, keycloakConstants.getClientSecret());
+        requestBody.add(OAuth2Constants.CLIENT_ID, keycloakProperties.getClientId());
+        requestBody.add(OAuth2Constants.CLIENT_SECRET, keycloakProperties.getClientSecret());
         requestBody.add(OAuth2Constants.USERNAME, request.username());
         requestBody.add(OAuth2Constants.PASSWORD, request.password());
-        log.info(keycloakConstants.getGetTokenUrl());
-        ResponseEntity<LoginResponseDto> response = restTemplate.postForEntity (keycloakConstants.getGetTokenUrl(),
+        log.info(keycloakProperties.getGetTokenUrl());
+        ResponseEntity<LoginResponseDto> response = restTemplate.postForEntity (keycloakProperties.getGetTokenUrl(),
                 new HttpEntity<>(requestBody, headers), LoginResponseDto.class);
 
         return response.getBody();
@@ -102,13 +102,13 @@ public class AuthServiceImpl implements AuthService {
         MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
         requestBody.add(OAuth2Constants.GRANT_TYPE, OAuth2Constants.REFRESH_TOKEN);
         requestBody.add(OAuth2Constants.REFRESH_TOKEN, refreshToken);
-        requestBody.add(OAuth2Constants.CLIENT_ID, keycloakConstants.getClientId());
-        requestBody.add(OAuth2Constants.CLIENT_SECRET, keycloakConstants.getClientSecret());
+        requestBody.add(OAuth2Constants.CLIENT_ID, keycloakProperties.getClientId());
+        requestBody.add(OAuth2Constants.CLIENT_SECRET, keycloakProperties.getClientSecret());
         try {
-            ResponseEntity<LoginResponseDto> response = restTemplate.postForEntity (keycloakConstants.getGetTokenUrl(),
+            ResponseEntity<LoginResponseDto> response = restTemplate.postForEntity (keycloakProperties.getGetTokenUrl(),
                     new HttpEntity<>(requestBody, headers), LoginResponseDto.class);
             return response.getBody();
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new KeycloakException(
                     new ErrorMessage(404,e.getMessage()));
         }
@@ -120,7 +120,7 @@ public class AuthServiceImpl implements AuthService {
                                             HttpServletResponse servletResponse) {
         UserRepresentation user = getUserRepresentation(request);
 
-        RealmResource realmResource = keycloak.realm(keycloakConstants.getRealmName());
+        RealmResource realmResource = keycloak.realm(keycloakProperties.getRealmName());
         UsersResource usersResource = realmResource.users();
         Response response = usersResource.create(user);
 
@@ -133,8 +133,7 @@ public class AuthServiceImpl implements AuthService {
             String adminClientAccessToken = keycloak.tokenManager().getAccessTokenString();
             try {
                 return createDriver(userId, request, adminClientAccessToken);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 usersResource.delete(userId);
                 throw e;
             }
@@ -158,7 +157,7 @@ public class AuthServiceImpl implements AuthService {
                                                   HttpServletResponse servletResponse) {
         UserRepresentation user = getUserRepresentation(request);
 
-        RealmResource realmResource = keycloak.realm(keycloakConstants.getRealmName());
+        RealmResource realmResource = keycloak.realm(keycloakProperties.getRealmName());
         UsersResource usersResource = realmResource.users();
         Response response = usersResource.create(user);
 
@@ -172,8 +171,7 @@ public class AuthServiceImpl implements AuthService {
             String adminClientAccessToken = keycloak.tokenManager().getAccessTokenString();
             try {
                 return createPassenger(userId, request, adminClientAccessToken);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 usersResource.delete(userId);
                 log.error(e.getMessage());
                 throw e;

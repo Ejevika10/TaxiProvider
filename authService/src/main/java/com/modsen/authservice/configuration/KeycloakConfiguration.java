@@ -1,6 +1,5 @@
 package com.modsen.authservice.configuration;
 
-import com.modsen.authservice.util.KeycloakConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.OAuth2Constants;
@@ -14,19 +13,19 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class KeycloakConfiguration {
 
-    private final KeycloakConstants keycloakConstants;
+    private final KeycloakProperties keycloakProperties;
 
     @Bean
     public Keycloak keycloak() {
-        log.info(keycloakConstants.getServerUrl());
+        log.info(keycloakProperties.getServerUrl());
         return KeycloakBuilder.builder()
-            .serverUrl(keycloakConstants.getServerUrl())
-            .realm(keycloakConstants.getRealmName())
+            .serverUrl(keycloakProperties.getServerUrl())
+            .realm(keycloakProperties.getRealmName())
             .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
-            .clientId(keycloakConstants.getClientId())
-            .clientSecret(keycloakConstants.getClientSecret())
-            .username(keycloakConstants.getUsername())
-            .password(keycloakConstants.getPassword())
+            .clientId(keycloakProperties.getClientId())
+            .clientSecret(keycloakProperties.getClientSecret())
+            .username(keycloakProperties.getUsername())
+            .password(keycloakProperties.getPassword())
             .build();
     }
 }

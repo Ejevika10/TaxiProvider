@@ -5,6 +5,7 @@ import com.modsen.ratingservice.client.ride.RideClientService;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RideResponseDto;
 import com.modsen.ratingservice.exception.ForbiddenException;
+import com.modsen.ratingservice.model.Role;
 import com.modsen.ratingservice.util.AppConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,8 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.modsen.ratingservice.util.SecurityConstants.ROLE_ADMIN;
-
 @RequiredArgsConstructor
 @Slf4j
 public class PassengerRatingsAccessFilter extends OncePerRequestFilter {
@@ -40,7 +39,7 @@ public class PassengerRatingsAccessFilter extends OncePerRequestFilter {
         if(request.getRequestURI().startsWith("/api/v1/passengerratings")) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            if (hasRole(auth, ROLE_ADMIN)) {
+            if (hasRole(auth, Role.ADMIN.getRole())) {
                 filterChain.doFilter(request, response);
                 return;
             }
