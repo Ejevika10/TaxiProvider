@@ -29,7 +29,7 @@ public class ChangelogCreateDriverRating {
         );
         mongoTemplate.indexOps("driver_ratings")
                 .ensureIndex(new Index("rideId", Direction.ASC)
-                .unique());
+                        .unique());
     }
 
     @RollbackExecution
@@ -38,4 +38,3 @@ public class ChangelogCreateDriverRating {
         mongoTemplate.dropCollection("driver_ratings");
     }
 }
-

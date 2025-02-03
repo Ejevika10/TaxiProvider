@@ -3,14 +3,15 @@ package com.modsen.ratingservice.dto;
 import com.modsen.ratingservice.model.RideState;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record RideResponseDto(
 
         long id,
 
-        Long driverId,
+        UUID driverId,
 
-        long passengerId,
+        UUID passengerId,
 
         String sourceAddress,
 

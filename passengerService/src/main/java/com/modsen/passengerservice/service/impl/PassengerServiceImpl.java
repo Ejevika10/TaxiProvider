@@ -1,5 +1,6 @@
 package com.modsen.passengerservice.service.impl;
 
+import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
 import com.modsen.passengerservice.dto.UserRatingDto;
 import com.modsen.passengerservice.util.AppConstants;
 import com.modsen.passengerservice.dto.PageDto;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +50,7 @@ public class PassengerServiceImpl implements PassengerService {
     }
 
     @Override
-    public PassengerResponseDto getPassengerById(Long id) {
+    public PassengerResponseDto getPassengerById(UUID id) {
         Passenger passenger = findByIdOrThrow(id);
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
@@ -62,7 +64,7 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     @Transactional
-    public PassengerResponseDto addPassenger(PassengerRequestDto requestDTO) {
+    public PassengerResponseDto addPassenger(PassengerCreateRequestDto requestDTO) {
         if(passengerRepository.existsByEmailAndDeletedIsFalse(requestDTO.email())) {
             throw new DuplicateFieldException(AppConstants.PASSENGER_EMAIL_EXISTS);
         }
@@ -73,7 +75,7 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     @Transactional
-    public PassengerResponseDto updatePassenger(Long id, PassengerRequestDto requestDTO) {
+    public PassengerResponseDto updatePassenger(UUID id, PassengerRequestDto requestDTO) {
         Passenger passengerToSave = findByIdOrThrow(id);
         Optional<Passenger> existingPassenger = passengerRepository.findByEmailAndDeletedIsFalse(requestDTO.email());
         if(existingPassenger.isPresent() && !existingPassenger.get().getId().equals(id)) {
@@ -86,7 +88,7 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     @Transactional
-    public void deletePassenger(Long id) {
+    public void deletePassenger(UUID id) {
         Passenger passenger = findByIdOrThrow(id);
         passenger.setDeleted(true);
         passengerRepository.save(passenger);
@@ -101,7 +103,7 @@ public class PassengerServiceImpl implements PassengerService {
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
-    private Passenger findByIdOrThrow(Long id) {
+    private Passenger findByIdOrThrow(UUID id) {
         return passengerRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException(AppConstants.PASSENGER_NOT_FOUND));
     }

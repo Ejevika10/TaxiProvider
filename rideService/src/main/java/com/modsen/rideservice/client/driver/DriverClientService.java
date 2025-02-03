@@ -16,8 +16,8 @@ public class DriverClientService {
 
     @CircuitBreaker(name = ClientConstants.DRIVER_CLIENT_CIRCUIT)
     @Retry(name = ClientConstants.DRIVER_CLIENT_RETRY)
-    public DriverResponseDto getDriverById(long driverId) {
+    public DriverResponseDto getDriverById(String driverId, String authorizationToken) {
         log.info("getDriverById");
-        return driverClient.getDriverById(driverId);
+        return driverClient.getDriverById(driverId, authorizationToken);
     }
 }

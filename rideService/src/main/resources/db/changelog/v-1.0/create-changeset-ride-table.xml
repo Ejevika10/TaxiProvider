@@ -12,10 +12,8 @@
                              primaryKey="true"
                              primaryKeyName="pk_ride"/>
             </column>
-            <column name="driver_id"
-                    type="BIGINT"/>
-            <column name="passenger_id"
-                    type="BIGINT">
+            <column name="driver_id" type="BIGINT"/>
+            <column name="passenger_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="source_address"
@@ -44,4 +42,3 @@
         </rollback>
     </changeSet>
 </databaseChangeLog>
-

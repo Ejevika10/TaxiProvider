@@ -1,11 +1,14 @@
 package com.modsen.passengerservice.controller;
 
 import com.modsen.passengerservice.dto.PageDto;
+import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
 import com.modsen.passengerservice.dto.PassengerRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
 import com.modsen.passengerservice.service.PassengerService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -21,10 +24,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import jakarta.validation.constraints.Min;
 
+import java.util.UUID;
+
+import static com.modsen.passengerservice.util.AppConstants.UUID_REGEXP;
+
 @RestController
 @Validated
 @RequestMapping("/api/v1/passengers")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "JWT")
 public class PassengerController {
     private final PassengerService passengerService;
 
@@ -34,24 +42,27 @@ public class PassengerController {
     }
 
     @GetMapping("/{id}")
-    public PassengerResponseDto getPassenger(@PathVariable @Min(0) Long id) {
-        return passengerService.getPassengerById(id);
+    public PassengerResponseDto getPassenger(@PathVariable String id) {
+        return passengerService.getPassengerById(UUID.fromString(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PassengerResponseDto createPassenger(@Valid @RequestBody PassengerRequestDto passengerRequestDTO) {
+    public PassengerResponseDto createPassenger(@Valid @RequestBody PassengerCreateRequestDto passengerRequestDTO) {
         return passengerService.addPassenger(passengerRequestDTO);
     }
 
     @PutMapping("/{id}")
-    public PassengerResponseDto updatePassenger(@PathVariable @Min(0) Long id, @Valid @RequestBody PassengerRequestDto passengerRequestDTO) {
-        return passengerService.updatePassenger(id, passengerRequestDTO);
+    public PassengerResponseDto updatePassenger(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                                    String id,
+                                                @Valid @RequestBody PassengerRequestDto passengerRequestDTO) {
+        return passengerService.updatePassenger(UUID.fromString(id), passengerRequestDTO);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePassenger(@PathVariable @Min(0) Long id) {
-        passengerService.deletePassenger(id);
+    public void deletePassenger(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                    String id) {
+        passengerService.deletePassenger(UUID.fromString(id));
     }
 }

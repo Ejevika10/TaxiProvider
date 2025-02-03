@@ -4,15 +4,16 @@ import com.modsen.rideservice.model.RideState;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Builder
-public record RideResponseDto (
+public record RideResponseDto(
 
         Long id,
 
-        Long driverId,
+        UUID driverId,
 
-        Long passengerId,
+        UUID passengerId,
 
         String sourceAddress,
 

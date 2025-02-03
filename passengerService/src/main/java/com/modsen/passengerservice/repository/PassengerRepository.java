@@ -7,13 +7,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface PassengerRepository extends JpaRepository<Passenger, Long> {
-    boolean existsByIdAndDeletedIsFalse(Long id);
+public interface PassengerRepository extends JpaRepository<Passenger, UUID> {
+    boolean existsByIdAndDeletedIsFalse(UUID id);
 
     boolean existsByEmailAndDeletedIsFalse(String email);
 
-    Optional<Passenger> findByIdAndDeletedIsFalse(Long id);
+    Optional<Passenger> findByIdAndDeletedIsFalse(UUID id);
 
     Optional<Passenger> findByEmailAndDeletedIsFalse(String email);
 

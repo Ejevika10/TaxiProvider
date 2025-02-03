@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @NoArgsConstructor
@@ -27,10 +28,10 @@ public class Ride {
     @Column(unique = true, nullable = false)
     private Long id;
 
-    private Long driverId;
+    private UUID driverId;
 
     @Column(nullable = false)
-    private Long passengerId;
+    private UUID passengerId;
 
     @Column(nullable = false)
     private String sourceAddress;

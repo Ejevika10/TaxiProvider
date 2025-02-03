@@ -1,5 +1,6 @@
 package com.modsen.driverservice.service.Impl;
 
+import com.modsen.driverservice.dto.DriverCreateRequestDto;
 import com.modsen.driverservice.dto.UserRatingDto;
 import com.modsen.driverservice.util.AppConstants;
 import com.modsen.driverservice.dto.DriverRequestDto;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -48,7 +50,7 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public DriverResponseDto getDriverById(Long id) {
+    public DriverResponseDto getDriverById(UUID id) {
         Driver driver = findByIdOrThrow(id);
         return driverMapper.toDriverResponseDTO(driver);
     }
@@ -62,7 +64,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
-    public DriverResponseDto createDriver(DriverRequestDto driverRequestDTO) {
+    public DriverResponseDto createDriver(DriverCreateRequestDto driverRequestDTO) {
         if (driverRepository.existsByEmailAndDeletedIsFalse(driverRequestDTO.email())) {
             throw new DuplicateFieldException(AppConstants.DRIVER_EMAIL_EXIST);
         }
@@ -73,7 +75,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
-    public DriverResponseDto updateDriver(Long id, DriverRequestDto driverRequestDTO) {
+    public DriverResponseDto updateDriver(UUID id, DriverRequestDto driverRequestDTO) {
         Driver driverToSave = findByIdOrThrow(id);
         Optional<Driver> existingDriver = driverRepository.findByEmailAndDeletedIsFalse(driverRequestDTO.email());
         if(existingDriver.isPresent() && !existingDriver.get().getId().equals(id)) {
@@ -95,13 +97,13 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
-    public void deleteDriver(Long id) {
+    public void deleteDriver(UUID id) {
         Driver driver = findByIdOrThrow(id);
         driver.setDeleted(true);
         driverRepository.save(driver);
     }
 
-    private Driver findByIdOrThrow(Long id) {
+    private Driver findByIdOrThrow(UUID id) {
         return driverRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
     }

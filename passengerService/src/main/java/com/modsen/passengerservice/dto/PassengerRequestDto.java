@@ -8,9 +8,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
-public record PassengerRequestDto (
+public record PassengerRequestDto(
     @NotBlank(message = "{passenger.name.mandatory}")
-    @Size(min = 2, max = 50)
+    @Size(min = 4, max = 100)
     String name,
 
     @NotBlank(message = "{passenger.email.mandatory}")

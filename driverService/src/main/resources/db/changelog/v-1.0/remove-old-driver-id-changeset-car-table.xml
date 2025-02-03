@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="9" author="loziukvika10@gmail.com">
+        <dropForeignKeyConstraint constraintName="FK_CAR_ON_DRIVER" baseTableName="car"/>
+        <dropColumn tableName="car" columnName="driver_id"/>
+        <renameColumn tableName="car" oldColumnName="new_driver_id" newColumnName="driver_id"/>
+
+        <rollback>
+            <renameColumn tableName="car" oldColumnName="driver_id" newColumnName="new_driver_id"/>
+            <addColumn tableName="car">
+                <column name="driver_id" type="BIGINT">
+                    <constraints nullable="false"/>
+                </column>
+            </addColumn>
+            <addForeignKeyConstraint baseColumnNames="driver_id" baseTableName="car" constraintName="FK_CAR_ON_DRIVER"
+                                     referencedColumnNames="id" referencedTableName="driver"/>
+            <update tableName="car">
+                <column name="driver_id" valueComputed="(SELECT id FROM driver WHERE driver.new_id = car.new_driver_id)"/>
+            </update>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

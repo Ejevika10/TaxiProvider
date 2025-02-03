@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="7" author="loziukvika10@gmail.com">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+        <sql>
+            CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+        </sql>
+
+        <addColumn tableName="passenger">
+            <column name="new_id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="passenger" columnName="new_id"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="8" author="loziukvika10@gmail.com">
+        <dropPrimaryKey tableName="passenger"/>
+        <dropColumn tableName="passenger" columnName="id"/>
+        <renameColumn tableName="passenger" oldColumnName="new_id" newColumnName="id"/>
+        <addPrimaryKey tableName="passenger" columnNames="id"/>
+
+        <rollback>
+            <dropPrimaryKey tableName="passenger"/>
+            <renameColumn tableName="passenger" oldColumnName="id" newColumnName="new_id"/>
+            <addColumn tableName="passenger">
+                <column autoIncrement="true" name="id" type="BIGINT">
+                    <constraints nullable="false" primaryKey="true" primaryKeyName="pk_passenger"/>
+                </column>
+            </addColumn>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>
