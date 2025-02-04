@@ -1,11 +1,11 @@
 package com.modsen.driverservice.security;
 
+import com.modsen.driverservice.model.Role;
 import com.modsen.driverservice.security.filters.CacheBodyHttpServletFilter;
 import com.modsen.driverservice.security.filters.CarAccessFilter;
 import com.modsen.driverservice.security.filters.DriverAccessFilter;
 import com.modsen.driverservice.security.filters.ExceptionHandlingFilter;
 import com.modsen.driverservice.service.CarService;
-import com.modsen.driverservice.service.DriverService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,8 +24,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 import static com.modsen.driverservice.util.SecurityConstants.KEYCLOAK_CLIENT_ID;
-import static com.modsen.driverservice.util.SecurityConstants.ROLE_ADMIN;
-import static com.modsen.driverservice.util.SecurityConstants.ROLE_DRIVER;
 import static com.modsen.driverservice.util.SecurityConstants.TOKEN_ISSUER_URL;
 
 @Slf4j
@@ -34,7 +32,6 @@ import static com.modsen.driverservice.util.SecurityConstants.TOKEN_ISSUER_URL;
 @RequiredArgsConstructor
 public class WebSecurityConfiguration {
 
-    private final DriverService driverService;
     private final CarService carService;
 
     private final CustomAuthenticationEntryPoint authEntryPoint;
@@ -43,7 +40,7 @@ public class WebSecurityConfiguration {
 
     @Bean
     public DriverAccessFilter driverAccessFilter() {
-        return new DriverAccessFilter(driverService);
+        return new DriverAccessFilter();
     }
 
     @Bean
@@ -79,12 +76,12 @@ public class WebSecurityConfiguration {
                 .addFilterAfter(cacheBodyHttpServletFilter(), ExceptionHandlingFilter.class)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers(HttpMethod.POST, "/api/v1/drivers").hasRole(ROLE_ADMIN)
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/drivers/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/drivers/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
-                                .requestMatchers(HttpMethod.POST, "/api/v1/cars").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/cars/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/cars/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
+                                .requestMatchers(HttpMethod.POST, "/api/v1/drivers").hasRole(Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/drivers/*").hasAnyRole(Role.ADMIN.getRole(), Role.DRIVER.getRole())
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/drivers/*").hasAnyRole(Role.ADMIN.getRole(), Role.DRIVER.getRole())
+                                .requestMatchers(HttpMethod.POST, "/api/v1/cars").hasAnyRole(Role.ADMIN.getRole(), Role.DRIVER.getRole())
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/cars/*").hasAnyRole(Role.ADMIN.getRole(), Role.DRIVER.getRole())
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/cars/*").hasAnyRole(Role.ADMIN.getRole(), Role.DRIVER.getRole())
                                 .requestMatchers("/api/*").authenticated()
                                 .anyRequest().permitAll()
                 )

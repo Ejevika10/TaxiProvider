@@ -1,12 +1,11 @@
-package com.modsen.ratingservice.model;
+package com.modsen.passengerservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.modsen.ratingservice.exception.InvalidFieldValueException;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.passengerservice.exception.InvalidFieldValueException;
+import com.modsen.passengerservice.util.AppConstants;
 
 public enum Role {
-    DRIVER("DRIVER"),
     PASSENGER("PASSENGER"),
     ADMIN("ADMIN");
 

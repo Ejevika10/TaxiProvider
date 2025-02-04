@@ -1,8 +1,8 @@
 package com.modsen.passengerservice.security;
 
+import com.modsen.passengerservice.model.Role;
 import com.modsen.passengerservice.security.filters.ExceptionHandlingFilter;
 import com.modsen.passengerservice.security.filters.PassengerAccessFilter;
-import com.modsen.passengerservice.service.PassengerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,8 +21,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 import static com.modsen.passengerservice.util.SecurityConstants.KEYCLOAK_CLIENT_ID;
-import static com.modsen.passengerservice.util.SecurityConstants.ROLE_ADMIN;
-import static com.modsen.passengerservice.util.SecurityConstants.ROLE_PASSENGER;
 import static com.modsen.passengerservice.util.SecurityConstants.TOKEN_ISSUER_URL;
 
 @Slf4j
@@ -31,15 +29,13 @@ import static com.modsen.passengerservice.util.SecurityConstants.TOKEN_ISSUER_UR
 @RequiredArgsConstructor
 public class WebSecurityConfiguration {
 
-    private final PassengerService passengerService;
-
     private final CustomAuthenticationEntryPoint authEntryPoint;
 
     private final CustomAccessDeniedHandler accessDenied;
 
     @Bean
     public PassengerAccessFilter passengerAccessFilter() {
-        return new PassengerAccessFilter(passengerService);
+        return new PassengerAccessFilter();
     }
 
     @Bean
@@ -64,9 +60,9 @@ public class WebSecurityConfiguration {
                 .addFilterBefore(exceptionHandlingFilter(), WebAsyncManagerIntegrationFilter.class)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers(HttpMethod.POST, "/api/v1/passengers").hasRole(ROLE_ADMIN)
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/passengers/*").hasAnyRole(ROLE_ADMIN, ROLE_PASSENGER)
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/drivers/*").hasAnyRole(ROLE_ADMIN, ROLE_PASSENGER)
+                                .requestMatchers(HttpMethod.POST, "/api/v1/passengers").hasRole(Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/passengers/*").hasAnyRole(Role.ADMIN.getRole(), Role.PASSENGER.getRole())
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/drivers/*").hasAnyRole(Role.ADMIN.getRole(), Role.PASSENGER.getRole())
                                 .requestMatchers("/api/*").authenticated()
                                 .anyRequest().permitAll()
                 )

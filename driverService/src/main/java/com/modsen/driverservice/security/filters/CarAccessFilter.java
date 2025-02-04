@@ -3,6 +3,7 @@ package com.modsen.driverservice.security.filters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.exception.ForbiddenException;
+import com.modsen.driverservice.model.Role;
 import com.modsen.driverservice.service.CarService;
 import com.modsen.driverservice.util.AppConstants;
 import jakarta.servlet.FilterChain;
@@ -22,8 +23,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.modsen.driverservice.util.SecurityConstants.ROLE_ADMIN;
-
 @RequiredArgsConstructor
 @Slf4j
 public class CarAccessFilter extends OncePerRequestFilter {
@@ -39,7 +38,7 @@ public class CarAccessFilter extends OncePerRequestFilter {
         if(request.getRequestURI().startsWith("/api/v1/cars")) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            if (hasRole(auth, ROLE_ADMIN)) {
+            if (hasRole(auth, Role.ADMIN.getRole())) {
                 filterChain.doFilter(request, response);
                 return;
             }

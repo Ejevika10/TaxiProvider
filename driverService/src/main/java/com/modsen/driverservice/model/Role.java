@@ -1,9 +1,9 @@
-package com.modsen.ratingservice.model;
+package com.modsen.driverservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.modsen.ratingservice.exception.InvalidFieldValueException;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.driverservice.exception.InvalidFieldValueException;
+import com.modsen.driverservice.util.AppConstants;
 
 public enum Role {
     DRIVER("DRIVER"),

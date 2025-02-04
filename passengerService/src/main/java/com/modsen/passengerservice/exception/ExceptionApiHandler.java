@@ -55,6 +55,12 @@ public class ExceptionApiHandler {
         return new ListErrorMessage(HttpStatus.BAD_REQUEST.value(), errors);
     }
 
+    @ExceptionHandler(InvalidFieldValueException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage invalidFieldValueException(InvalidFieldValueException exception) {
+        return new ErrorMessage(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
+    }
+
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorMessage forbiddenException(ForbiddenException exception) {
