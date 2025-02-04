@@ -1,6 +1,8 @@
 package com.modsen.rideservice.service;
 
 import com.modsen.rideservice.dto.PageDto;
+import com.modsen.rideservice.dto.RideAcceptRequestDto;
+import com.modsen.rideservice.dto.RideCreateRequestDto;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
@@ -23,7 +25,11 @@ public interface RideService {
 
     RideResponseDto getRideById(Long id);
 
-    RideResponseDto createRide(RideRequestDto ride, String authorizationToken);
+    RideResponseDto createRide(RideCreateRequestDto ride, String authorizationToken);
+
+    RideResponseDto acceptRide(Long id, RideAcceptRequestDto ride, String authorizationToken);
+
+    RideResponseDto cancelRide(Long id, String authorizationToken);
 
     RideResponseDto updateRide(Long id, RideRequestDto ride, String authorizationToken);
 

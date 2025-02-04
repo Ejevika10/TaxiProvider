@@ -1,6 +1,8 @@
 package com.modsen.rideservice.controller;
 
 import com.modsen.rideservice.dto.PageDto;
+import com.modsen.rideservice.dto.RideAcceptRequestDto;
+import com.modsen.rideservice.dto.RideCreateRequestDto;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
@@ -66,7 +68,7 @@ public class RideController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RideResponseDto createRide(@RequestBody RideRequestDto rideRequestDto,
+    public RideResponseDto createRide(@RequestBody RideCreateRequestDto rideRequestDto,
                                       @RequestHeader("Authorization") String authorizationToken) {
         return rideService.createRide(rideRequestDto, authorizationToken);
     }
@@ -76,6 +78,19 @@ public class RideController {
                                       @RequestBody RideRequestDto rideRequestDto,
                                       @RequestHeader("Authorization") String authorizationToken) {
         return rideService.updateRide(id, rideRequestDto, authorizationToken);
+    }
+
+    @PutMapping("/{id}/accept")
+    public RideResponseDto acceptRide(@PathVariable @Min(0) Long id,
+                                      @RequestBody RideAcceptRequestDto rideRequestDto,
+                                      @RequestHeader("Authorization") String authorizationToken) {
+        return rideService.acceptRide(id, rideRequestDto, authorizationToken);
+    }
+
+    @PutMapping("/{id}/cancel")
+    public RideResponseDto cancelRide(@PathVariable @Min(0) Long id,
+                                      @RequestHeader("Authorization") String authorizationToken) {
+        return rideService.cancelRide(id, authorizationToken);
     }
 
     @PutMapping("/{id}/state")
