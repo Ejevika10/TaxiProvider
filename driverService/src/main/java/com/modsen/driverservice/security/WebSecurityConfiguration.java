@@ -1,5 +1,6 @@
 package com.modsen.driverservice.security;
 
+import com.modsen.driverservice.security.filters.CacheBodyHttpServletFilter;
 import com.modsen.driverservice.security.filters.CarAccessFilter;
 import com.modsen.driverservice.security.filters.DriverAccessFilter;
 import com.modsen.driverservice.security.filters.ExceptionHandlingFilter;
@@ -55,6 +56,11 @@ public class WebSecurityConfiguration {
         return new ExceptionHandlingFilter();
     }
 
+    @Bean
+    public CacheBodyHttpServletFilter cacheBodyHttpServletFilter() {
+        return new CacheBodyHttpServletFilter();
+    }
+
     @Value(KEYCLOAK_CLIENT_ID)
     private String kcClientId;
 
@@ -70,12 +76,13 @@ public class WebSecurityConfiguration {
 
         http
                 .addFilterBefore(exceptionHandlingFilter(), WebAsyncManagerIntegrationFilter.class)
+                .addFilterAfter(cacheBodyHttpServletFilter(), ExceptionHandlingFilter.class)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers(HttpMethod.POST, "/api/v1/drivers").hasRole(ROLE_ADMIN)
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/drivers/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/drivers/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
-                                .requestMatchers(HttpMethod.POST, "/api/v1/cars").hasAnyRole(ROLE_ADMIN)
+                                .requestMatchers(HttpMethod.POST, "/api/v1/cars").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/cars/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/cars/*").hasAnyRole(ROLE_ADMIN, ROLE_DRIVER)
                                 .requestMatchers("/api/*").authenticated()
