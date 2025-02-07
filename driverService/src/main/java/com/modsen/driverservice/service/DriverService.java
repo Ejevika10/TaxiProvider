@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface DriverService {
+    String EXCHANGE_NAME = "authservice";
+    String UPDATE_ROUTING_KEY = "user.update";
+    String DELETE_ROUTING_KEY = "user.delete";
+
     List<DriverResponseDto> getAllDrivers();
 
     PageDto<DriverResponseDto> getPageDrivers(Integer offset, Integer limit);

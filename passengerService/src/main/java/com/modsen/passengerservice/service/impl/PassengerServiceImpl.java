@@ -1,7 +1,10 @@
 package com.modsen.passengerservice.service.impl;
 
 import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
+import com.modsen.passengerservice.dto.UserDeleteRequestDto;
 import com.modsen.passengerservice.dto.UserRatingDto;
+import com.modsen.passengerservice.dto.UserUpdateRequestDto;
+import com.modsen.passengerservice.service.RabbitService;
 import com.modsen.passengerservice.util.AppConstants;
 import com.modsen.passengerservice.dto.PageDto;
 import com.modsen.passengerservice.dto.PassengerRequestDto;
@@ -29,6 +32,8 @@ import java.util.UUID;
 public class PassengerServiceImpl implements PassengerService {
 
     private final PassengerRepository passengerRepository;
+
+    private final RabbitService rabbitService;
 
     private final PassengerMapper passengerMapper;
 
@@ -83,6 +88,13 @@ public class PassengerServiceImpl implements PassengerService {
         }
         passengerMapper.updatePassenger(passengerToSave, requestDTO);
         Passenger passenger = passengerRepository.save(passengerToSave);
+
+        UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(passenger.getId().toString(),
+                passenger.getName(),
+                passenger.getEmail(),
+                passenger.getPhone());
+        rabbitService.sendUpdateMessage(EXCHANGE_NAME, UPDATE_ROUTING_KEY, userUpdateRequestDto);
+
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
@@ -92,6 +104,9 @@ public class PassengerServiceImpl implements PassengerService {
         Passenger passenger = findByIdOrThrow(id);
         passenger.setDeleted(true);
         passengerRepository.save(passenger);
+
+        UserDeleteRequestDto userDeleteRequestDto = new UserDeleteRequestDto(id.toString());
+        rabbitService.sendDeleteMessage(EXCHANGE_NAME, DELETE_ROUTING_KEY, userDeleteRequestDto);
     }
 
     @Override

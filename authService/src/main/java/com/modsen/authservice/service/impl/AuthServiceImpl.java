@@ -11,6 +11,8 @@ import com.modsen.authservice.dto.LoginResponseDto;
 import com.modsen.authservice.dto.PassengerCreateRequestDto;
 import com.modsen.authservice.dto.PassengerResponseDto;
 import com.modsen.authservice.dto.RegisterRequestDto;
+import com.modsen.authservice.dto.UserDeleteRequestDto;
+import com.modsen.authservice.dto.UserUpdateRequestDto;
 import com.modsen.authservice.exception.ErrorMessage;
 import com.modsen.authservice.exception.KeycloakException;
 import com.modsen.authservice.model.Role;
@@ -151,6 +153,20 @@ public class AuthServiceImpl implements AuthService {
         return driverClientService.createDriver(driverRequestDto, "Bearer " + adminClientAccessToken);
     }
 
+    public void updateUser(UserUpdateRequestDto updateRequestDto) {
+        RealmResource realmResource = keycloak.realm(keycloakProperties.getRealmName());
+        UsersResource usersResource = realmResource.users();
+        UserResource user = usersResource.get(updateRequestDto.id());
+        UserRepresentation newUser = getUpdateUserRepresentation(updateRequestDto);
+        user.update(newUser);
+    }
+
+    public void deleteUser(UserDeleteRequestDto userDeleteRequestDto) {
+        RealmResource realmResource = keycloak.realm(keycloakProperties.getRealmName());
+        UsersResource usersResource = realmResource.users();
+        usersResource.get(userDeleteRequestDto.id()).remove();
+    }
+
     @Override
     public PassengerResponseDto registerPassenger(RegisterRequestDto request,
                                                   HttpServletRequest servletRequest,
@@ -204,6 +220,17 @@ public class AuthServiceImpl implements AuthService {
         passwordCred.setType(CredentialRepresentation.PASSWORD);
 
         user.setCredentials(List.of(passwordCred));
+        return user;
+    }
+
+    private static UserRepresentation getUpdateUserRepresentation(UserUpdateRequestDto request) {
+        UserRepresentation user = new UserRepresentation();
+        user.setUsername(request.username());
+        user.setEmail(request.email());
+        user.setEmailVerified(true);
+        user.setAttributes(Collections.singletonMap("phone", Collections.singletonList(request.phone())));
+        user.setEnabled(true);
+
         return user;
     }
 

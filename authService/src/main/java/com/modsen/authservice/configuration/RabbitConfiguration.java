@@ -1,9 +1,8 @@
-package com.modsen.passengerservice.configuration;
+package com.modsen.authservice.configuration;
 
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Declarables;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -16,17 +15,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfiguration {
-    @Value("${spring.rabbitmq.rating.exchange}")
-    private String ratingExchangeName;
-
     @Value("${spring.rabbitmq.user.exchange}")
     private String userExchangeName;
-
-    @Value("${spring.rabbitmq.passenger.routing.key}")
-    private String passengerRoutingKey;
-
-    @Value("${spring.rabbitmq.passenger.queue}")
-    private String passengerQueueName;
 
     @Value("${spring.rabbitmq.user.update.routing.key}")
     private String userUpdateRoutingKey;
@@ -41,30 +31,28 @@ public class RabbitConfiguration {
     private String userDeleteQueueName;
 
     @Bean
-    public Queue queue() {
-        return new Queue(passengerQueueName, false);
+    public Queue userUpdateQueue() {
+        return new Queue(userUpdateQueueName, false);
+    }
+
+    @Bean
+    public Queue userDeleteQueue() {
+        return new Queue(userDeleteQueueName, false);
     }
 
     @Bean
     TopicExchange exchange() {
-        return new TopicExchange(ratingExchangeName);
+        return new TopicExchange(userExchangeName);
     }
 
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(passengerRoutingKey);
+    public Binding userUpdateBinding(Queue userUpdateQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(userUpdateQueue).to(exchange).with(userUpdateRoutingKey);
     }
 
     @Bean
-    public Declarables topicBindings() {
-        Queue topicQueueUpdateUsers = new Queue(userUpdateQueueName, false);
-        Queue topicQueueDeleteUsers = new Queue(userDeleteQueueName, false);
-
-        TopicExchange topicExchange = new TopicExchange(userExchangeName);
-
-        return new Declarables(topicQueueUpdateUsers, topicQueueDeleteUsers, topicExchange,
-                BindingBuilder.bind(topicQueueUpdateUsers).to(topicExchange).with(userUpdateRoutingKey),
-                BindingBuilder.bind(topicQueueDeleteUsers).to(topicExchange).with(userDeleteRoutingKey));
+    public Binding userDeleteBinding(Queue userDeleteQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(userDeleteQueue).to(exchange).with(userDeleteRoutingKey);
     }
 
     @Bean
