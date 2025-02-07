@@ -2,8 +2,8 @@ package com.modsen.passengerservice.service;
 
 import com.modsen.passengerservice.dto.PageDto;
 import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
-import com.modsen.passengerservice.dto.PassengerRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
+import com.modsen.passengerservice.dto.PassengerUpdateRequestDto;
 import com.modsen.passengerservice.dto.UserRatingDto;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public interface PassengerService{
 
     PassengerResponseDto addPassenger(PassengerCreateRequestDto requestDTO);
 
-    PassengerResponseDto updatePassenger(UUID id, PassengerRequestDto requestDTO);
+    PassengerResponseDto updatePassenger(UUID id, PassengerUpdateRequestDto requestDTO);
 
     void deletePassenger(UUID id);
 

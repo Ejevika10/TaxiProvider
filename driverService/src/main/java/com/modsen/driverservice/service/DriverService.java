@@ -1,8 +1,8 @@
 package com.modsen.driverservice.service;
 
 import com.modsen.driverservice.dto.DriverCreateRequestDto;
-import com.modsen.driverservice.dto.DriverRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
+import com.modsen.driverservice.dto.DriverUpdateRequestDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.dto.UserRatingDto;
 
@@ -24,7 +24,7 @@ public interface DriverService {
 
     DriverResponseDto createDriver(DriverCreateRequestDto driverRequestDTO);
 
-    DriverResponseDto updateDriver(UUID id, DriverRequestDto driverRequestDTO);
+    DriverResponseDto updateDriver(UUID id, DriverUpdateRequestDto driverRequestDTO);
 
     DriverResponseDto updateRating(UserRatingDto userRatingDto);
 

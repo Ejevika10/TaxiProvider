@@ -1,13 +1,13 @@
 package com.modsen.passengerservice.service.impl;
 
 import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
+import com.modsen.passengerservice.dto.PassengerUpdateRequestDto;
 import com.modsen.passengerservice.dto.UserDeleteRequestDto;
 import com.modsen.passengerservice.dto.UserRatingDto;
 import com.modsen.passengerservice.dto.UserUpdateRequestDto;
 import com.modsen.passengerservice.service.RabbitService;
 import com.modsen.passengerservice.util.AppConstants;
 import com.modsen.passengerservice.dto.PageDto;
-import com.modsen.passengerservice.dto.PassengerRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
 import com.modsen.passengerservice.exception.DuplicateFieldException;
 import com.modsen.passengerservice.exception.NotFoundException;
@@ -80,7 +80,7 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     @Transactional
-    public PassengerResponseDto updatePassenger(UUID id, PassengerRequestDto requestDTO) {
+    public PassengerResponseDto updatePassenger(UUID id, PassengerUpdateRequestDto requestDTO) {
         Passenger passengerToSave = findByIdOrThrow(id);
         Optional<Passenger> existingPassenger = passengerRepository.findByEmailAndDeletedIsFalse(requestDTO.email());
         if(existingPassenger.isPresent() && !existingPassenger.get().getId().equals(id)) {

@@ -1,12 +1,12 @@
 package com.modsen.driverservice.service.Impl;
 
 import com.modsen.driverservice.dto.DriverCreateRequestDto;
+import com.modsen.driverservice.dto.DriverUpdateRequestDto;
 import com.modsen.driverservice.dto.UserDeleteRequestDto;
 import com.modsen.driverservice.dto.UserRatingDto;
 import com.modsen.driverservice.dto.UserUpdateRequestDto;
 import com.modsen.driverservice.service.RabbitService;
 import com.modsen.driverservice.util.AppConstants;
-import com.modsen.driverservice.dto.DriverRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.exception.DuplicateFieldException;
@@ -80,7 +80,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
-    public DriverResponseDto updateDriver(UUID id, DriverRequestDto driverRequestDTO) {
+    public DriverResponseDto updateDriver(UUID id, DriverUpdateRequestDto driverRequestDTO) {
         Driver driverToSave = findByIdOrThrow(id);
         Optional<Driver> existingDriver = driverRepository.findByEmailAndDeletedIsFalse(driverRequestDTO.email());
         if(existingDriver.isPresent() && !existingDriver.get().getId().equals(id)) {

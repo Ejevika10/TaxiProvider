@@ -2,8 +2,8 @@ package com.modsen.passengerservice.controller;
 
 import com.modsen.passengerservice.dto.PageDto;
 import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
-import com.modsen.passengerservice.dto.PassengerRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
+import com.modsen.passengerservice.dto.PassengerUpdateRequestDto;
 import com.modsen.passengerservice.service.PassengerService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -55,7 +55,7 @@ public class PassengerController {
     @PutMapping("/{id}")
     public PassengerResponseDto updatePassenger(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
                                                     String id,
-                                                @Valid @RequestBody PassengerRequestDto passengerRequestDTO) {
+                                                @Valid @RequestBody PassengerUpdateRequestDto passengerRequestDTO) {
         return passengerService.updatePassenger(UUID.fromString(id), passengerRequestDTO);
     }
 
