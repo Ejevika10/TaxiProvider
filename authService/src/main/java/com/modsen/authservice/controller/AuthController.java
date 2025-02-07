@@ -5,6 +5,7 @@ import com.modsen.authservice.dto.LoginRequestDto;
 import com.modsen.authservice.dto.LoginResponseDto;
 import com.modsen.authservice.dto.PassengerResponseDto;
 import com.modsen.authservice.dto.RegisterRequestDto;
+import com.modsen.authservice.dto.UpdatePasswordRequestDto;
 import com.modsen.authservice.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,7 +13,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,5 +67,15 @@ public class AuthController implements AuthEndpoints {
                                                    @Valid @RequestBody RegisterRequestDto registerRequestDto) {
 
         return authService.registerPassenger(registerRequestDto, servletRequest, servletResponse);
+    }
+
+    @PutMapping("/password/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updatePassword (HttpServletRequest servletRequest,
+                                HttpServletResponse servletResponse,
+                                @RequestBody UpdatePasswordRequestDto updatePasswordRequestDto,
+                                @PathVariable String userId) {
+
+        authService.updatePassword(userId, updatePasswordRequestDto);
     }
 }

@@ -11,6 +11,7 @@ import com.modsen.authservice.dto.LoginResponseDto;
 import com.modsen.authservice.dto.PassengerCreateRequestDto;
 import com.modsen.authservice.dto.PassengerResponseDto;
 import com.modsen.authservice.dto.RegisterRequestDto;
+import com.modsen.authservice.dto.UpdatePasswordRequestDto;
 import com.modsen.authservice.dto.UserDeleteRequestDto;
 import com.modsen.authservice.dto.UserUpdateRequestDto;
 import com.modsen.authservice.exception.ErrorMessage;
@@ -61,7 +62,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponseDto login(LoginRequestDto request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
-        LoginResponseDto responseDto = getAccessToken(request);
+        LoginResponseDto responseDto = getAccessToken(request.username(), request.password());
 
         servletResponse.addHeader(OAuth2Constants.ACCESS_TOKEN, responseDto.access_token());
         servletResponse.addHeader(OAuth2Constants.EXPIRES_IN, String.valueOf(responseDto.expires_in()));
@@ -69,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
         return responseDto;
     }
 
-    private LoginResponseDto getAccessToken(LoginRequestDto request) {
+    private LoginResponseDto getAccessToken(String username, String password) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -77,8 +78,8 @@ public class AuthServiceImpl implements AuthService {
         requestBody.add(OAuth2Constants.GRANT_TYPE, OAuth2Constants.PASSWORD);
         requestBody.add(OAuth2Constants.CLIENT_ID, keycloakProperties.getClientId());
         requestBody.add(OAuth2Constants.CLIENT_SECRET, keycloakProperties.getClientSecret());
-        requestBody.add(OAuth2Constants.USERNAME, request.username());
-        requestBody.add(OAuth2Constants.PASSWORD, request.password());
+        requestBody.add(OAuth2Constants.USERNAME, username);
+        requestBody.add(OAuth2Constants.PASSWORD, password);
         log.info(keycloakProperties.getGetTokenUrl());
         ResponseEntity<LoginResponseDto> response = restTemplate.postForEntity (keycloakProperties.getGetTokenUrl(),
                 new HttpEntity<>(requestBody, headers), LoginResponseDto.class);
@@ -120,7 +121,7 @@ public class AuthServiceImpl implements AuthService {
     public DriverResponseDto registerDriver(RegisterRequestDto request,
                                             HttpServletRequest servletRequest,
                                             HttpServletResponse servletResponse) {
-        UserRepresentation user = getUserRepresentation(request);
+        UserRepresentation user = getRegisterUserRepresentation(request);
 
         RealmResource realmResource = keycloak.realm(keycloakProperties.getRealmName());
         UsersResource usersResource = realmResource.users();
@@ -168,10 +169,21 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public void updatePassword(String id, UpdatePasswordRequestDto updatePasswordRequestDto) {
+        RealmResource realmResource = keycloak.realm(keycloakProperties.getRealmName());
+        UsersResource usersResource = realmResource.users();
+        UserResource user = usersResource.get(id);
+        UserRepresentation userRepresentation = user.toRepresentation();
+
+        LoginResponseDto response = getAccessToken(userRepresentation.getUsername(), updatePasswordRequestDto.oldPassword());
+        user.resetPassword(getNewCredentials(updatePasswordRequestDto.newPassword()));
+    }
+
+    @Override
     public PassengerResponseDto registerPassenger(RegisterRequestDto request,
                                                   HttpServletRequest servletRequest,
                                                   HttpServletResponse servletResponse) {
-        UserRepresentation user = getUserRepresentation(request);
+        UserRepresentation user = getRegisterUserRepresentation(request);
 
         RealmResource realmResource = keycloak.realm(keycloakProperties.getRealmName());
         UsersResource usersResource = realmResource.users();
@@ -206,7 +218,7 @@ public class AuthServiceImpl implements AuthService {
         return passengerClientService.createPassenger(passengerRequestDto, "Bearer " + adminClientAccessToken);
     }
 
-    private static UserRepresentation getUserRepresentation(RegisterRequestDto request) {
+    private static UserRepresentation getRegisterUserRepresentation(RegisterRequestDto request) {
         UserRepresentation user = new UserRepresentation();
         user.setUsername(request.username());
         user.setEmail(request.email());
@@ -232,6 +244,14 @@ public class AuthServiceImpl implements AuthService {
         user.setEnabled(true);
 
         return user;
+    }
+
+    private static CredentialRepresentation getNewCredentials(String newPassword) {
+        CredentialRepresentation passwordCred = new CredentialRepresentation();
+        passwordCred.setValue(newPassword);
+        passwordCred.setTemporary(false);
+        passwordCred.setType(CredentialRepresentation.PASSWORD);
+        return passwordCred;
     }
 
     private static String getErrorMessage(String exception) {

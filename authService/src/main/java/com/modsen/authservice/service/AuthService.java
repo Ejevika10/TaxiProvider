@@ -5,6 +5,7 @@ import com.modsen.authservice.dto.LoginRequestDto;
 import com.modsen.authservice.dto.LoginResponseDto;
 import com.modsen.authservice.dto.PassengerResponseDto;
 import com.modsen.authservice.dto.RegisterRequestDto;
+import com.modsen.authservice.dto.UpdatePasswordRequestDto;
 import com.modsen.authservice.dto.UserDeleteRequestDto;
 import com.modsen.authservice.dto.UserUpdateRequestDto;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,4 +23,6 @@ public interface AuthService {
     void updateUser(UserUpdateRequestDto updateRequestDto);
 
     void deleteUser(UserDeleteRequestDto userDeleteRequestDto);
+
+    void updatePassword(String id, UpdatePasswordRequestDto updatePasswordRequestDto);
 }
