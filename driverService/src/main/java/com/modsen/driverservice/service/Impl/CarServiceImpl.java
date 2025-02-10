@@ -79,7 +79,7 @@ public class CarServiceImpl implements CarService {
     @Override
     @Transactional
     public CarResponseDto addCar(CarRequestDto carRequestDTO) {
-        Driver driver = findDriverByIdOrThrow(carRequestDTO.driverId());
+        Driver driver = findDriverByIdOrThrow(UUID.fromString(carRequestDTO.driverId()));
         if (carRepository.existsByNumberAndDeletedIsFalse(carRequestDTO.number())) {
             throw new DuplicateFieldException(AppConstants.CAR_NUMBER_EXIST);
         }
@@ -94,7 +94,7 @@ public class CarServiceImpl implements CarService {
     @Transactional
     public CarResponseDto updateCar(Long id, CarRequestDto carRequestDTO) {
         Car carToSave = findCarByIdOrThrow(id);
-        Driver driver = findDriverByIdOrThrow(carRequestDTO.driverId());
+        Driver driver = findDriverByIdOrThrow(UUID.fromString(carRequestDTO.driverId()));
         Optional<Car> existingCar = carRepository.findByNumberAndDeletedIsFalse(carRequestDTO.number());
         if(existingCar.isPresent() && !existingCar.get().getId().equals(id)) {
             throw new DuplicateFieldException(AppConstants.CAR_NUMBER_EXIST);

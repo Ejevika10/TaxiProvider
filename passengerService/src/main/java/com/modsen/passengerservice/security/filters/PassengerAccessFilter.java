@@ -1,7 +1,7 @@
 package com.modsen.passengerservice.security.filters;
 
 import com.modsen.passengerservice.exception.ForbiddenException;
-import com.modsen.passengerservice.service.PassengerService;
+import com.modsen.passengerservice.model.Role;
 import com.modsen.passengerservice.util.AppConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,13 +19,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.modsen.passengerservice.util.SecurityConstants.ROLE_ADMIN;
-
 @RequiredArgsConstructor
 @Slf4j
 public class PassengerAccessFilter extends OncePerRequestFilter {
-
-    private final PassengerService passengerService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -34,7 +30,7 @@ public class PassengerAccessFilter extends OncePerRequestFilter {
         if(request.getRequestURI().startsWith("/api/v1/passengers")) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            if (hasRole(auth, ROLE_ADMIN)) {
+            if (hasRole(auth, Role.ADMIN.getRole())) {
                 filterChain.doFilter(request, response);
                 return;
             }

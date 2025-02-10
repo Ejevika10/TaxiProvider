@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
-public record PassengerRequestDto(
+public record PassengerUpdateRequestDto(
     @NotBlank(message = "{passenger.name.mandatory}")
     @Size(min = 4, max = 100)
     String name,
@@ -19,7 +19,5 @@ public record PassengerRequestDto(
 
     @NotBlank(message = "{passenger.phone.mandatory}")
     @Pattern(regexp = AppConstants.PHONE_REGEXP, message = "{passenger.phone.invalid}")
-    String phone,
-
-    Double rating) {
+    String phone) {
 }

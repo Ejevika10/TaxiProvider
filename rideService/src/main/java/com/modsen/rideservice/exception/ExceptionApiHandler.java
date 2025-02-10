@@ -125,6 +125,13 @@ public class ExceptionApiHandler {
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
+    @ExceptionHandler(RequestBodyReadException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorMessage requestBodyReadException(RequestBodyReadException exception) {
+        return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage defException(Exception exception) {

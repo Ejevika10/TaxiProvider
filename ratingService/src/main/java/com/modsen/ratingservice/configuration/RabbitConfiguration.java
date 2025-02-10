@@ -50,7 +50,8 @@ public class RabbitConfiguration {
 
     @Bean
     public AmqpTemplate amqpTemplate(ConnectionFactory connectionFactory) {
-        final RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setObservationEnabled(true);
         template.setMessageConverter(jsonMessageConverter());
         return template;
     }

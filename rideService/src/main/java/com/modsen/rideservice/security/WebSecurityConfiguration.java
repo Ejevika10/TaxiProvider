@@ -72,6 +72,13 @@ public class WebSecurityConfiguration {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers(HttpMethod.POST, "/api/v1/rides").hasAnyRole(Role.PASSENGER.getRole(), Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/rides/{id}/accept").hasAnyRole(Role.DRIVER.getRole(), Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/rides/{id}/cancel").hasAnyRole(Role.DRIVER.getRole(), Role.PASSENGER.getRole(), Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/rides/{id}/state").hasAnyRole(Role.DRIVER.getRole(), Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/rides/{id}").hasRole(Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.GET, "/api/v1/rides").hasRole(Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.GET, "/api/v1/rides/passenger/{passengerId}").hasAnyRole(Role.PASSENGER.getRole(), Role.ADMIN.getRole())
+                                .requestMatchers(HttpMethod.GET, "/api/v1/rides/driver/{driverId}").hasAnyRole(Role.DRIVER.getRole(), Role.ADMIN.getRole())
                                 .requestMatchers("/api/*").authenticated()
                                 .anyRequest().permitAll()
                 )

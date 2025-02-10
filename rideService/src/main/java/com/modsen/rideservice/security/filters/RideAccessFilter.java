@@ -1,8 +1,10 @@
 package com.modsen.rideservice.security.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.modsen.rideservice.dto.RideRequestDto;
+import com.modsen.rideservice.dto.RideAcceptRequestDto;
+import com.modsen.rideservice.dto.RideCreateRequestDto;
 import com.modsen.rideservice.exception.ForbiddenException;
+import com.modsen.rideservice.exception.RequestBodyReadException;
 import com.modsen.rideservice.model.Role;
 import com.modsen.rideservice.service.RideService;
 import com.modsen.rideservice.util.AppConstants;
@@ -43,11 +45,6 @@ public class RideAccessFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (request.getMethod().equals("GET")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
             JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) auth;
             Map<String, Object> claims = jwtAuth.getToken().getClaims();
 
@@ -55,40 +52,55 @@ public class RideAccessFilter extends OncePerRequestFilter {
             log.info(userIdParam);
             UUID userId = UUID.fromString(userIdParam);
 
-            if(request.getRequestURI().endsWith("state")) {
-                if (hasRole(auth, Role.PASSENGER.getRole())) {
-                    UUID passengerId = getPassengerIdFromStatusRequestURI(request.getRequestURI());
-                    if (!Objects.equals(userId, passengerId)) {
-                        throw new ForbiddenException(AppConstants.FORBIDDEN);
-                    }
+            if (request.getMethod().equals("GET")) {
+                UUID userIdFromRequestURI = getUserIdFromRequestURI(request.getRequestURI());
+                if (!Objects.equals(userId, userIdFromRequestURI)) {
+                    throw new ForbiddenException(AppConstants.FORBIDDEN);
                 }
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            if(request.getRequestURI().endsWith("accept")) {
+                RideAcceptRequestDto rideAcceptRequestDto = getRideAcceptRequestDto(request);
+                UUID driverId = UUID.fromString(rideAcceptRequestDto.driverId());
+                if (!Objects.equals(userId, driverId)) {
+                    throw new ForbiddenException(AppConstants.FORBIDDEN);
+                }
+            }
+            else if(request.getRequestURI().endsWith("cancel")) {
                 if (hasRole(auth, Role.DRIVER.getRole())) {
                     UUID driverId = getDriverIdFromStatusRequestURI(request.getRequestURI());
                     if (!Objects.equals(userId, driverId)) {
                         throw new ForbiddenException(AppConstants.FORBIDDEN);
                     }
                 }
-            }
-            else {
-                RideRequestDto rideRequestDto = getRideRequestDto(request);
-                log.info(rideRequestDto.toString());
-                UUID passengerId = UUID.fromString(rideRequestDto.passengerId());
-                if (hasRole(auth, Role.PASSENGER.getRole()) &&
-                        (rideRequestDto.driverId() != null || !Objects.equals(userId, passengerId))) {
-                    throw new ForbiddenException(AppConstants.FORBIDDEN);
-                }
-                if (hasRole(auth, Role.DRIVER.getRole()) && rideRequestDto.driverId() != null) {
-                    UUID driverId = UUID.fromString(rideRequestDto.driverId());
-                    if(!Objects.equals(userId, driverId)) {
+                else if (hasRole(auth, Role.PASSENGER.getRole())) {
+                    UUID passengerId = getPassengerIdFromStatusRequestURI(request.getRequestURI());
+                    if (!Objects.equals(userId, passengerId)) {
                         throw new ForbiddenException(AppConstants.FORBIDDEN);
                     }
+                }
+            }
+            else if(request.getRequestURI().endsWith("state")) {
+                UUID driverId = getDriverIdFromStatusRequestURI(request.getRequestURI());
+                if (!Objects.equals(userId, driverId)) {
+                    throw new ForbiddenException(AppConstants.FORBIDDEN);
+                }
+            }
+            else {
+                RideCreateRequestDto rideCreateRequestDto = getRideCreateRequestDto(request);
+                log.info(rideCreateRequestDto.toString());
+                UUID passengerId = UUID.fromString(rideCreateRequestDto.passengerId());
+                if(!Objects.equals(userId, passengerId)) {
+                    throw new ForbiddenException(AppConstants.FORBIDDEN);
                 }
             }
         }
         filterChain.doFilter(request, response);
     }
 
-    private RideRequestDto getRideRequestDto(HttpServletRequest request) {
+    private RideCreateRequestDto getRideCreateRequestDto(HttpServletRequest request) {
         StringBuilder stringBuilder = new StringBuilder();
         String line;
 
@@ -97,9 +109,24 @@ public class RideAccessFilter extends OncePerRequestFilter {
                 stringBuilder.append(line);
             }
             String body = stringBuilder.toString();
-            return objectMapper.readValue(body, RideRequestDto.class);
+            return objectMapper.readValue(body, RideCreateRequestDto.class);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RequestBodyReadException(AppConstants.BODY_READ_ERROR);
+        }
+    }
+
+    private RideAcceptRequestDto getRideAcceptRequestDto(HttpServletRequest request) {
+        StringBuilder stringBuilder = new StringBuilder();
+        String line;
+
+        try (BufferedReader reader = request.getReader()) {
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+            String body = stringBuilder.toString();
+            return objectMapper.readValue(body, RideAcceptRequestDto.class);
+        } catch (IOException e) {
+            throw new RequestBodyReadException(AppConstants.BODY_READ_ERROR);
         }
     }
 
@@ -121,5 +148,11 @@ public class RideAccessFilter extends OncePerRequestFilter {
         String idParam = pathParts[pathParts.length - 2];
         Long rideId = Long.valueOf(idParam);
         return rideService.getRideById(rideId).passengerId();
+    }
+
+    private UUID getUserIdFromRequestURI(String requestURI) {
+        String[] pathParts = requestURI.split("/");
+        String idParam = pathParts[pathParts.length - 1];
+        return UUID.fromString(idParam);
     }
 }

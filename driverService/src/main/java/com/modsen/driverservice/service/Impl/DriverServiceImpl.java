@@ -1,9 +1,12 @@
 package com.modsen.driverservice.service.Impl;
 
 import com.modsen.driverservice.dto.DriverCreateRequestDto;
+import com.modsen.driverservice.dto.DriverUpdateRequestDto;
+import com.modsen.driverservice.dto.UserDeleteRequestDto;
 import com.modsen.driverservice.dto.UserRatingDto;
+import com.modsen.driverservice.dto.UserUpdateRequestDto;
+import com.modsen.driverservice.service.RabbitService;
 import com.modsen.driverservice.util.AppConstants;
-import com.modsen.driverservice.dto.DriverRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.exception.DuplicateFieldException;
@@ -33,6 +36,8 @@ public class DriverServiceImpl implements DriverService {
     private final DriverMapper driverMapper;
 
     private final DriverListMapper driverListMapper;
+
+    private final RabbitService rabbitService;
 
     private final PageMapper pageMapper;
 
@@ -75,7 +80,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
-    public DriverResponseDto updateDriver(UUID id, DriverRequestDto driverRequestDTO) {
+    public DriverResponseDto updateDriver(UUID id, DriverUpdateRequestDto driverRequestDTO) {
         Driver driverToSave = findByIdOrThrow(id);
         Optional<Driver> existingDriver = driverRepository.findByEmailAndDeletedIsFalse(driverRequestDTO.email());
         if(existingDriver.isPresent() && !existingDriver.get().getId().equals(id)) {
@@ -83,6 +88,13 @@ public class DriverServiceImpl implements DriverService {
         }
         driverMapper.updateDriver(driverToSave, driverRequestDTO);
         Driver driver = driverRepository.save(driverToSave);
+
+        UserUpdateRequestDto userUpdateRequestDto = new UserUpdateRequestDto(driver.getId().toString(),
+                driver.getName(),
+                driver.getEmail(),
+                driver.getPhone());
+        rabbitService.sendUpdateMessage(EXCHANGE_NAME, UPDATE_ROUTING_KEY, userUpdateRequestDto);
+
         return driverMapper.toDriverResponseDTO(driver);
     }
 
@@ -101,6 +113,9 @@ public class DriverServiceImpl implements DriverService {
         Driver driver = findByIdOrThrow(id);
         driver.setDeleted(true);
         driverRepository.save(driver);
+
+        UserDeleteRequestDto userDeleteRequestDto = new UserDeleteRequestDto(id.toString());
+        rabbitService.sendDeleteMessage(EXCHANGE_NAME, DELETE_ROUTING_KEY, userDeleteRequestDto);
     }
 
     private Driver findByIdOrThrow(UUID id) {

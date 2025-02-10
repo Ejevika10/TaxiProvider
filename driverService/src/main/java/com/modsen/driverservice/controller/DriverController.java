@@ -1,8 +1,8 @@
 package com.modsen.driverservice.controller;
 
 import com.modsen.driverservice.dto.DriverCreateRequestDto;
-import com.modsen.driverservice.dto.DriverRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
+import com.modsen.driverservice.dto.DriverUpdateRequestDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.service.DriverService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -57,7 +57,7 @@ public class DriverController {
     @PutMapping("/{id}")
     public DriverResponseDto updateDriver(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
                                               String id,
-                                          @Valid @RequestBody DriverRequestDto driverRequestDTO) {
+                                          @Valid @RequestBody DriverUpdateRequestDto driverRequestDTO) {
         return driverService.updateDriver(UUID.fromString(id), driverRequestDTO);
     }
 

@@ -3,6 +3,7 @@ package com.modsen.driverservice.configuration;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Declarables;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -15,14 +16,29 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfiguration {
-    @Value("${spring.rabbitmq.exchange}")
-    private String exchangeName;
+    @Value("${spring.rabbitmq.rating.exchange}")
+    private String ratingExchangeName;
+
+    @Value("${spring.rabbitmq.user.exchange}")
+    private String userExchangeName;
 
     @Value("${spring.rabbitmq.driver.routing.key}")
     private String driverRoutingKey;
 
     @Value("${spring.rabbitmq.driver.queue}")
     private String driverQueueName;
+
+    @Value("${spring.rabbitmq.user.update.routing.key}")
+    private String userUpdateRoutingKey;
+
+    @Value("${spring.rabbitmq.user.update.queue}")
+    private String userUpdateQueueName;
+
+    @Value("${spring.rabbitmq.user.delete.routing.key}")
+    private String userDeleteRoutingKey;
+
+    @Value("${spring.rabbitmq.user.delete.queue}")
+    private String userDeleteQueueName;
 
     @Bean
     public Queue queue() {
@@ -31,12 +47,24 @@ public class RabbitConfiguration {
 
     @Bean
     TopicExchange exchange() {
-        return new TopicExchange(exchangeName);
+        return new TopicExchange(ratingExchangeName);
     }
 
     @Bean
     public Binding binding(Queue queue, TopicExchange exchange) {
         return BindingBuilder.bind(queue).to(exchange).with(driverRoutingKey);
+    }
+
+    @Bean
+    public Declarables topicBindings() {
+        Queue topicQueueUpdateUsers = new Queue(userUpdateQueueName, false);
+        Queue topicQueueDeleteUsers = new Queue(userDeleteQueueName, false);
+
+        TopicExchange topicExchange = new TopicExchange(userExchangeName);
+
+        return new Declarables(topicQueueUpdateUsers, topicQueueDeleteUsers, topicExchange,
+                BindingBuilder.bind(topicQueueUpdateUsers).to(topicExchange).with(userUpdateRoutingKey),
+                BindingBuilder.bind(topicQueueDeleteUsers).to(topicExchange).with(userDeleteRoutingKey));
     }
 
     @Bean
@@ -47,6 +75,7 @@ public class RabbitConfiguration {
     @Bean
     public AmqpTemplate amqpTemplate(ConnectionFactory connectionFactory) {
         final RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setObservationEnabled(true);
         template.setMessageConverter(jsonMessageConverter());
         return template;
     }

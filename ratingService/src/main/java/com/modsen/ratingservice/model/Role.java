@@ -6,9 +6,9 @@ import com.modsen.ratingservice.exception.InvalidFieldValueException;
 import com.modsen.ratingservice.util.AppConstants;
 
 public enum Role {
-    DRIVER("driver"),
-    PASSENGER("passenger"),
-    ADMIN("admin");
+    DRIVER("DRIVER"),
+    PASSENGER("PASSENGER"),
+    ADMIN("ADMIN");
 
     private final String role;
 

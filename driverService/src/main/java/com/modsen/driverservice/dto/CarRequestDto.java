@@ -5,8 +5,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
-import java.util.UUID;
-
 import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
 
 @Builder
@@ -28,6 +26,6 @@ public record CarRequestDto(
     String number,
 
     @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
-    UUID driverId){
+    String driverId){
 
 }

@@ -5,6 +5,8 @@ import com.modsen.rideservice.client.passenger.PassengerClientService;
 import com.modsen.rideservice.dto.DriverResponseDto;
 import com.modsen.rideservice.dto.PageDto;
 import com.modsen.rideservice.dto.PassengerResponseDto;
+import com.modsen.rideservice.dto.RideAcceptRequestDto;
+import com.modsen.rideservice.dto.RideCreateRequestDto;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
@@ -88,15 +90,30 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    public RideResponseDto createRide(RideRequestDto rideRequestDto, String authorizationToken) {
+    public RideResponseDto createRide(RideCreateRequestDto rideRequestDto, String authorizationToken) {
         PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId(), authorizationToken);
-        if(rideRequestDto.driverId() != null) {
-            DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId(), authorizationToken);
-        }
         Ride rideToSave = rideMapper.toRide(rideRequestDto);
         rideToSave.setRideState(RideState.CREATED);
         rideToSave.setRideDateTime(LocalDateTime.now());
         rideToSave.setRideCost(rideCostService.getRideCost());
+        Ride ride = rideRepository.save(rideToSave);
+        return rideMapper.toRideResponseDto(ride);
+    }
+
+    @Override
+    public RideResponseDto acceptRide(Long id, RideAcceptRequestDto rideRequestDto, String authorizationToken) {
+        Ride rideToSave = findByIdOrThrow(id);
+        DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId(), authorizationToken);
+        rideToSave.setRideState(RideState.ACCEPTED);
+        rideToSave.setDriverId(UUID.fromString(rideRequestDto.driverId()));
+        Ride ride = rideRepository.save(rideToSave);
+        return rideMapper.toRideResponseDto(ride);
+    }
+
+    @Override
+    public RideResponseDto cancelRide(Long id, String authorizationToken) {
+        Ride rideToSave = findByIdOrThrow(id);
+        rideToSave.setRideState(RideState.CANCELLED);
         Ride ride = rideRepository.save(rideToSave);
         return rideMapper.toRideResponseDto(ride);
     }
