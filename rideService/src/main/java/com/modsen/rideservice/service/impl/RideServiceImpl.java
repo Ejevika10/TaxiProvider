@@ -88,20 +88,6 @@ public class RideServiceImpl implements RideService {
         return rideMapper.toRideResponseDto(ride);
     }
 
-    @Transactional
-    public RideResponseDto createRide1(RideRequestDto rideRequestDto, String authorizationToken) {
-        PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId(), authorizationToken);
-        if(rideRequestDto.driverId() != null) {
-            DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId(), authorizationToken);
-        }
-        Ride rideToSave = rideMapper.toRide(rideRequestDto);
-        rideToSave.setRideState(RideState.CREATED);
-        rideToSave.setRideDateTime(LocalDateTime.now());
-        rideToSave.setRideCost(rideCostService.getRideCost());
-        Ride ride = rideRepository.save(rideToSave);
-        return rideMapper.toRideResponseDto(ride);
-    }
-
     @Override
     @Transactional
     public RideResponseDto createRide(RideCreateRequestDto rideRequestDto, String authorizationToken) {

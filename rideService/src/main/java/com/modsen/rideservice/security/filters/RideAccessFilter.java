@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsen.rideservice.dto.RideAcceptRequestDto;
 import com.modsen.rideservice.dto.RideCreateRequestDto;
 import com.modsen.rideservice.exception.ForbiddenException;
+import com.modsen.rideservice.exception.RequestBodyReadException;
 import com.modsen.rideservice.model.Role;
 import com.modsen.rideservice.service.RideService;
 import com.modsen.rideservice.util.AppConstants;
@@ -110,7 +111,7 @@ public class RideAccessFilter extends OncePerRequestFilter {
             String body = stringBuilder.toString();
             return objectMapper.readValue(body, RideCreateRequestDto.class);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RequestBodyReadException(AppConstants.BODY_READ_ERROR);
         }
     }
 
@@ -125,7 +126,7 @@ public class RideAccessFilter extends OncePerRequestFilter {
             String body = stringBuilder.toString();
             return objectMapper.readValue(body, RideAcceptRequestDto.class);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RequestBodyReadException(AppConstants.BODY_READ_ERROR);
         }
     }
 
