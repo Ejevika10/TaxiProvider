@@ -1,6 +1,6 @@
 package com.modsen.passengerservice.security;
 
-import com.modsen.passengerservice.exception.UnauthorizedException;
+import com.modsen.exceptionstarter.exception.UnauthorizedException;
 import com.modsen.passengerservice.util.AppConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

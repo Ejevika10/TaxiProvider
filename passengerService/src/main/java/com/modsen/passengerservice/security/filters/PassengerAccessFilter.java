@@ -1,6 +1,6 @@
 package com.modsen.passengerservice.security.filters;
 
-import com.modsen.passengerservice.exception.ForbiddenException;
+import com.modsen.exceptionstarter.exception.ForbiddenException;
 import com.modsen.passengerservice.model.Role;
 import com.modsen.passengerservice.util.AppConstants;
 import jakarta.servlet.FilterChain;
