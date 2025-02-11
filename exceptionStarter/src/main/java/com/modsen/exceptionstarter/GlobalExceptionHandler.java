@@ -68,7 +68,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidFieldValueException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorMessage invalidFieldValueException(InvalidFieldValueException exception) {
-        return new ErrorMessage(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
+        return new ErrorMessage(HttpStatus.BAD_REQUEST.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
     @ExceptionHandler(InvalidStateException.class)

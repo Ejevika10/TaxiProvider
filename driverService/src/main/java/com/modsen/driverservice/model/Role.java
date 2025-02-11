@@ -29,6 +29,6 @@ public enum Role {
                 return state;
             }
         }
-        throw new InvalidFieldValueException(AppConstants.INVALID_ROLE_VALUE + ": " + value);
+        throw new InvalidFieldValueException(AppConstants.INVALID_ROLE_VALUE);
     }
 }
