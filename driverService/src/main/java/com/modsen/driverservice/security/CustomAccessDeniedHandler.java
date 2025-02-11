@@ -1,7 +1,7 @@
 package com.modsen.driverservice.security;
 
-import com.modsen.driverservice.exception.ForbiddenException;
 import com.modsen.driverservice.util.AppConstants;
+import com.modsen.exceptionstarter.exception.ForbiddenException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
