@@ -1,6 +1,6 @@
 package com.modsen.ratingservice.security;
 
-import com.modsen.ratingservice.exception.UnauthorizedException;
+import com.modsen.exceptionstarter.exception.UnauthorizedException;
 import com.modsen.ratingservice.util.AppConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

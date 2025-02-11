@@ -1,10 +1,10 @@
 package com.modsen.ratingservice.service.impl;
 
+import com.modsen.exceptionstarter.exception.NotFoundException;
 import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
 import com.modsen.ratingservice.dto.UserRatingDto;
-import com.modsen.ratingservice.exception.NotFoundException;
 import com.modsen.ratingservice.mapper.PageMapper;
 import com.modsen.ratingservice.mapper.RatingListMapper;
 import com.modsen.ratingservice.mapper.RatingMapper;
