@@ -1,10 +1,10 @@
-package com.modsen.driverservice.exception;
+package com.modsen.exceptionstarter.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class InvalidFieldValueException extends RuntimeException {
+public class DuplicateFieldException extends RuntimeException {
     private String message;
 }

@@ -1,10 +1,10 @@
-package com.modsen.ratingservice.exception;
+package com.modsen.exceptionstarter.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class ServiceUnavailableException extends RuntimeException {
+public class RequestBodyReadException extends RuntimeException {
     private String message;
 }

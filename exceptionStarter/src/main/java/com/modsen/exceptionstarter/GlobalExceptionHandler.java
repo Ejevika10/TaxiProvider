@@ -1,6 +1,18 @@
-package com.modsen.rideservice.exception;
+package com.modsen.exceptionstarter;
 
-import com.modsen.rideservice.util.AppConstants;
+import com.modsen.exceptionstarter.exception.ClientException;
+import com.modsen.exceptionstarter.exception.DuplicateFieldException;
+import com.modsen.exceptionstarter.exception.ForbiddenException;
+import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
+import com.modsen.exceptionstarter.exception.InvalidStateException;
+import com.modsen.exceptionstarter.exception.KeycloakException;
+import com.modsen.exceptionstarter.exception.NotFoundException;
+import com.modsen.exceptionstarter.exception.RequestBodyReadException;
+import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
+import com.modsen.exceptionstarter.exception.UnauthorizedException;
+import com.modsen.exceptionstarter.message.ErrorMessage;
+import com.modsen.exceptionstarter.message.ListErrorMessage;
+import com.modsen.exceptionstarter.util.AppConstants;
 import feign.RetryableException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import jakarta.validation.ConstraintViolationException;
@@ -19,10 +31,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.List;
 import java.util.Locale;
 
-@Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
-public class ExceptionApiHandler {
+@Slf4j
+public class GlobalExceptionHandler {
+
     private final MessageSource messageSource;
 
     @ExceptionHandler(NotFoundException.class)
@@ -39,19 +52,6 @@ public class ExceptionApiHandler {
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
 
-    @ExceptionHandler(InvalidStateException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorMessage invalidStateException(InvalidStateException exception) {
-        return new ErrorMessage(HttpStatus.CONFLICT.value(),
-                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
-    }
-
-    @ExceptionHandler(InvalidFieldValueException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorMessage invalidFieldValueException(InvalidFieldValueException exception) {
-        return new ErrorMessage(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
-    }
-
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ListErrorMessage constraintViolationException(ConstraintViolationException exception) {
@@ -65,11 +65,26 @@ public class ExceptionApiHandler {
         return new ListErrorMessage(HttpStatus.BAD_REQUEST.value(), errors);
     }
 
+    @ExceptionHandler(InvalidFieldValueException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorMessage invalidFieldValueException(InvalidFieldValueException exception) {
+        return new ErrorMessage(HttpStatus.BAD_REQUEST.value(), exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorMessage invalidStateException(InvalidStateException exception) {
+        return new ErrorMessage(HttpStatus.CONFLICT.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ListErrorMessage methodArgumentNotValidException(MethodArgumentNotValidException exception) {
         List<String> errors;
-        errors = exception.getBindingResult().getFieldErrors().stream().map(error -> error.getField() + ": " + error.getDefaultMessage()).toList();
+        errors = exception.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .toList();
         return new ListErrorMessage(HttpStatus.BAD_REQUEST.value(), errors);
     }
 
@@ -81,11 +96,17 @@ public class ExceptionApiHandler {
 
     @ExceptionHandler(ClientException.class)
     public ResponseEntity<ErrorMessage> clientException(ClientException exception) {
+        log.info(exception.getErrorMessage().errorMessage());
         return ResponseEntity.status(exception.getErrorMessage().errorCode())
                 .body(exception.getErrorMessage());
     }
 
-    //thrown when circuit breaker is open
+    @ExceptionHandler(KeycloakException.class)
+    public ResponseEntity<ErrorMessage> keycloakException(KeycloakException exception) {
+        return ResponseEntity.status(exception.getErrorMessage().errorCode())
+                .body(exception.getErrorMessage());
+    }
+
     @ExceptionHandler(CallNotPermittedException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorMessage circuitBreakerException(CallNotPermittedException exception) {
@@ -94,7 +115,10 @@ public class ExceptionApiHandler {
                         new Object[]{}, Locale.getDefault()));
     }
 
-    //thrown when circuit breaker is closed and feign client is trying to send request to non-existent service
+    /**
+     * thrown when circuit breaker is closed and feign client is trying to send request to non-existent service
+     * @author ejevika
+     */
     @ExceptionHandler(RetryableException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorMessage serviceInstanceWasntResolvedException(RetryableException exception) {
@@ -103,17 +127,10 @@ public class ExceptionApiHandler {
                         new Object[]{}, Locale.getDefault()));
     }
 
-    //any unknown exception from feign client
-    @ExceptionHandler(ServiceUnavailableException.class)
-    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    public ErrorMessage serviceUnavailableException(ServiceUnavailableException exception) {
-        return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(),
-                messageSource.getMessage(exception.getMessage(), new Object[]{}, Locale.getDefault()));
-    }
-
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorMessage forbiddenException(ForbiddenException exception) {
+        log.info("ForbiddenException handling");
         return new ErrorMessage(HttpStatus.FORBIDDEN.value(),
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
@@ -121,8 +138,20 @@ public class ExceptionApiHandler {
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorMessage unauthorizedException(UnauthorizedException exception) {
+        log.info("UnauthorizedException handling");
         return new ErrorMessage(HttpStatus.UNAUTHORIZED.value(),
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
+    }
+
+    /**
+     * any unknown exception from feign client
+     * @author ejevika
+     */
+    @ExceptionHandler(ServiceUnavailableException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorMessage serviceUnavailableException(ServiceUnavailableException exception) {
+        return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(),
+                messageSource.getMessage(exception.getMessage(), new Object[]{}, Locale.getDefault()));
     }
 
     @ExceptionHandler(RequestBodyReadException.class)

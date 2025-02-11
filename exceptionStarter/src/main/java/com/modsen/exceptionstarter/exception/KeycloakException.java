@@ -1,5 +1,6 @@
-package com.modsen.authservice.exception;
+package com.modsen.exceptionstarter.exception;
 
+import com.modsen.exceptionstarter.message.ErrorMessage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

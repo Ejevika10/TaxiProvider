@@ -1,10 +1,10 @@
-package com.modsen.rideservice.exception;
+package com.modsen.exceptionstarter.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class RequestBodyReadException extends RuntimeException {
+public class InvalidFieldValueException extends RuntimeException {
     private String message;
 }

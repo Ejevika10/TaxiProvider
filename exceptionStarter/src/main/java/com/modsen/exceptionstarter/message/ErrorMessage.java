@@ -1,4 +1,4 @@
-package com.modsen.rideservice.exception;
+package com.modsen.exceptionstarter.message;
 
 public record ErrorMessage (
     int errorCode,

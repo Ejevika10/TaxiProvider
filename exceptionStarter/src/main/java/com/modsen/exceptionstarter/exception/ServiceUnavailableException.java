@@ -1,10 +1,10 @@
-package com.modsen.driverservice.exception;
+package com.modsen.exceptionstarter.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class ForbiddenException extends RuntimeException {
+public class ServiceUnavailableException extends RuntimeException {
     private String message;
 }
