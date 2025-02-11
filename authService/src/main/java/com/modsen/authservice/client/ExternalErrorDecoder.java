@@ -1,10 +1,10 @@
 package com.modsen.authservice.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.modsen.authservice.exception.ClientException;
-import com.modsen.authservice.exception.ErrorMessage;
-import com.modsen.authservice.exception.ServiceUnavailableException;
 import com.modsen.authservice.util.AppConstants;
+import com.modsen.exceptionstarter.exception.ClientException;
+import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
+import com.modsen.exceptionstarter.message.ErrorMessage;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;

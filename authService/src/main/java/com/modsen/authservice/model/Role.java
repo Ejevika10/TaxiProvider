@@ -2,8 +2,8 @@ package com.modsen.authservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.modsen.authservice.exception.InvalidFieldValueException;
 import com.modsen.authservice.util.AppConstants;
+import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
 
 public enum Role {
     DRIVER("driver"),
