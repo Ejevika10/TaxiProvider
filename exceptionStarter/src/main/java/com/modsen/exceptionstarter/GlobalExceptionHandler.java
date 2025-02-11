@@ -110,9 +110,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CallNotPermittedException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorMessage circuitBreakerException(CallNotPermittedException exception) {
-        return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(),
-                messageSource.getMessage(AppConstants.SERVICE_UNAVAILABLE,
-                        new Object[]{}, Locale.getDefault()));
+        return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(), AppConstants.SERVICE_UNAVAILABLE);
     }
 
     /**
@@ -122,9 +120,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RetryableException.class)
     @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
     public ErrorMessage serviceInstanceWasntResolvedException(RetryableException exception) {
-        return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(),
-                messageSource.getMessage(AppConstants.SERVICE_UNAVAILABLE,
-                        new Object[]{}, Locale.getDefault()));
+        return new ErrorMessage(HttpStatus.SERVICE_UNAVAILABLE.value(), AppConstants.SERVICE_UNAVAILABLE);
     }
 
     @ExceptionHandler(ForbiddenException.class)
@@ -165,7 +161,6 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage defException(Exception exception) {
         log.info(exception.getMessage());
-        return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                messageSource.getMessage(AppConstants.INTERNAL_SERVER_ERROR, new Object[]{}, Locale.getDefault()));
+        return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), AppConstants.INTERNAL_SERVER_ERROR);
     }
 }
