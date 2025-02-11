@@ -1,9 +1,9 @@
 package com.modsen.rideservice.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.modsen.rideservice.exception.ClientException;
-import com.modsen.rideservice.exception.ErrorMessage;
-import com.modsen.rideservice.exception.ServiceUnavailableException;
+import com.modsen.exceptionstarter.exception.ClientException;
+import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
+import com.modsen.exceptionstarter.message.ErrorMessage;
 import com.modsen.rideservice.util.AppConstants;
 import feign.Response;
 import feign.codec.ErrorDecoder;

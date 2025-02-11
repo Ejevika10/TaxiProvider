@@ -1,6 +1,6 @@
 package com.modsen.rideservice.security;
 
-import com.modsen.rideservice.exception.ForbiddenException;
+import com.modsen.exceptionstarter.exception.ForbiddenException;
 import com.modsen.rideservice.util.AppConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

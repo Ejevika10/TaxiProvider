@@ -2,7 +2,7 @@ package com.modsen.rideservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.modsen.rideservice.exception.InvalidFieldValueException;
+import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
 import com.modsen.rideservice.util.AppConstants;
 
 public enum Role {

@@ -1,6 +1,6 @@
 package com.modsen.rideservice.security;
 
-import com.modsen.rideservice.exception.UnauthorizedException;
+import com.modsen.exceptionstarter.exception.UnauthorizedException;
 import com.modsen.rideservice.util.AppConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
