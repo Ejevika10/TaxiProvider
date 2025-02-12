@@ -2,8 +2,8 @@ package com.modsen.driverservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.modsen.driverservice.exception.InvalidFieldValueException;
 import com.modsen.driverservice.util.AppConstants;
+import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
 
 public enum Role {
     DRIVER("DRIVER"),
@@ -29,6 +29,6 @@ public enum Role {
                 return state;
             }
         }
-        throw new InvalidFieldValueException(AppConstants.INVALID_ROLE_VALUE + ": " + value);
+        throw new InvalidFieldValueException(AppConstants.INVALID_ROLE_VALUE);
     }
 }

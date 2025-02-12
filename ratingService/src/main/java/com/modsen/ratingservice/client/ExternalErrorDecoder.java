@@ -1,9 +1,9 @@
 package com.modsen.ratingservice.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.modsen.ratingservice.exception.ClientException;
-import com.modsen.ratingservice.exception.ErrorMessage;
-import com.modsen.ratingservice.exception.ServiceUnavailableException;
+import com.modsen.exceptionstarter.exception.ClientException;
+import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
+import com.modsen.exceptionstarter.message.ErrorMessage;
 import com.modsen.ratingservice.util.AppConstants;
 import feign.Response;
 import feign.codec.ErrorDecoder;

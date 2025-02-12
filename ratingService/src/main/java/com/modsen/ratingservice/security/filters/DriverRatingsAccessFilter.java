@@ -1,10 +1,10 @@
 package com.modsen.ratingservice.security.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.modsen.exceptionstarter.exception.ForbiddenException;
 import com.modsen.ratingservice.client.ride.RideClientService;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RideResponseDto;
-import com.modsen.ratingservice.exception.ForbiddenException;
 import com.modsen.ratingservice.model.Role;
 import com.modsen.ratingservice.util.AppConstants;
 import jakarta.servlet.FilterChain;

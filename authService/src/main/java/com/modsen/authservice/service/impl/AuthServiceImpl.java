@@ -14,11 +14,14 @@ import com.modsen.authservice.dto.RegisterRequestDto;
 import com.modsen.authservice.dto.UpdatePasswordRequestDto;
 import com.modsen.authservice.dto.UserDeleteRequestDto;
 import com.modsen.authservice.dto.UserUpdateRequestDto;
-import com.modsen.authservice.exception.ErrorMessage;
-import com.modsen.authservice.exception.KeycloakException;
 import com.modsen.authservice.model.Role;
 import com.modsen.authservice.service.AuthService;
 import com.modsen.authservice.configuration.KeycloakProperties;
+import com.modsen.authservice.util.AppConstants;
+import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
+import com.modsen.exceptionstarter.exception.KeycloakException;
+import com.modsen.exceptionstarter.exception.NotFoundException;
+import com.modsen.exceptionstarter.message.ErrorMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.Response;
@@ -42,6 +45,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
@@ -80,11 +84,13 @@ public class AuthServiceImpl implements AuthService {
         requestBody.add(OAuth2Constants.CLIENT_SECRET, keycloakProperties.getClientSecret());
         requestBody.add(OAuth2Constants.USERNAME, username);
         requestBody.add(OAuth2Constants.PASSWORD, password);
-        log.info(keycloakProperties.getGetTokenUrl());
-        ResponseEntity<LoginResponseDto> response = restTemplate.postForEntity (keycloakProperties.getGetTokenUrl(),
-                new HttpEntity<>(requestBody, headers), LoginResponseDto.class);
-
-        return response.getBody();
+        try {
+            ResponseEntity<LoginResponseDto> response = restTemplate.postForEntity (keycloakProperties.getGetTokenUrl(),
+                    new HttpEntity<>(requestBody, headers), LoginResponseDto.class);
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            throw new NotFoundException(AppConstants.USER_DOESNT_EXIST);
+        }
     }
 
     @Override
@@ -112,8 +118,7 @@ public class AuthServiceImpl implements AuthService {
                     new HttpEntity<>(requestBody, headers), LoginResponseDto.class);
             return response.getBody();
         } catch (Exception e) {
-            throw new KeycloakException(
-                    new ErrorMessage(404,e.getMessage()));
+            throw new InvalidFieldValueException(AppConstants.INVALID_REFRESH_TOKEN);
         }
     }
 

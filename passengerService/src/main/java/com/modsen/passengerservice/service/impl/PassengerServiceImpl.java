@@ -1,5 +1,7 @@
 package com.modsen.passengerservice.service.impl;
 
+import com.modsen.exceptionstarter.exception.DuplicateFieldException;
+import com.modsen.exceptionstarter.exception.NotFoundException;
 import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
 import com.modsen.passengerservice.dto.PassengerUpdateRequestDto;
 import com.modsen.passengerservice.dto.UserDeleteRequestDto;
@@ -9,8 +11,6 @@ import com.modsen.passengerservice.service.RabbitService;
 import com.modsen.passengerservice.util.AppConstants;
 import com.modsen.passengerservice.dto.PageDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
-import com.modsen.passengerservice.exception.DuplicateFieldException;
-import com.modsen.passengerservice.exception.NotFoundException;
 import com.modsen.passengerservice.mapper.PageMapper;
 import com.modsen.passengerservice.mapper.PassengerListMapper;
 import com.modsen.passengerservice.mapper.PassengerMapper;

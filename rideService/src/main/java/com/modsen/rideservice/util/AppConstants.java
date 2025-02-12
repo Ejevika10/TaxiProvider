@@ -10,11 +10,9 @@ public final class AppConstants {
 
     public static final String RIDE_NOT_FOUND = "ride.notfound";
 
-    public static final String INTERNAL_SERVER_ERROR = "internal.server.error";
+    public static final String INVALID_STATE_VALUE = "invalid.state";
 
-    public static final String INVALID_STATE_VALUE = "Invalid value for State";
-
-    public static final String INVALID_ROLE_VALUE = "Invalid value for User Role";
+    public static final String INVALID_ROLE_VALUE = "invalid.user.role";
 
     public static final String STATE_VALUE_ERROR = "ride.state.error";
 

@@ -28,6 +28,7 @@
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <cucumber.version>7.19.0</cucumber.version>
         <loki.version>1.4.1</loki.version>
+        <exception-spring-boot-starter.version>0.0.1-SNAPSHOT</exception-spring-boot-starter.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -48,6 +49,11 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>com.modsen</groupId>
+            <artifactId>exception-spring-boot-starter</artifactId>
+            <version>${exception-spring-boot-starter.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>

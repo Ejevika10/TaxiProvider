@@ -1,8 +1,8 @@
 package com.modsen.driverservice.security.filters;
 
-import com.modsen.driverservice.exception.ForbiddenException;
 import com.modsen.driverservice.model.Role;
 import com.modsen.driverservice.util.AppConstants;
+import com.modsen.exceptionstarter.exception.ForbiddenException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
