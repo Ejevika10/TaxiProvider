@@ -31,12 +31,13 @@
         <keycloak-admin-client.version>26.0.3</keycloak-admin-client.version>
         <resteasy-client.version>6.2.9.Final</resteasy-client.version>
         <loki.version>1.4.1</loki.version>
+        <exception-spring-boot-starter.version>0.0.1-SNAPSHOT</exception-spring-boot-starter.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>com.modsen</groupId>
             <artifactId>exception-spring-boot-starter</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${exception-spring-boot-starter.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
