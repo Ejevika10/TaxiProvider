@@ -1,0 +1,2 @@
+TRUNCATE TABLE passenger;
+INSERT INTO passenger (id, name, email, phone, rating, deleted) VALUES ('00000000-0000-0001-0000-000000000002', 'passenger', 'passenger@mail.ru', '71234567890', '0.0', 'False')

@@ -1,10 +1,10 @@
 Feature: Ride API
   Scenario: Create ride
-    Given Ride request dto
+    Given Access token
+    And Ride create request dto
     """
         {
-        "driverId": 1,
-        "passengerId": 1,
+        "passengerId": "00000000-0000-0001-0000-000000000002",
         "sourceAddress": "Source address",
         "destinationAddress": "Destination address"
         }
@@ -15,8 +15,8 @@ Feature: Ride API
     """
         {
         "id": 1,
-        "driverId": 1,
-        "passengerId": 1,
+        "driverId": null,
+        "passengerId": "00000000-0000-0001-0000-000000000002",
         "sourceAddress": "Source address",
         "destinationAddress": "Destination address",
         "rideState": "Created",
@@ -24,7 +24,33 @@ Feature: Ride API
         "rideCost": 9884
         }
     """
+
+  Scenario: Accept ride
+    Given Access token
+    And Ride accept request dto
+    """
+        {
+        "driverId": "00000000-0000-0001-0000-000000000001"
+        }
+    """
+    When Accept ride with id 1
+    Then Response status is 200
+    And Response body contains Ride response dto
+    """
+        {
+        "id": 1,
+        "driverId": "00000000-0000-0001-0000-000000000001",
+        "passengerId": "00000000-0000-0001-0000-000000000002",
+        "sourceAddress": "Source address",
+        "destinationAddress": "Destination address",
+        "rideState": "Accepted",
+        "rideDateTime": "2024-11-26T00:30:13.84088",
+        "rideCost": 9884
+        }
+    """
+
   Scenario: Get page of rides
+    Given Access token
     When Get page of rides
     Then Response status is 200
     And Response body contains Page dto
@@ -37,11 +63,11 @@ Feature: Ride API
           "content": [
               {
                   "id": 1,
-                  "driverId": 1,
-                  "passengerId": 1,
+                  "driverId": "00000000-0000-0001-0000-000000000001",
+                  "passengerId": "00000000-0000-0001-0000-000000000002",
                   "sourceAddress": "Source address",
                   "destinationAddress": "Destination address",
-                  "rideState": "Created",
+                  "rideState": "Accepted",
                   "rideDateTime": "2024-11-26T00:30:13.84088",
                   "rideCost": 1894
               }
@@ -49,7 +75,8 @@ Feature: Ride API
         }
     """
   Scenario: Get page of ride by driver id
-    When Get page of rides by driver id 1
+    Given Access token
+    When Get page of rides by driver id "00000000-0000-0001-0000-000000000001"
     Then Response status is 200
     And Response body contains Page dto
     """
@@ -61,11 +88,11 @@ Feature: Ride API
           "content": [
               {
                   "id": 1,
-                  "driverId": 1,
-                  "passengerId": 1,
+                  "driverId": "00000000-0000-0001-0000-000000000001",
+                  "passengerId": "00000000-0000-0001-0000-000000000002",
                   "sourceAddress": "Source address",
                   "destinationAddress": "Destination address",
-                  "rideState": "Created",
+                  "rideState": "Accepted",
                   "rideDateTime": "2024-11-26T00:30:13.84088",
                   "rideCost": 1894
               }
@@ -74,7 +101,8 @@ Feature: Ride API
     """
 
   Scenario: Get page of ride by passenger id
-    When Get page of rides by passenger id 1
+    Given Access token
+    When Get page of rides by passenger id "00000000-0000-0001-0000-000000000002"
     Then Response status is 200
     And Response body contains Page dto
     """
@@ -86,11 +114,11 @@ Feature: Ride API
           "content": [
               {
                   "id": 1,
-                  "driverId": 1,
-                  "passengerId": 1,
+                  "driverId": "00000000-0000-0001-0000-000000000001",
+                  "passengerId": "00000000-0000-0001-0000-000000000002",
                   "sourceAddress": "Source address",
                   "destinationAddress": "Destination address",
-                  "rideState": "Created",
+                  "rideState": "Accepted",
                   "rideDateTime": "2024-11-26T00:30:13.84088",
                   "rideCost": 1894
               }
@@ -99,27 +127,29 @@ Feature: Ride API
     """
 
   Scenario: Get ride by id
+    Given Access token
     When Get ride by id 1
     Then Response status is 200
     And Response body contains Ride response dto
     """
         {
         "id": 1,
-        "driverId": 1,
-        "passengerId": 1,
+        "driverId": "00000000-0000-0001-0000-000000000001",
+        "passengerId": "00000000-0000-0001-0000-000000000002",
         "sourceAddress": "Source address",
         "destinationAddress": "Destination address",
-        "rideState": "Created",
+        "rideState": "Accepted",
         "rideDateTime": "2024-11-26T00:30:13.84088",
         "rideCost": 1894
         }
     """
   Scenario: Update ride
-    Given Ride request dto
+    Given Access token
+    And Ride request dto
     """
         {
-        "driverId": 1,
-        "passengerId": 1,
+        "driverId": "00000000-0000-0001-0000-000000000001",
+        "passengerId": "00000000-0000-0001-0000-000000000002",
         "sourceAddress": "New source address",
         "destinationAddress": "New destination address"
         }
@@ -130,20 +160,21 @@ Feature: Ride API
     """
         {
         "id": 1,
-        "driverId": 1,
-        "passengerId": 1,
+        "driverId": "00000000-0000-0001-0000-000000000001",
+        "passengerId": "00000000-0000-0001-0000-000000000002",
         "sourceAddress": "New source address",
         "destinationAddress": "New destination address",
-        "rideState": "Created",
+        "rideState": "Accepted",
         "rideDateTime": "2024-11-26T00:30:13.84088",
         "rideCost": 9884
         }
     """
   Scenario: Update ride state
-    Given Ride state request dto
+    Given Access token
+    And Ride state request dto
     """
         {
-        "rideState": "Cancelled"
+        "rideState": "On the way to pick up the passenger"
         }
     """
     When Update ride state with id 1
@@ -152,8 +183,26 @@ Feature: Ride API
     """
         {
         "id": 1,
-        "driverId": 1,
-        "passengerId": 1,
+        "driverId": "00000000-0000-0001-0000-000000000001",
+        "passengerId": "00000000-0000-0001-0000-000000000002",
+        "sourceAddress": "New source address",
+        "destinationAddress": "New destination address",
+        "rideState": "On the way to pick up the passenger",
+        "rideDateTime": "2024-11-26T00:30:13.84088",
+        "rideCost": 9884
+        }
+    """
+
+  Scenario: Cancel ride
+    Given Access token
+    When Cancel ride with id 1
+    Then Response status is 200
+    And Response body contains Ride response dto
+    """
+        {
+        "id": 1,
+        "driverId": "00000000-0000-0001-0000-000000000001",
+        "passengerId": "00000000-0000-0001-0000-000000000002",
         "sourceAddress": "New source address",
         "destinationAddress": "New destination address",
         "rideState": "Cancelled",

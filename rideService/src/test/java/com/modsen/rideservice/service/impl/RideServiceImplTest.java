@@ -1,15 +1,17 @@
 package com.modsen.rideservice.service.impl;
 
+import com.modsen.exceptionstarter.exception.InvalidStateException;
+import com.modsen.exceptionstarter.exception.NotFoundException;
 import com.modsen.rideservice.client.driver.DriverClientService;
 import com.modsen.rideservice.client.passenger.PassengerClientService;
 import com.modsen.rideservice.dto.DriverResponseDto;
 import com.modsen.rideservice.dto.PageDto;
 import com.modsen.rideservice.dto.PassengerResponseDto;
+import com.modsen.rideservice.dto.RideAcceptRequestDto;
+import com.modsen.rideservice.dto.RideCreateRequestDto;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
-import com.modsen.rideservice.exception.InvalidStateException;
-import com.modsen.rideservice.exception.NotFoundException;
 import com.modsen.rideservice.mapper.PageMapper;
 import com.modsen.rideservice.mapper.RideListMapper;
 import com.modsen.rideservice.mapper.RideMapper;
@@ -28,7 +30,9 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import static com.modsen.rideservice.util.TestData.AUTHORIZATION_VALUE;
 import static com.modsen.rideservice.util.TestData.DRIVER_ID;
 import static com.modsen.rideservice.util.TestData.LIMIT_VALUE;
 import static com.modsen.rideservice.util.TestData.OFFSET_VALUE;
@@ -37,6 +41,8 @@ import static com.modsen.rideservice.util.TestData.RIDE_ID;
 import static com.modsen.rideservice.util.TestData.getDriverResponseDto;
 import static com.modsen.rideservice.util.TestData.getPassengerResponseDto;
 import static com.modsen.rideservice.util.TestData.getRide;
+import static com.modsen.rideservice.util.TestData.getRideAcceptRequestDto;
+import static com.modsen.rideservice.util.TestData.getRideCreateRequestDto;
 import static com.modsen.rideservice.util.TestData.getRideList;
 import static com.modsen.rideservice.util.TestData.getRideRequestDto;
 import static com.modsen.rideservice.util.TestData.getRideResponseDto;
@@ -46,6 +52,7 @@ import static com.modsen.rideservice.util.TestData.getRideStateRequestDto;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
@@ -128,7 +135,7 @@ class RideServiceImplTest {
         //Arrange
         List<Ride> rideList = getRideList();
         List<RideResponseDto> rideResponseDtoList = getRideResponseDtoList();
-        when(rideRepository.findAllByDriverId(anyLong())).thenReturn(rideList);
+        when(rideRepository.findAllByDriverId(any(UUID.class))).thenReturn(rideList);
         when(rideListMapper.toRideResponseDtoList(rideList)).thenReturn(rideResponseDtoList);
 
         //Act
@@ -156,7 +163,7 @@ class RideServiceImplTest {
         PageDto<RideResponseDto> actual = rideService.getPageRidesByDriverId(DRIVER_ID, OFFSET_VALUE, LIMIT_VALUE);
 
         //Assert
-        verify(rideRepository).findAllByDriverId(1L, pageRequest);
+        verify(rideRepository).findAllByDriverId(DRIVER_ID, pageRequest);
         verify(rideMapper, times(actual.content().size())).toRideResponseDto(any(Ride.class));
         verify(pageMapper).pageToDto(any(Page.class));
 
@@ -172,7 +179,7 @@ class RideServiceImplTest {
         //Arrange
         List<Ride> rideList = getRideList();
         List<RideResponseDto> rideResponseDtoList = getRideResponseDtoList();
-        when(rideRepository.findAllByPassengerId(anyLong())).thenReturn(rideList);
+        when(rideRepository.findAllByPassengerId(any(UUID.class))).thenReturn(rideList);
         when(rideListMapper.toRideResponseDtoList(rideList)).thenReturn(rideResponseDtoList);
 
         //Act
@@ -242,29 +249,99 @@ class RideServiceImplTest {
     }
 
     @Test
-    void createRide_ExistingDriverIdExistingPassengerId_ReturnsValidDto() {
+    void createRide_ExistingPassengerId_ReturnsValidDto() {
         //Arrange
         Ride ride = getRide();
-        RideRequestDto rideRequestDto = getRideRequestDto();
+        RideCreateRequestDto rideRequestDto = getRideCreateRequestDto();
         RideResponseDto rideResponseDto = getRideResponseDto();
         PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
-        DriverResponseDto driverResponseDto = getDriverResponseDto();
-        when(passengerClientService.getPassengerById(anyLong())).thenReturn(passengerResponseDto);
-        when(driverClientService.getDriverById(anyLong())).thenReturn(driverResponseDto);
+        when(passengerClientService.getPassengerById(anyString(), anyString())).thenReturn(passengerResponseDto);
         when(rideMapper.toRide(rideRequestDto)).thenReturn(ride);
         when(rideRepository.save(ride)).thenReturn(ride);
         when(rideMapper.toRideResponseDto(ride)).thenReturn(rideResponseDto);
 
         //Act
-        RideResponseDto actual = rideService.createRide(rideRequestDto);
+        RideResponseDto actual = rideService.createRide(rideRequestDto, AUTHORIZATION_VALUE);
 
         //Assert
-        verify(passengerClientService).getPassengerById(rideRequestDto.passengerId());
-        verify(driverClientService).getDriverById(rideRequestDto.driverId());
+        verify(passengerClientService).getPassengerById(rideRequestDto.passengerId(), AUTHORIZATION_VALUE);
         verify(rideMapper).toRide(rideRequestDto);
         verify(rideRepository).save(ride);
         verify(rideMapper).toRideResponseDto(ride);
         assertEquals(rideResponseDto, actual);
+    }
+
+    @Test
+    void acceptRide_ExistingIdExistingDriverId_ReturnsValidDto() {
+        //Arrange
+        Ride ride = getRide();
+        RideAcceptRequestDto rideAcceptRequestDto = getRideAcceptRequestDto();
+        RideResponseDto rideResponseDto = getRideResponseDtoBuilder()
+                .driverId(DRIVER_ID)
+                .rideState(RideState.ACCEPTED)
+                .build();
+        DriverResponseDto driverResponseDto = getDriverResponseDto();
+        when(rideRepository.findById(anyLong())).thenReturn(Optional.of(ride));
+        when(driverClientService.getDriverById(anyString(), anyString())).thenReturn(driverResponseDto);
+        when(rideRepository.save(ride)).thenReturn(ride);
+        when(rideMapper.toRideResponseDto(ride)).thenReturn(rideResponseDto);
+
+        //Act
+        RideResponseDto actual = rideService.acceptRide(ride.getId(), rideAcceptRequestDto, AUTHORIZATION_VALUE);
+
+        //Assert
+        verify(driverClientService).getDriverById(rideAcceptRequestDto.driverId(), AUTHORIZATION_VALUE);
+        verify(rideRepository).save(ride);
+        verify(rideMapper).toRideResponseDto(ride);
+        assertEquals(rideResponseDto, actual);
+    }
+
+    @Test
+    void acceptRide_NonExistingId_ReturnsNotFoundException() {
+        //Arrange
+        RideAcceptRequestDto rideAcceptRequestDto = getRideAcceptRequestDto();
+        when(rideRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        //Act
+        //Assert
+        assertThrows(NotFoundException.class,
+                () -> rideService.acceptRide(RIDE_ID, rideAcceptRequestDto, AUTHORIZATION_VALUE),
+                AppConstants.RIDE_NOT_FOUND);
+        verify(rideRepository).findById(RIDE_ID);
+    }
+
+    @Test
+    void cancelRide_ExistingId_ReturnsValidDto() {
+        //Arrange
+        Ride ride = getRide();
+        RideResponseDto rideResponseDto = getRideResponseDtoBuilder()
+                .rideState(RideState.CANCELLED)
+                .build();
+        DriverResponseDto driverResponseDto = getDriverResponseDto();
+        when(rideRepository.findById(anyLong())).thenReturn(Optional.of(ride));
+        when(rideRepository.save(ride)).thenReturn(ride);
+        when(rideMapper.toRideResponseDto(ride)).thenReturn(rideResponseDto);
+
+        //Act
+        RideResponseDto actual = rideService.cancelRide(ride.getId(), AUTHORIZATION_VALUE);
+
+        //Assert
+        verify(rideRepository).save(ride);
+        verify(rideMapper).toRideResponseDto(ride);
+        assertEquals(rideResponseDto, actual);
+    }
+
+    @Test
+    void cancelRide_NonExistingId_ReturnsNotFoundException() {
+        //Arrange
+        when(rideRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        //Act
+        //Assert
+        assertThrows(NotFoundException.class,
+                () -> rideService.cancelRide(RIDE_ID, AUTHORIZATION_VALUE),
+                AppConstants.RIDE_NOT_FOUND);
+        verify(rideRepository).findById(RIDE_ID);
     }
 
     @Test
@@ -276,18 +353,18 @@ class RideServiceImplTest {
         PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
         DriverResponseDto driverResponseDto = getDriverResponseDto();
         when(rideRepository.findById(anyLong())).thenReturn(Optional.of(ride));
-        when(passengerClientService.getPassengerById(anyLong())).thenReturn(passengerResponseDto);
-        when(driverClientService.getDriverById(anyLong())).thenReturn(driverResponseDto);
+        when(passengerClientService.getPassengerById(anyString(), anyString())).thenReturn(passengerResponseDto);
+        when(driverClientService.getDriverById(anyString(), anyString())).thenReturn(driverResponseDto);
         when(rideRepository.save(ride)).thenReturn(ride);
         when(rideMapper.toRideResponseDto(ride)).thenReturn(rideResponseDto);
 
         //Act
-        RideResponseDto actual = rideService.updateRide(ride.getId(), rideRequestDto);
+        RideResponseDto actual = rideService.updateRide(ride.getId(), rideRequestDto, AUTHORIZATION_VALUE);
 
         //Assert
         verify(rideRepository).findById(ride.getId());
-        verify(passengerClientService).getPassengerById(rideRequestDto.passengerId());
-        verify(driverClientService).getDriverById(rideRequestDto.driverId());
+        verify(passengerClientService).getPassengerById(rideRequestDto.passengerId(), AUTHORIZATION_VALUE);
+        verify(driverClientService).getDriverById(rideRequestDto.driverId(), AUTHORIZATION_VALUE);
         verify(rideRepository).save(ride);
         verify(rideMapper).toRideResponseDto(ride);
         assertEquals(rideResponseDto, actual);
@@ -302,7 +379,7 @@ class RideServiceImplTest {
         //Act
         //Assert
         assertThrows(NotFoundException.class,
-                () -> rideService.updateRide(RIDE_ID, rideRequestDto),
+                () -> rideService.updateRide(RIDE_ID, rideRequestDto, AUTHORIZATION_VALUE),
                 AppConstants.RIDE_NOT_FOUND);
         verify(rideRepository).findById(RIDE_ID);
     }
