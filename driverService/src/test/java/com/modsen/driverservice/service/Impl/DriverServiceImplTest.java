@@ -1,17 +1,19 @@
 package com.modsen.driverservice.service.Impl;
 
-import com.modsen.driverservice.dto.DriverRequestDto;
+import com.modsen.driverservice.dto.DriverCreateRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
+import com.modsen.driverservice.dto.DriverUpdateRequestDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.dto.UserRatingDto;
-import com.modsen.driverservice.exception.DuplicateFieldException;
-import com.modsen.driverservice.exception.NotFoundException;
 import com.modsen.driverservice.mapper.DriverListMapper;
 import com.modsen.driverservice.mapper.DriverMapper;
 import com.modsen.driverservice.mapper.PageMapper;
 import com.modsen.driverservice.model.Driver;
 import com.modsen.driverservice.repository.DriverRepository;
+import com.modsen.driverservice.service.RabbitService;
 import com.modsen.driverservice.util.AppConstants;
+import com.modsen.exceptionstarter.exception.DuplicateFieldException;
+import com.modsen.exceptionstarter.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,22 +25,24 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.modsen.driverservice.util.TestData.DRIVER_ID;
+import static com.modsen.driverservice.util.TestData.DRIVER_ID_2;
 import static com.modsen.driverservice.util.TestData.LIMIT_VALUE;
 import static com.modsen.driverservice.util.TestData.OFFSET_VALUE;
 import static com.modsen.driverservice.util.TestData.getDriver;
 import static com.modsen.driverservice.util.TestData.getDriverBuilder;
+import static com.modsen.driverservice.util.TestData.getDriverCreateRequestDto;
 import static com.modsen.driverservice.util.TestData.getDriverList;
-import static com.modsen.driverservice.util.TestData.getDriverRequestDto;
 import static com.modsen.driverservice.util.TestData.getDriverResponseDto;
 import static com.modsen.driverservice.util.TestData.getDriverResponseDtoBuilder;
 import static com.modsen.driverservice.util.TestData.getDriverResponseDtoList;
+import static com.modsen.driverservice.util.TestData.getDriverUpdateRequestDto;
 import static com.modsen.driverservice.util.TestData.getUserRatingDto;
 import static com.modsen.driverservice.util.TestData.NEW_RATING;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,6 +62,9 @@ class DriverServiceImplTest {
 
     @Mock
     private PageMapper pageMapper;
+
+    @Mock
+    private RabbitService rabbitService;
 
     @InjectMocks
     private DriverServiceImpl driverService;
@@ -111,7 +118,7 @@ class DriverServiceImplTest {
         //Arrange
         Driver driver = getDriver();
         DriverResponseDto driverResponseDto = getDriverResponseDto();
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(driver));
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(driver));
         when(driverMapper.toDriverResponseDTO(driver)).thenReturn(driverResponseDto);
 
         //Act
@@ -126,7 +133,7 @@ class DriverServiceImplTest {
     @Test
     void getDriverById_NonExistingId_ReturnsNotFoundException() {
         //Arrange
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.empty());
 
         //Act
         //Assert
@@ -170,7 +177,7 @@ class DriverServiceImplTest {
     @Test
     void createDriver_UniqueEmail_ReturnsValidDto() {
         //Arrange
-        DriverRequestDto driverRequestDto = getDriverRequestDto();
+        DriverCreateRequestDto driverRequestDto = getDriverCreateRequestDto();
         Driver driver = getDriver();
         DriverResponseDto driverResponseDto = getDriverResponseDto();
         when(driverRepository.existsByEmailAndDeletedIsFalse(anyString())).thenReturn(false);
@@ -192,7 +199,7 @@ class DriverServiceImplTest {
     @Test
     void createDriver_NonUniqueEmail_ReturnsDuplicateFieldException() {
         //Arrange
-        DriverRequestDto driverRequestDto = getDriverRequestDto();
+        DriverCreateRequestDto driverRequestDto = getDriverCreateRequestDto();
         when(driverRepository.existsByEmailAndDeletedIsFalse(anyString())).thenReturn(true);
 
         //Act
@@ -206,10 +213,10 @@ class DriverServiceImplTest {
     @Test
     void updateDriver_ExistingIdUniqueEmail_ReturnsValidDto() {
         //Arrange
-        DriverRequestDto driverRequestDto = getDriverRequestDto();
+        DriverUpdateRequestDto driverRequestDto = getDriverUpdateRequestDto();
         DriverResponseDto driverResponseDto = getDriverResponseDto();
         Driver driver = getDriver();
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(driver));
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(driver));
         when(driverRepository.findByEmailAndDeletedIsFalse(anyString())).thenReturn(Optional.empty());
         when(driverRepository.save(driver)).thenReturn(driver);
         when(driverMapper.toDriverResponseDTO(driver)).thenReturn(driverResponseDto);
@@ -228,8 +235,8 @@ class DriverServiceImplTest {
     @Test
     void updateDriver_NonExistingId_ReturnsNotFoundException() {
         //Arrange
-        DriverRequestDto driverRequestDto = getDriverRequestDto();
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        DriverUpdateRequestDto driverRequestDto = getDriverUpdateRequestDto();
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.empty());
 
         //Act
         //Assert
@@ -244,11 +251,11 @@ class DriverServiceImplTest {
         //Arrange
         Driver driver = getDriver();
         Driver driverWithSameEmail = getDriverBuilder()
-                .id(2L)
+                .id(DRIVER_ID_2)
                 .build();
-        DriverRequestDto driverRequestDto = getDriverRequestDto();
+        DriverUpdateRequestDto driverRequestDto = getDriverUpdateRequestDto();
 
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(driver));
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(driver));
         when(driverRepository.findByEmailAndDeletedIsFalse(anyString())).thenReturn(Optional.of(driverWithSameEmail));
 
         //Act
@@ -279,14 +286,14 @@ class DriverServiceImplTest {
     @Test
     void deleteDriver_NonExistingId_ReturnsNotFoundException() {
         //Arrange
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.empty());
 
         //Act
         //Assert
         assertThrows(NotFoundException.class,
-                () -> driverService.deleteDriver(3L),
+                () -> driverService.deleteDriver(DRIVER_ID),
                 AppConstants.DRIVER_NOT_FOUND);
-        verify(driverRepository).findByIdAndDeletedIsFalse(3L);
+        verify(driverRepository).findByIdAndDeletedIsFalse(DRIVER_ID);
     }
 
     @Test
@@ -294,7 +301,7 @@ class DriverServiceImplTest {
         //Arrange
         Driver driver = getDriver();
         UserRatingDto driverRating = getUserRatingDto();
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(driver));
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(driver));
         when(driverRepository.save(driver)).thenReturn(driver);
         DriverResponseDto driverUpdatedResponseDto = getDriverResponseDtoBuilder()
                 .rating(NEW_RATING)
@@ -315,7 +322,7 @@ class DriverServiceImplTest {
     void updateRating_NonExistingId_ReturnsNotFoundException() {
         //Arrange
         UserRatingDto driverRating = getUserRatingDto();
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.empty());
 
         //Act
         //Assert

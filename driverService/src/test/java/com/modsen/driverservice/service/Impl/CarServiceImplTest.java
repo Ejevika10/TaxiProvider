@@ -3,8 +3,6 @@ package com.modsen.driverservice.service.Impl;
 import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.dto.CarResponseDto;
 import com.modsen.driverservice.dto.PageDto;
-import com.modsen.driverservice.exception.DuplicateFieldException;
-import com.modsen.driverservice.exception.NotFoundException;
 import com.modsen.driverservice.mapper.CarListMapper;
 import com.modsen.driverservice.mapper.CarMapper;
 import com.modsen.driverservice.mapper.PageMapper;
@@ -13,6 +11,8 @@ import com.modsen.driverservice.model.Driver;
 import com.modsen.driverservice.repository.CarRepository;
 import com.modsen.driverservice.repository.DriverRepository;
 import com.modsen.driverservice.util.AppConstants;
+import com.modsen.exceptionstarter.exception.DuplicateFieldException;
+import com.modsen.exceptionstarter.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 
 import static com.modsen.driverservice.util.TestData.CAR_ID;
@@ -118,7 +119,7 @@ class CarServiceImplTest {
         //Arrange
         List<Car> carList = getCarList();
         List<CarResponseDto> carResponseDtoList = getCarResponseDtoList();
-        when(carRepository.findAllByDriverIdAndDeletedIsFalse(anyLong())).thenReturn(carList);
+        when(carRepository.findAllByDriverIdAndDeletedIsFalse(any(UUID.class))).thenReturn(carList);
         when(carListMapper.toCarResponseDTOList(carList)).thenReturn(carResponseDtoList);
 
         //Act
@@ -199,7 +200,7 @@ class CarServiceImplTest {
         Driver driver = getDriver();
         CarResponseDto carResponseDto = getCarResponseDto();
 
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(driver));
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(driver));
         when(carRepository.existsByNumberAndDeletedIsFalse(anyString())).thenReturn(false);
         when(carMapper.toCar(carRequestDto)).thenReturn(car);
         when(carRepository.save(car)).thenReturn(car);
@@ -209,7 +210,7 @@ class CarServiceImplTest {
         CarResponseDto actual = carService.addCar(carRequestDto);
 
         //Assert
-        verify(driverRepository).findByIdAndDeletedIsFalse(carRequestDto.driverId());
+        verify(driverRepository).findByIdAndDeletedIsFalse(UUID.fromString(carRequestDto.driverId()));
         verify(carRepository).existsByNumberAndDeletedIsFalse(carRequestDto.number());
         verify(carMapper).toCar(carRequestDto);
         verify(carRepository).save(car);
@@ -221,14 +222,14 @@ class CarServiceImplTest {
     void addCar_NonExistingDriverId_ThrowNotFoundException() {
         //Arrange
         CarRequestDto carRequestDto = getCarRequestDto();
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.empty());
 
         //Act
        //Assert
         assertThrows(NotFoundException.class,
                 () -> carService.addCar(carRequestDto),
                 AppConstants.DRIVER_NOT_FOUND);
-        verify(driverRepository).findByIdAndDeletedIsFalse(carRequestDto.driverId());
+        verify(driverRepository).findByIdAndDeletedIsFalse(UUID.fromString(carRequestDto.driverId()));
     }
 
     @Test
@@ -236,7 +237,7 @@ class CarServiceImplTest {
         //Arrange
         CarRequestDto carRequestDto = getCarRequestDto();
         Driver driver = getDriver();
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(driver));
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(driver));
         when(carRepository.existsByNumberAndDeletedIsFalse(anyString())).thenReturn(true);
 
         //Act
@@ -244,7 +245,7 @@ class CarServiceImplTest {
         assertThrows(DuplicateFieldException.class,
                 () -> carService.addCar(carRequestDto),
                 AppConstants.CAR_NUMBER_EXIST);
-        verify(driverRepository).findByIdAndDeletedIsFalse(carRequestDto.driverId());
+        verify(driverRepository).findByIdAndDeletedIsFalse(UUID.fromString(carRequestDto.driverId()));
         verify(carRepository).existsByNumberAndDeletedIsFalse(carRequestDto.number());
     }
 
@@ -256,7 +257,7 @@ class CarServiceImplTest {
         CarResponseDto carResponseDto = getCarResponseDto();
         Driver driver = getDriver();
         when(carRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(car));
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(driver));
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(driver));
         when(carRepository.findByNumberAndDeletedIsFalse(anyString())).thenReturn(Optional.empty());
         when(carRepository.save(car)).thenReturn(car);
         when(carMapper.toCarResponseDTO(car)).thenReturn(carResponseDto);
@@ -266,7 +267,7 @@ class CarServiceImplTest {
 
         //Assert
         verify(carRepository).findByIdAndDeletedIsFalse(car.getId());
-        verify(driverRepository).findByIdAndDeletedIsFalse(carRequestDto.driverId());
+        verify(driverRepository).findByIdAndDeletedIsFalse(UUID.fromString(carRequestDto.driverId()));
         verify(carRepository).findByNumberAndDeletedIsFalse(carRequestDto.number());
         verify(carRepository).save(car);
         verify(carMapper).toCarResponseDTO(car);
@@ -294,7 +295,7 @@ class CarServiceImplTest {
         Car car = getCar();
         CarRequestDto carRequestDto = getCarRequestDto();
         when(carRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(car));
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.empty());
 
         //Act
         //Assert
@@ -302,7 +303,7 @@ class CarServiceImplTest {
                 () -> carService.updateCar(car.getId(), carRequestDto),
                 AppConstants.DRIVER_NOT_FOUND);
         verify(carRepository).findByIdAndDeletedIsFalse(car.getId());
-        verify(driverRepository).findByIdAndDeletedIsFalse(carRequestDto.driverId());
+        verify(driverRepository).findByIdAndDeletedIsFalse(UUID.fromString(carRequestDto.driverId()));
     }
 
     @Test
@@ -315,7 +316,7 @@ class CarServiceImplTest {
                 .id(2L)
                 .build();
         when(carRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(car));
-        when(driverRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(driver));
+        when(driverRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(driver));
         when(carRepository.findByNumberAndDeletedIsFalse(anyString())).thenReturn(Optional.of(carWithSameNumber));
 
         //Act
@@ -324,7 +325,7 @@ class CarServiceImplTest {
                 () -> carService.updateCar(car.getId(), carRequestDto),
                 AppConstants.CAR_NUMBER_EXIST);
         verify(carRepository).findByIdAndDeletedIsFalse(car.getId());
-        verify(driverRepository).findByIdAndDeletedIsFalse(carRequestDto.driverId());
+        verify(driverRepository).findByIdAndDeletedIsFalse(UUID.fromString(carRequestDto.driverId()));
         verify(carRepository).findByNumberAndDeletedIsFalse(carRequestDto.number());
     }
 

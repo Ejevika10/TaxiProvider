@@ -3,10 +3,11 @@ package com.modsen.driverservice.integration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.modsen.driverservice.dto.DriverRequestDto;
+import com.modsen.driverservice.dto.DriverCreateRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
+import com.modsen.driverservice.dto.DriverUpdateRequestDto;
 import com.modsen.driverservice.dto.PageDto;
-import com.modsen.driverservice.exception.ListErrorMessage;
+import com.modsen.exceptionstarter.message.ListErrorMessage;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ import static com.modsen.driverservice.util.TestData.DRIVER_ID;
 import static com.modsen.driverservice.util.TestData.DRIVER_SCRIPT;
 import static com.modsen.driverservice.util.TestData.EXCEEDED_LIMIT_VALUE;
 import static com.modsen.driverservice.util.TestData.EXCEEDED_OFFSET_VALUE;
-import static com.modsen.driverservice.util.TestData.INSUFFICIENT_DRIVER_ID;
+import static com.modsen.driverservice.util.TestData.INVALID_DRIVER_ID;
 import static com.modsen.driverservice.util.TestData.INSUFFICIENT_LIMIT_VALUE;
 import static com.modsen.driverservice.util.TestData.INSUFFICIENT_OFFSET_VALUE;
 import static com.modsen.driverservice.util.TestData.LIMIT;
@@ -37,23 +38,26 @@ import static com.modsen.driverservice.util.TestData.PAGE_SIZE;
 import static com.modsen.driverservice.util.TestData.UNIQUE_EMAIL;
 import static com.modsen.driverservice.util.TestData.URL_DRIVER;
 import static com.modsen.driverservice.util.TestData.URL_DRIVER_ID;
-import static com.modsen.driverservice.util.TestData.getDriverRequestDto;
-import static com.modsen.driverservice.util.TestData.getDriverRequestDtoBuilder;
+import static com.modsen.driverservice.util.TestData.getDriverCreateRequestDtoBuilder;
 import static com.modsen.driverservice.util.TestData.getDriverResponseDto;
 import static com.modsen.driverservice.util.TestData.getDriverResponseDtoBuilder;
-import static com.modsen.driverservice.util.TestData.getEmptyDriverRequestDto;
-import static com.modsen.driverservice.util.TestData.getInvalidDriverRequestDto;
+import static com.modsen.driverservice.util.TestData.getDriverUpdateRequestDto;
+import static com.modsen.driverservice.util.TestData.getEmptyDriverCreateRequestDto;
+import static com.modsen.driverservice.util.TestData.getEmptyDriverUpdateRequestDto;
+import static com.modsen.driverservice.util.TestData.getInvalidDriverCreateRequestDto;
+import static com.modsen.driverservice.util.TestData.getInvalidDriverUpdateRequestDto;
 import static com.modsen.driverservice.util.TestData.getPageDriverResponseDto;
 import static com.modsen.driverservice.util.ViolationData.DRIVER_EMAIL_INVALID;
 import static com.modsen.driverservice.util.ViolationData.DRIVER_EMAIL_MANDATORY;
+import static com.modsen.driverservice.util.ViolationData.DRIVER_ID_MANDATORY;
 import static com.modsen.driverservice.util.ViolationData.DRIVER_NAME_INVALID;
 import static com.modsen.driverservice.util.ViolationData.DRIVER_NAME_MANDATORY;
 import static com.modsen.driverservice.util.ViolationData.DRIVER_PHONE_INVALID;
 import static com.modsen.driverservice.util.ViolationData.DRIVER_PHONE_MANDATORY;
-import static com.modsen.driverservice.util.ViolationData.ID_INVALID;
 import static com.modsen.driverservice.util.ViolationData.LIMIT_EXCEEDED;
 import static com.modsen.driverservice.util.ViolationData.LIMIT_INSUFFICIENT;
 import static com.modsen.driverservice.util.ViolationData.OFFSET_INSUFFICIENT;
+import static com.modsen.driverservice.util.ViolationData.UUID_INVALID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -174,15 +178,15 @@ public class DriverControllerIntegrationTest extends ControllerIntegrationTest{
     }
 
     @Test
-    void getDriver_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+    void getDriver_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(ID_INVALID));
+                List.of(UUID_INVALID));
 
         String responseJson = RestAssuredMockMvc
                 .given()
                 .when()
-                .get(URL_DRIVER_ID, INSUFFICIENT_DRIVER_ID.toString())
+                .get(URL_DRIVER_ID, INVALID_DRIVER_ID)
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -195,11 +199,11 @@ public class DriverControllerIntegrationTest extends ControllerIntegrationTest{
 
     @Test
     void createDriver_whenValidInput_thenReturns201AndResponseDto() throws Exception {
-        DriverRequestDto driverRequestDto = getDriverRequestDtoBuilder()
+        DriverCreateRequestDto driverRequestDto = getDriverCreateRequestDtoBuilder()
                 .email(UNIQUE_EMAIL)
                 .build();
         DriverResponseDto expectedDriverResponseDto = getDriverResponseDtoBuilder()
-                .id(2L)
+                .id(DRIVER_ID)
                 .email(UNIQUE_EMAIL)
                 .build();
         String responseJson = RestAssuredMockMvc
@@ -220,10 +224,10 @@ public class DriverControllerIntegrationTest extends ControllerIntegrationTest{
 
     @Test
     void createDriver_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        DriverRequestDto driverRequestDto = getEmptyDriverRequestDto();
+        DriverCreateRequestDto driverRequestDto = getEmptyDriverCreateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(DRIVER_PHONE_MANDATORY, DRIVER_NAME_MANDATORY, DRIVER_EMAIL_MANDATORY));
+                List.of(DRIVER_ID_MANDATORY, DRIVER_PHONE_MANDATORY, DRIVER_NAME_MANDATORY, DRIVER_EMAIL_MANDATORY));
 
         String responseJson = RestAssuredMockMvc
                 .given()
@@ -246,7 +250,7 @@ public class DriverControllerIntegrationTest extends ControllerIntegrationTest{
 
     @Test
     void createDriver_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
-        DriverRequestDto driverRequestDto = getInvalidDriverRequestDto();
+        DriverCreateRequestDto driverRequestDto = getInvalidDriverCreateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(DRIVER_PHONE_INVALID, DRIVER_NAME_INVALID, DRIVER_EMAIL_INVALID));
@@ -272,7 +276,7 @@ public class DriverControllerIntegrationTest extends ControllerIntegrationTest{
 
     @Test
     void updateDriver_whenValidInput_thenReturns200AndResponseDto() throws Exception {
-        DriverRequestDto driverRequestDto = getDriverRequestDto();
+        DriverUpdateRequestDto driverRequestDto = getDriverUpdateRequestDto();
 
         String responseJson = RestAssuredMockMvc
                 .given()
@@ -292,7 +296,7 @@ public class DriverControllerIntegrationTest extends ControllerIntegrationTest{
 
     @Test
     void updateDriver_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        DriverRequestDto driverRequestDto = getEmptyDriverRequestDto();
+        DriverUpdateRequestDto driverRequestDto = getEmptyDriverUpdateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(DRIVER_PHONE_MANDATORY, DRIVER_NAME_MANDATORY, DRIVER_EMAIL_MANDATORY));
@@ -318,7 +322,7 @@ public class DriverControllerIntegrationTest extends ControllerIntegrationTest{
 
     @Test
     void updateDriver_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
-        DriverRequestDto driverRequestDto = getInvalidDriverRequestDto();
+        DriverUpdateRequestDto driverRequestDto = getInvalidDriverUpdateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(DRIVER_PHONE_INVALID, DRIVER_NAME_INVALID, DRIVER_EMAIL_INVALID));
@@ -343,18 +347,18 @@ public class DriverControllerIntegrationTest extends ControllerIntegrationTest{
     }
 
     @Test
-    void updateDriver_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
-        DriverRequestDto driverRequestDto = getDriverRequestDto();
+    void updateDriver_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
+        DriverUpdateRequestDto driverRequestDto = getDriverUpdateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(ID_INVALID));
+                List.of(UUID_INVALID));
 
         String responseJson = RestAssuredMockMvc
                 .given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(driverRequestDto)
                 .when()
-                .put(URL_DRIVER_ID, INSUFFICIENT_DRIVER_ID.toString())
+                .put(URL_DRIVER_ID, INVALID_DRIVER_ID)
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -378,14 +382,14 @@ public class DriverControllerIntegrationTest extends ControllerIntegrationTest{
     }
 
     @Test
-    void deleteDriver_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+    void deleteDriver_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(ID_INVALID));
+                List.of(UUID_INVALID));
 
         String responseJson = RestAssuredMockMvc
                 .when()
-                .delete(URL_DRIVER_ID, INSUFFICIENT_DRIVER_ID.toString())
+                .delete(URL_DRIVER_ID, INVALID_DRIVER_ID)
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

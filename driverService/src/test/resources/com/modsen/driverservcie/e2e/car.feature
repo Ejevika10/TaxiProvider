@@ -1,8 +1,10 @@
 Feature: Car API
   Scenario: Create driver
-  Given Driver request dto
+  Given Access token
+  And Driver create request dto
   """
           {
+          "id": "00000000-0000-0001-0000-000000000001",
           "name": "Driver",
           "email": "driver@email.com",
           "phone": "71234567890"
@@ -13,7 +15,7 @@ Feature: Car API
   And Response body contains Driver response dto
   """
           {
-            "id": "1",
+            "id": "00000000-0000-0001-0000-000000000001",
             "name": "Driver",
             "email": "driver@email.com",
             "phone": "71234567890",
@@ -22,14 +24,15 @@ Feature: Car API
       """
 
   Scenario: Create car
-  Given Car request dto
+  Given Access token
+  And Car request dto
   """
           {
           "color": "red",
           "model": "sedan",
           "brand": "audi",
           "number": "12345",
-          "driverId": 1
+          "driverId": "00000000-0000-0001-0000-000000000001"
           }
       """
   When Create car
@@ -43,7 +46,7 @@ Feature: Car API
             "brand": "audi",
             "number": "12345",
             "driver": {
-                "id": 1,
+                "id": "00000000-0000-0001-0000-000000000001",
                 "name": "Driver",
                 "email": "driver@email.com",
                 "phone": "71234567890",
@@ -52,6 +55,7 @@ Feature: Car API
           }
       """
   Scenario: Get page of cars
+  Given Access token
   When Get page of cars
   Then Response status is 200
   And Response body contains Page dto
@@ -69,7 +73,7 @@ Feature: Car API
                 "brand": "audi",
                 "number": "12345",
                 "driver": {
-                    "id": 1,
+                    "id": "00000000-0000-0001-0000-000000000001",
                     "name": "Driver",
                     "email": "driver@email.com",
                     "phone": "71234567890",
@@ -80,7 +84,8 @@ Feature: Car API
           }
       """
   Scenario: Get page of cars by driver id
-  When Get page of cars by driver id 1
+  Given Access token
+  When Get page of cars by driver id "00000000-0000-0001-0000-000000000001"
   Then Response status is 200
   And Response body contains Page dto
   """
@@ -97,7 +102,7 @@ Feature: Car API
                 "brand": "audi",
                 "number": "12345",
                 "driver": {
-                    "id": 1,
+                    "id": "00000000-0000-0001-0000-000000000001",
                     "name": "Driver",
                     "email": "driver@email.com",
                     "phone": "71234567890",
@@ -109,6 +114,7 @@ Feature: Car API
       """
 
   Scenario: Get car by id
+  Given Access token
   When Get car by id 1
   Then Response status is 200
   And Response body contains Car response dto
@@ -120,7 +126,7 @@ Feature: Car API
             "brand": "audi",
             "number": "12345",
             "driver": {
-                "id": 1,
+                "id": "00000000-0000-0001-0000-000000000001",
                 "name": "Driver",
                 "email": "driver@email.com",
                 "phone": "71234567890",
@@ -129,6 +135,7 @@ Feature: Car API
           }
       """
   Scenario: Update car
+  Given Access token
   Given Car request dto
   """
           {
@@ -136,7 +143,7 @@ Feature: Car API
           "model": "new_model",
           "brand": "bmw",
           "number": "12345",
-          "driverId": 1
+          "driverId": "00000000-0000-0001-0000-000000000001"
           }
       """
   When Update car with id 1
@@ -150,7 +157,7 @@ Feature: Car API
             "brand": "bmw",
             "number": "12345",
             "driver": {
-                "id": 1,
+                "id": "00000000-0000-0001-0000-000000000001",
                 "name": "Driver",
                 "email": "driver@email.com",
                 "phone": "71234567890",
@@ -159,5 +166,11 @@ Feature: Car API
           }
       """
   Scenario: Delete car
+  Given Access token
   When Delete car with id 1
+  Then Response status is 204
+
+  Scenario: Delete driver
+  Given Access token
+  When Delete driver with id "00000000-0000-0001-0000-000000000001"
   Then Response status is 204

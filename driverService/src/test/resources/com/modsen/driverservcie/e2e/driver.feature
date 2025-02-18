@@ -1,8 +1,10 @@
 Feature: Driver API
   Scenario: Create driver
-    Given Driver request dto
+    Given Access token
+    And Driver create request dto
     """
         {
+        "id": "00000000-0000-0001-0000-000000000001",
         "name": "Driver",
         "email": "driver@email.com",
         "phone": "71234567890"
@@ -13,7 +15,7 @@ Feature: Driver API
     And Response body contains Driver response dto
     """
         {
-          "id": "1",
+          "id": "00000000-0000-0001-0000-000000000001",
           "name": "Driver",
           "email": "driver@email.com",
           "phone": "71234567890",
@@ -21,6 +23,7 @@ Feature: Driver API
         }
     """
   Scenario: Get page of drivers
+    Given Access token
     When Get page of drivers
     Then Response status is 200
     And Response body contains Page dto
@@ -32,7 +35,7 @@ Feature: Driver API
           "totalElements": 1,
           "content": [
             {
-                "id": 1,
+                "id": "00000000-0000-0001-0000-000000000001",
                 "name": "Driver",
                 "email": "driver@email.com",
                 "phone": "71234567890",
@@ -42,12 +45,13 @@ Feature: Driver API
         }
     """
   Scenario: Get driver by id
-    When Get driver by id 1
+    Given Access token
+    When Get driver by id "00000000-0000-0001-0000-000000000001"
     Then Response status is 200
     And Response body contains Driver response dto
     """
         {
-            "id": 1,
+            "id": "00000000-0000-0001-0000-000000000001",
             "name": "Driver",
             "email": "driver@email.com",
             "phone": "71234567890",
@@ -55,7 +59,8 @@ Feature: Driver API
         }
     """
   Scenario: Update driver
-    Given Driver request dto
+    Given Access token
+    And Driver update request dto
     """
         {
         "name": "new_driver",
@@ -63,12 +68,12 @@ Feature: Driver API
         "phone": "71234567890"
         }
     """
-    When Update driver with id 1
+    When Update driver with id "00000000-0000-0001-0000-000000000001"
     Then Response status is 200
     And Response body contains Driver response dto
     """
         {
-          "id": "1",
+          "id": "00000000-0000-0001-0000-000000000001",
           "name": "new_driver",
           "email": "new_driver@email.com",
           "phone": "71234567890",
@@ -76,5 +81,6 @@ Feature: Driver API
         }
     """
   Scenario: Delete driver
-    When Delete driver with id 1
+    Given Access token
+    When Delete driver with id "00000000-0000-0001-0000-000000000001"
     Then Response status is 204
