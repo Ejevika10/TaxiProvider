@@ -1,16 +1,18 @@
 package com.modsen.passengerservice.service.impl;
 
+import com.modsen.exceptionstarter.exception.DuplicateFieldException;
+import com.modsen.exceptionstarter.exception.NotFoundException;
 import com.modsen.passengerservice.dto.PageDto;
-import com.modsen.passengerservice.dto.PassengerRequestDto;
+import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
+import com.modsen.passengerservice.dto.PassengerUpdateRequestDto;
 import com.modsen.passengerservice.dto.UserRatingDto;
-import com.modsen.passengerservice.exception.DuplicateFieldException;
-import com.modsen.passengerservice.exception.NotFoundException;
 import com.modsen.passengerservice.mapper.PageMapper;
 import com.modsen.passengerservice.mapper.PassengerListMapper;
 import com.modsen.passengerservice.mapper.PassengerMapper;
 import com.modsen.passengerservice.model.Passenger;
 import com.modsen.passengerservice.repository.PassengerRepository;
+import com.modsen.passengerservice.service.RabbitService;
 import com.modsen.passengerservice.util.AppConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,22 +25,24 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.modsen.passengerservice.util.TestData.LIMIT_VALUE;
 import static com.modsen.passengerservice.util.TestData.NEW_RATING;
 import static com.modsen.passengerservice.util.TestData.OFFSET_VALUE;
 import static com.modsen.passengerservice.util.TestData.PASSENGER_ID;
+import static com.modsen.passengerservice.util.TestData.PASSENGER_ID_2;
 import static com.modsen.passengerservice.util.TestData.getPassenger;
 import static com.modsen.passengerservice.util.TestData.getPassengerBuilder;
+import static com.modsen.passengerservice.util.TestData.getPassengerCreateRequestDto;
 import static com.modsen.passengerservice.util.TestData.getPassengerList;
-import static com.modsen.passengerservice.util.TestData.getPassengerRequestDto;
 import static com.modsen.passengerservice.util.TestData.getPassengerResponseDto;
 import static com.modsen.passengerservice.util.TestData.getPassengerResponseDtoBuilder;
 import static com.modsen.passengerservice.util.TestData.getPassengerResponseDtoList;
+import static com.modsen.passengerservice.util.TestData.getPassengerUpdateRequestDto;
 import static com.modsen.passengerservice.util.TestData.getUserRatingDto;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,6 +62,9 @@ class PassengerServiceImplTest {
 
     @Mock
     private PageMapper pageMapper;
+
+    @Mock
+    private RabbitService rabbitService;
 
     @InjectMocks
     private PassengerServiceImpl passengerService;
@@ -111,7 +118,7 @@ class PassengerServiceImplTest {
         //Arrange
         Passenger passenger = getPassenger();
         PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passenger));
+        when(passengerRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(passenger));
         when(passengerMapper.toPassengerResponseDTO(passenger)).thenReturn(passengerResponseDto);
 
         //Act
@@ -126,14 +133,14 @@ class PassengerServiceImplTest {
     @Test
     void getPassengerById_NonExistingId_ReturnsNotFoundException() {
         //Arrange
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        when(passengerRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.empty());
 
         //Act
         //Assert
         assertThrows(NotFoundException.class,
-                () -> passengerService.getPassengerById(3L),
+                () -> passengerService.getPassengerById(PASSENGER_ID),
                 AppConstants.PASSENGER_NOT_FOUND);
-        verify(passengerRepository).findByIdAndDeletedIsFalse(3L);
+        verify(passengerRepository).findByIdAndDeletedIsFalse(PASSENGER_ID);
     }
 
     @Test
@@ -171,7 +178,7 @@ class PassengerServiceImplTest {
     void addPassenger_UniqueEmail_ReturnsValidDto() {
         //Arrange
         Passenger passenger = getPassenger();
-        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        PassengerCreateRequestDto passengerRequestDto = getPassengerCreateRequestDto();
         PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
         when(passengerRepository.existsByEmailAndDeletedIsFalse(anyString())).thenReturn(false);
         when(passengerMapper.toPassenger(passengerRequestDto)).thenReturn(passenger);
@@ -192,7 +199,7 @@ class PassengerServiceImplTest {
     @Test
     void addPassenger_NonUniqueEmail_ReturnsDuplicateFieldException() {
         //Arrange
-        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        PassengerCreateRequestDto passengerRequestDto = getPassengerCreateRequestDto();
         when(passengerRepository.existsByEmailAndDeletedIsFalse(anyString())).thenReturn(true);
 
         //Act
@@ -208,8 +215,8 @@ class PassengerServiceImplTest {
         //Arrange
         Passenger passenger = getPassenger();
         PassengerResponseDto passengerResponseDto = getPassengerResponseDto();
-        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passenger));
+        PassengerUpdateRequestDto passengerRequestDto = getPassengerUpdateRequestDto();
+        when(passengerRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(passenger));
         when(passengerRepository.findByEmailAndDeletedIsFalse(anyString())).thenReturn(Optional.empty());
         when(passengerRepository.save(passenger)).thenReturn(passenger);
         when(passengerMapper.toPassengerResponseDTO(passenger)).thenReturn(passengerResponseDto);
@@ -228,8 +235,8 @@ class PassengerServiceImplTest {
     @Test
     void updatePassenger_NonExistingId_ReturnsNotFoundException() {
         //Arrange
-        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        PassengerUpdateRequestDto passengerRequestDto = getPassengerUpdateRequestDto();
+        when(passengerRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.empty());
 
         //Act
         //Assert
@@ -242,13 +249,13 @@ class PassengerServiceImplTest {
     @Test
     void updatePassenger_ExistingIdNonUniqueEmail_ReturnsDuplicateFieldException() {
         //Arrange
-        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        PassengerUpdateRequestDto passengerRequestDto = getPassengerUpdateRequestDto();
         Passenger passenger = getPassenger();
         Passenger passengerWithSameEmail = getPassengerBuilder()
-                .id(2L)
+                .id(PASSENGER_ID_2)
                 .build();
 
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passenger));
+        when(passengerRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(passenger));
         when(passengerRepository.findByEmailAndDeletedIsFalse(anyString())).thenReturn(Optional.of(passengerWithSameEmail));
 
         //Act
@@ -279,7 +286,7 @@ class PassengerServiceImplTest {
     @Test
     void deletePassenger_NonExistingId_ReturnsNotFoundException() {
         //Arrange
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        when(passengerRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.empty());
 
         //Act
         //Assert
@@ -294,7 +301,7 @@ class PassengerServiceImplTest {
         //Arrange
         Passenger passenger = getPassenger();
         UserRatingDto passengerRating = getUserRatingDto();
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.of(passenger));
+        when(passengerRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.of(passenger));
         when(passengerRepository.save(passenger)).thenReturn(passenger);
         PassengerResponseDto passengerUpdatedResponseDto = getPassengerResponseDtoBuilder()
                 .rating(NEW_RATING)
@@ -315,7 +322,7 @@ class PassengerServiceImplTest {
     void updateRating_NonExistingId_ReturnsNotFoundException() {
         //Arrange
         UserRatingDto passengerRating = getUserRatingDto();
-        when(passengerRepository.findByIdAndDeletedIsFalse(anyLong())).thenReturn(Optional.empty());
+        when(passengerRepository.findByIdAndDeletedIsFalse(any(UUID.class))).thenReturn(Optional.empty());
 
         //Act
         //Assert

@@ -1,3 +1,2 @@
-ALTER SEQUENCE passenger_id_seq RESTART WITH 1;
 TRUNCATE TABLE passenger;
-INSERT INTO passenger (id, name, email, phone, rating, deleted) VALUES (nextval('passenger_id_seq'), 'passenger', 'passenger@mail.ru', '71234567890', '0.0', 'False')
+INSERT INTO passenger (id, name, email, phone, rating, deleted) VALUES ('00000000-0000-0001-0000-000000000001', 'passenger', 'passenger@mail.ru', '71234567890', '0.0', 'False')

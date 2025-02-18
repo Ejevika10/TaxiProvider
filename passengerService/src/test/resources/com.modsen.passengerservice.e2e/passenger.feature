@@ -1,8 +1,10 @@
 Feature: Passenger API
   Scenario: Create passenger
-    Given Passenger request dto
+    Given Access token
+    And Passenger create request dto
     """
         {
+        "id": "00000000-0000-0001-0000-000000000001",
         "name": "passenger",
         "email": "passenger@mail.ru",
         "phone": "71234567890"
@@ -13,7 +15,7 @@ Feature: Passenger API
     And Response body contains Passenger response dto
     """
         {
-          "id": "1",
+          "id": "00000000-0000-0001-0000-000000000001",
           "name": "passenger",
           "email": "passenger@mail.ru",
           "phone": "71234567890",
@@ -21,6 +23,7 @@ Feature: Passenger API
         }
     """
   Scenario: Get page of passengers
+    Given Access token
     When Get page of passengers
     Then Response status is 200
     And Response body contains Page dto
@@ -32,7 +35,7 @@ Feature: Passenger API
           "totalElements": 1,
           "content": [
             {
-                "id": 1,
+                "id": "00000000-0000-0001-0000-000000000001",
                 "name": "passenger",
                 "email": "passenger@mail.ru",
                 "phone": "71234567890",
@@ -42,12 +45,13 @@ Feature: Passenger API
         }
     """
   Scenario: Get passenger by id
-    When Get passenger by id 1
+    Given Access token
+    When Get passenger by id "00000000-0000-0001-0000-000000000001"
     Then Response status is 200
     And Response body contains Passenger response dto
     """
         {
-            "id": 1,
+            "id": "00000000-0000-0001-0000-000000000001",
             "name": "passenger",
             "email": "passenger@mail.ru",
             "phone": "71234567890",
@@ -55,7 +59,8 @@ Feature: Passenger API
         }
     """
   Scenario: Update passenger
-    Given Passenger request dto
+    Given Access token
+    Given Passenger update request dto
     """
         {
         "name": "new_passenger",
@@ -63,12 +68,12 @@ Feature: Passenger API
         "phone": "71234567890"
         }
     """
-    When Update passenger with id 1
+    When Update passenger with id "00000000-0000-0001-0000-000000000001"
     Then Response status is 200
     And Response body contains Passenger response dto
     """
         {
-          "id": "1",
+          "id": "00000000-0000-0001-0000-000000000001",
           "name": "new_passenger",
           "email": "new_passenger@mail.ru",
           "phone": "71234567890",
@@ -76,5 +81,6 @@ Feature: Passenger API
         }
     """
   Scenario: Delete passenger
-    When Delete passenger with id 1
+    Given Access token
+    When Delete passenger with id "00000000-0000-0001-0000-000000000001"
     Then Response status is 204

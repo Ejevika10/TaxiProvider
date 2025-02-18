@@ -42,7 +42,8 @@ public class PassengerController {
     }
 
     @GetMapping("/{id}")
-    public PassengerResponseDto getPassenger(@PathVariable String id) {
+    public PassengerResponseDto getPassenger(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                                 String id) {
         return passengerService.getPassengerById(UUID.fromString(id));
     }
 
