@@ -1,7 +1,7 @@
 package com.modsen.ratingservice.service.impl;
 
+import com.modsen.exceptionstarter.exception.DuplicateFieldException;
 import com.modsen.ratingservice.client.ride.RideClientService;
-import com.modsen.ratingservice.exception.DuplicateFieldException;
 import com.modsen.ratingservice.repository.PassengerRatingRepository;
 import com.modsen.ratingservice.util.AppConstants;
 import org.junit.jupiter.api.Test;

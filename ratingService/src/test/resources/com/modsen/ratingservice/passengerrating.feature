@@ -1,10 +1,11 @@
 Feature: PassengerRating API
   Scenario: Create passenger rating
-    Given Rating request dto
+    Given Access token
+    And Rating request dto
     """
         {
             "rideId": 1,
-            "userId": 1,
+            "userId": "00000000-0000-0001-0000-000000000002",
             "rating": 1,
             "comment": "This is a comment"
         }
@@ -14,14 +15,15 @@ Feature: PassengerRating API
     And Response body contains Rating response dto
     """
         {
-            "id": "6748eb64aec5be63e5293caf",
+            "id": "67af2045d38b5434a550ce2e",
             "rideId": 1,
-            "userId": 1,
+            "userId": "00000000-0000-0001-0000-000000000002",
             "rating": 1,
             "comment": "This is a comment"
         }
     """
   Scenario: Get page of passenger ratings
+    Given Access token
     When Get page of passenger ratings
     Then Response status is 200
     And Response body contains Page dto
@@ -33,16 +35,16 @@ Feature: PassengerRating API
           "totalElements": 2,
           "content": [
             {
-                "id": "6748eb64aec5be63e5293caf",
+                "id": "67af2045d38b5434a550ce2e",
                 "rideId": 2,
-                "userId": 1,
+                "userId": "00000000-0000-0001-0000-000000000002",
                 "rating": 1,
                 "comment": "This is a comment"
             },
             {
-                "id": "675b7caeae1ffb29763bab22",
+                "id": "67af2045d38b5434a550ce2e",
                 "rideId": 1,
-                "userId": 1,
+                "userId": "00000000-0000-0001-0000-000000000002",
                 "rating": 1,
                 "comment": "This is a comment"
             }
@@ -50,7 +52,8 @@ Feature: PassengerRating API
         }
     """
   Scenario: Get page of passenger ratings by user id
-    When Get page of passenger ratings by user id 1
+    Given Access token
+    When Get page of passenger ratings by user id "00000000-0000-0001-0000-000000000002"
     Then Response status is 200
     And Response body contains Page dto
     """
@@ -61,16 +64,16 @@ Feature: PassengerRating API
           "totalElements": 2,
           "content": [
             {
-                "id": "6748eb64aec5be63e5293caf",
+                "id": "67af2045d38b5434a550ce2e",
                 "rideId": 2,
-                "userId": 1,
+                "userId": "00000000-0000-0001-0000-000000000002",
                 "rating": 1,
                 "comment": "This is a comment"
             },
             {
-                "id": "675b7caeae1ffb29763bab22",
+                "id": "67af2045d38b5434a550ce2e",
                 "rideId": 1,
-                "userId": 1,
+                "userId": "00000000-0000-0001-0000-000000000002",
                 "rating": 1,
                 "comment": "This is a comment"
             }
@@ -78,40 +81,43 @@ Feature: PassengerRating API
         }
     """
   Scenario: Get passenger rating by id
-    When Get passenger rating by id "675b7caeae1ffb29763bab22"
+    Given Access token
+    When Get passenger rating by id "67af2045d38b5434a550ce2e"
     Then Response status is 200
     And Response body contains Rating response dto
     """
         {
-            "id": "675b7caeae1ffb29763bab22",
+            "id": "67af2045d38b5434a550ce2e",
             "rideId": 2,
-            "userId": 1,
+            "userId": "00000000-0000-0001-0000-000000000002",
             "rating": 1,
             "comment": "This is a comment"
         }
     """
   Scenario: Update passenger rating
-    Given Rating request dto
+    Given Access token
+    And Rating request dto
     """
         {
             "rideId": 2,
-            "userId": 1,
+            "userId": "00000000-0000-0001-0000-000000000002",
             "rating": 5,
             "comment": "This is a new comment"
         }
     """
-    When Update passenger rating with id "675b7caeae1ffb29763bab22"
+    When Update passenger rating with id "67af2045d38b5434a550ce2e"
     Then Response status is 200
     And Response body contains Rating response dto
     """
         {
-            "id": "675b7caeae1ffb29763bab22",
+            "id": "67af2045d38b5434a550ce2e",
             "rideId": 2,
-            "userId": 1,
+            "userId": "00000000-0000-0001-0000-000000000002",
             "rating": 5,
             "comment": "This is a new comment"
         }
     """
   Scenario: Delete passenger rating
-    When Delete passenger rating with id "675b7caeae1ffb29763bab22"
+    Given Access token
+    When Delete passenger rating with id "67af2045d38b5434a550ce2e"
     Then Response status is 204

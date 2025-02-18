@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
+import com.modsen.ratingservice.e2e.dto.LoginResponseDto;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.springframework.http.MediaType;
 
@@ -18,6 +20,10 @@ import static com.modsen.ratingservice.util.E2ETestData.URL_DRIVER_RATING_USER_I
 import static com.modsen.ratingservice.util.E2ETestData.URL_PASSENGER_RATING;
 import static com.modsen.ratingservice.util.E2ETestData.URL_PASSENGER_RATING_ID;
 import static com.modsen.ratingservice.util.E2ETestData.URL_PASSENGER_RATING_USER_ID;
+import static com.modsen.ratingservice.util.TestData.AUTHORIZATION;
+import static com.modsen.ratingservice.util.TestData.BEARER;
+import static com.modsen.ratingservice.util.TestData.URL_AUTHENTICATION;
+import static com.modsen.ratingservice.util.TestData.getLoginRequestDto;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -25,7 +31,20 @@ public class RatingStepsDefinitions {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private Response response;
+    private String accessToken;
     private RatingRequestDto ratingRequestDto;
+
+    @Given("Access token")
+    public void accessToken() throws JsonProcessingException {
+        Response response = given()
+                .contentType(ContentType.JSON)
+                .body(getLoginRequestDto())
+                .when()
+                .post(URL_AUTHENTICATION);
+
+        LoginResponseDto loginResponse = response.as(LoginResponseDto.class);
+        accessToken = loginResponse.access_token();
+    }
 
     @Given("Rating request dto")
     public void ratingRequestDto(String requestBody) throws JsonProcessingException {
@@ -35,6 +54,7 @@ public class RatingStepsDefinitions {
     @When("Get page of passenger ratings")
     public void getPageOfPassengerRatings() {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .get(URL_PASSENGER_RATING);
     }
@@ -42,20 +62,23 @@ public class RatingStepsDefinitions {
     @When("Get page of driver ratings")
     public void getPageOfDriverRatings() {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .get(URL_DRIVER_RATING);
     }
 
-    @When("Get page of passenger ratings by user id {int}")
-    public void getPageOfPassengerRatingsByUserId(int id) {
+    @When("Get page of passenger ratings by user id {string}")
+    public void getPageOfPassengerRatingsByUserId(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .get(URL_PASSENGER_RATING_USER_ID, id);
     }
 
-    @When("Get page of driver ratings by user id {int}")
-    public void getPageOfDriverRatingsByUserId(int id) {
+    @When("Get page of driver ratings by user id {string}")
+    public void getPageOfDriverRatingsByUserId(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .get(URL_DRIVER_RATING_USER_ID, id);
     }
@@ -63,6 +86,7 @@ public class RatingStepsDefinitions {
     @When("Get passenger rating by id {string}")
     public void getPassengerRatingById(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .get(URL_PASSENGER_RATING_ID, id);
     }
@@ -70,6 +94,7 @@ public class RatingStepsDefinitions {
     @When("Get driver rating by id {string}")
     public void getDriverRatingById(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .get(URL_DRIVER_RATING_ID, id);
     }
@@ -77,6 +102,7 @@ public class RatingStepsDefinitions {
     @When("Create passenger rating")
     public void createPassengerRating() {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(ratingRequestDto)
                 .when()
@@ -86,6 +112,7 @@ public class RatingStepsDefinitions {
     @When("Create driver rating")
     public void createDriverRating() {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(ratingRequestDto)
                 .when()
@@ -95,6 +122,7 @@ public class RatingStepsDefinitions {
     @When("Update passenger rating with id {string}")
     public void updatePassengerRatingWithId(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(ratingRequestDto)
                 .when()
@@ -104,6 +132,7 @@ public class RatingStepsDefinitions {
     @When("Update driver rating with id {string}")
     public void updateDriverRatingWithId(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(ratingRequestDto)
                 .when()
@@ -113,6 +142,7 @@ public class RatingStepsDefinitions {
     @When("Delete passenger rating with id {string}")
     public void deletePassengerRatingWithId(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .delete(URL_PASSENGER_RATING_ID, id);
     }
@@ -120,6 +150,7 @@ public class RatingStepsDefinitions {
     @When("Delete driver rating with id {string}")
     public void deleteDriverRatingWithId(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .delete(URL_DRIVER_RATING_ID, id);
     }

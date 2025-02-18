@@ -1,10 +1,11 @@
 Feature: DriverRating API
   Scenario: Create driver rating
-    Given Rating request dto
+    Given Access token
+    And Rating request dto
     """
         {
             "rideId": 1,
-            "userId": 1,
+            "userId": "00000000-0000-0001-0000-000000000001",
             "rating": 1,
             "comment": "This is a comment"
         }
@@ -14,14 +15,15 @@ Feature: DriverRating API
     And Response body contains Rating response dto
     """
         {
-            "id": "6748eb64aec5be63e5293caf",
+            "id": "67af2043d38b5434a550ce2d",
             "rideId": 1,
-            "userId": 1,
+            "userId": "00000000-0000-0001-0000-000000000001",
             "rating": 1,
             "comment": "This is a comment"
         }
     """
   Scenario: Get page of driver ratings
+    Given Access token
     When Get page of driver ratings
     Then Response status is 200
     And Response body contains Page dto
@@ -33,16 +35,16 @@ Feature: DriverRating API
           "totalElements": 2,
           "content": [
             {
-                "id": "6748eb64aec5be63e5293caf",
+                "id": "67af2043d38b5434a550ce2d",
                 "rideId": 2,
-                "userId": 1,
+                "userId": "00000000-0000-0001-0000-000000000001",
                 "rating": 1,
                 "comment": "This is a comment"
             },
             {
-                "id": "675b7c7fae1ffb29763bab21",
+                "id": "67af2043d38b5434a550ce2d",
                 "rideId": 1,
-                "userId": 1,
+                "userId": "00000000-0000-0001-0000-000000000001",
                 "rating": 1,
                 "comment": "This is a comment"
             }
@@ -50,7 +52,8 @@ Feature: DriverRating API
         }
     """
   Scenario: Get page of driver ratings by user id
-    When Get page of driver ratings by user id 1
+    Given Access token
+    When Get page of driver ratings by user id "00000000-0000-0001-0000-000000000001"
     Then Response status is 200
     And Response body contains Page dto
     """
@@ -61,16 +64,16 @@ Feature: DriverRating API
           "totalElements": 2,
           "content": [
             {
-                "id": "6748eb64aec5be63e5293caf",
+                "id": "67af2043d38b5434a550ce2d",
                 "rideId": 2,
-                "userId": 1,
+                "userId": "00000000-0000-0001-0000-000000000001",
                 "rating": 1,
                 "comment": "This is a comment"
             },
             {
-                "id": "675b7c7fae1ffb29763bab21",
+                "id": "67af2043d38b5434a550ce2d",
                 "rideId": 1,
-                "userId": 1,
+                "userId": "00000000-0000-0001-0000-000000000001",
                 "rating": 1,
                 "comment": "This is a comment"
             }
@@ -78,40 +81,43 @@ Feature: DriverRating API
         }
     """
   Scenario: Get driver rating by id
-    When Get driver rating by id "675b7c7fae1ffb29763bab21"
+    Given Access token
+    When Get driver rating by id "67af2043d38b5434a550ce2d"
     Then Response status is 200
     And Response body contains Rating response dto
     """
         {
-            "id": "675b7c7fae1ffb29763bab21",
+            "id": "67af2043d38b5434a550ce2d",
             "rideId": 2,
-            "userId": 1,
+            "userId": "00000000-0000-0001-0000-000000000001",
             "rating": 1,
             "comment": "This is a comment"
         }
     """
   Scenario: Update driver rating
-    Given Rating request dto
+    Given Access token
+    And Rating request dto
     """
         {
             "rideId": 2,
-            "userId": 1,
+            "userId": "00000000-0000-0001-0000-000000000001",
             "rating": 5,
             "comment": "This is a new comment"
         }
     """
-    When Update driver rating with id "675b7c7fae1ffb29763bab21"
+    When Update driver rating with id "67af2043d38b5434a550ce2d"
     Then Response status is 200
     And Response body contains Rating response dto
     """
         {
-            "id": "675b7c7fae1ffb29763bab21",
+            "id": "67af2043d38b5434a550ce2d",
             "rideId": 2,
-            "userId": 1,
+            "userId": "00000000-0000-0001-0000-000000000001",
             "rating": 5,
             "comment": "This is a new comment"
         }
     """
   Scenario: Delete driver rating
-    When Delete driver rating with id "675b7c7fae1ffb29763bab21"
+    Given Access token
+    When Delete driver rating with id "67af2043d38b5434a550ce2d"
     Then Response status is 204
