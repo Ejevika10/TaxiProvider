@@ -18,7 +18,7 @@ public class DatasourceSetup {
 
     @PostConstruct
     public void setUp() throws Exception {
-        executeSqlScript("classpath:/com.modsen.passengerservice.e2e/sql/passenger-datasource-setup.sql");
+        executeSqlScript("classpath:/e2e/sql/passenger-datasource-setup.sql");
     }
 
     private void executeSqlScript(String path) throws Exception {
