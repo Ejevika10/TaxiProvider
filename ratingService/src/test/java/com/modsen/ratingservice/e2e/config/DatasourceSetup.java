@@ -30,7 +30,7 @@ public class DatasourceSetup {
 
     @PostConstruct
     public void setUp() throws Exception {
-        executeSqlScript(jdbcRideTemplate, "classpath:/com/modsen/ratingservice/sql/ride-datasource-setup.sql");
+        executeSqlScript(jdbcRideTemplate, "classpath:/e2e/sql/ride-datasource-setup.sql");
         executeMongoPreparation(mongoTemplate);
     }
 
