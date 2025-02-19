@@ -71,8 +71,8 @@ public final class TestData {
     public static final String USERNAME = "admin";
     public static final String PASSWORD = "admin";
 
-    public static final String DRIVER_SCRIPT = "driver-controller-preparation.sql";
-    public static final String CAR_SCRIPT = "car-controller-preparation.sql";
+    public static final String DRIVER_SCRIPT = "classpath:/integration/driver-controller-preparation.sql";
+    public static final String CAR_SCRIPT = "classpath:/integration/car-controller-preparation.sql";
 
     public static Car.CarBuilder getCarBuilder() {
         return Car.builder()

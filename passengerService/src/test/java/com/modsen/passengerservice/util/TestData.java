@@ -48,7 +48,7 @@ public final class TestData {
     public static final String USERNAME = "admin";
     public static final String PASSWORD = "admin";
 
-    public static final String PASSENGER_SCRIPT = "passenger-controller-preparation.sql";
+    public static final String PASSENGER_SCRIPT = "classpath:/integration/passenger-controller-preparation.sql";
 
     public static Passenger.PassengerBuilder getPassengerBuilder() {
         return Passenger.builder()

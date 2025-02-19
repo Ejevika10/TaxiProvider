@@ -70,7 +70,7 @@ public final class TestData {
     public static final String USERNAME = "admin";
     public static final String PASSWORD = "admin";
 
-    public static final String RIDE_SCRIPT = "ride-controller-preparation.sql";
+    public static final String RIDE_SCRIPT = "classpath:/integration/ride-controller-preparation.sql";
 
     public static Ride.RideBuilder getRideBuilder() {
         return Ride.builder()
