@@ -8,8 +8,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(
-        features = {"src/test/resources/com/modsen/ratingservice/passengerrating.feature",
-        "src/test/resources/com/modsen/ratingservice/driverrating.feature"}
+        features = {"src/test/resources/e2e/passengerrating.feature",
+        "src/test/resources/e2e/driverrating.feature"}
 )
 @EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
 public class CucumberTest {
