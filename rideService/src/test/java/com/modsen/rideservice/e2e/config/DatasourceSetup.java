@@ -32,9 +32,9 @@ public class DatasourceSetup {
 
     @PostConstruct
     public void setUp() throws Exception {
-        executeSqlScript(jdbcRideTemplate, "classpath:/com/modsen/rideservice/e2e/sql/ride-datasource-setup.sql");
-        executeSqlScript(jdbcDriverTemplate, "classpath:/com/modsen/rideservice/e2e/sql/driver-datasource-setup.sql");
-        executeSqlScript(jdbcPassengerTemplate, "classpath:/com/modsen/rideservice/e2e/sql/passenger-datasource-setup.sql");
+        executeSqlScript(jdbcRideTemplate, "classpath:/e2e/sql/ride-datasource-setup.sql");
+        executeSqlScript(jdbcDriverTemplate, "classpath:/e2e/sql/driver-datasource-setup.sql");
+        executeSqlScript(jdbcPassengerTemplate, "classpath:/e2e/sql/passenger-datasource-setup.sql");
     }
 
     private void executeSqlScript(JdbcTemplate jdbcTemplate, String path) throws Exception {
