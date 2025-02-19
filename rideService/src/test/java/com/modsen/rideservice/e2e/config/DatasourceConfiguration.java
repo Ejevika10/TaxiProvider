@@ -7,26 +7,28 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 
 @Configuration
+@Profile("e2e")
 public class DatasourceConfiguration {
     @Primary
     @Bean(name = "rideDataSource")
-    @ConfigurationProperties(prefix="spring.datasource")
+    @ConfigurationProperties(prefix = "spring.datasource.ride")
     public DataSource primaryDataSource() {
         return DataSourceBuilder.create().build();
     }
 
     @Bean(name = "driverDataSource")
-    @ConfigurationProperties(prefix="spring.datasource.driver")
+    @ConfigurationProperties(prefix = "spring.datasource.driver")
     public DataSource driverDataSource() {
         return DataSourceBuilder.create().build();
     }
 
     @Bean(name = "passengerDataSource")
-    @ConfigurationProperties(prefix="spring.datasource.passenger")
+    @ConfigurationProperties(prefix = "spring.datasource.passenger")
     public DataSource passengerDataSource() {
         return DataSourceBuilder.create().build();
     }

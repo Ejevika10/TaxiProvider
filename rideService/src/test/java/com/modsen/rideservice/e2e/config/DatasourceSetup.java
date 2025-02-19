@@ -2,8 +2,8 @@ package com.modsen.rideservice.e2e.config;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,19 +14,17 @@ import java.nio.file.Paths;
 
 @Component
 @RequiredArgsConstructor
+@Profile("e2e")
 public class DatasourceSetup {
 
-    @Autowired
     @Qualifier("jdbcRideTemplate")
-    private JdbcTemplate jdbcRideTemplate;
+    private final JdbcTemplate jdbcRideTemplate;
 
-    @Autowired
     @Qualifier("jdbcDriverTemplate")
-    private JdbcTemplate jdbcDriverTemplate;
+    private final JdbcTemplate jdbcDriverTemplate;
 
-    @Autowired
     @Qualifier("jdbcPassengerTemplate")
-    private JdbcTemplate jdbcPassengerTemplate;
+    private final JdbcTemplate jdbcPassengerTemplate;
 
     private final ResourceLoader resourceLoader;
 

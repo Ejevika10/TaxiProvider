@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,10 +14,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 
 @Configuration
+@Profile("e2e")
 public class DatasourceConfiguration {
 
     @Bean(name = "rideDataSource")
-    @ConfigurationProperties(prefix="spring.datasource.ride")
+    @ConfigurationProperties(prefix = "spring.datasource.ride")
     public DataSource primaryDataSource() {
         return DataSourceBuilder.create().build();
     }

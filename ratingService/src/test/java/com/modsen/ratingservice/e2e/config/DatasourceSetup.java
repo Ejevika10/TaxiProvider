@@ -2,9 +2,9 @@ package com.modsen.ratingservice.e2e.config;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
+@Profile("e2e")
 public class DatasourceSetup {
 
     @Qualifier("jdbcRideTemplate")
@@ -64,7 +64,6 @@ public class DatasourceSetup {
         passengerRating.put("comment", "This is a comment");
         passengerRating.put("deleted", false);
 
-        Map<String, Object> res = mongoTemplate.save(passengerRating, "passenger_ratings");
-        log.info(res.get("_id").toString());
+        mongoTemplate.save(passengerRating, "passenger_ratings");
     }
 }
