@@ -18,8 +18,8 @@ public class DatasourceSetup {
 
     @PostConstruct
     public void setUp() throws Exception {
-        executeSqlScript("classpath:/sql/driver-datasource-setup.sql");
-        executeSqlScript("classpath:/sql/car-datasource-setup.sql");
+        executeSqlScript("classpath:/e2e/sql/driver-datasource-setup.sql");
+        executeSqlScript("classpath:/e2e/sql/car-datasource-setup.sql");
     }
 
     private void executeSqlScript(String path) throws Exception {
