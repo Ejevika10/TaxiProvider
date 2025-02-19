@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import com.modsen.exceptionstarter.message.ErrorMessage;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,7 +21,6 @@ import static com.modsen.rideservice.util.TestData.getDriverResponseDto;
 import static com.modsen.rideservice.util.TestData.getPassengerResponseDto;
 
 @Component
-@PropertySource("classpath:test.properties")
 public class FeignClientStubs {
 
     private final ObjectMapper objectMapper;
