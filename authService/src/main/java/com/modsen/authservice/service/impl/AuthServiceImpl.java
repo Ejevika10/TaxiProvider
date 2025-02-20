@@ -68,8 +68,8 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponseDto login(LoginRequestDto request, HttpServletRequest servletRequest, HttpServletResponse servletResponse) {
         LoginResponseDto responseDto = getAccessToken(request.username(), request.password());
 
-        servletResponse.addHeader(OAuth2Constants.ACCESS_TOKEN, responseDto.access_token());
-        servletResponse.addHeader(OAuth2Constants.EXPIRES_IN, String.valueOf(responseDto.expires_in()));
+        servletResponse.addHeader(OAuth2Constants.ACCESS_TOKEN, responseDto.accessToken());
+        servletResponse.addHeader(OAuth2Constants.EXPIRES_IN, String.valueOf(responseDto.expiresIn()));
 
         return responseDto;
     }
@@ -98,8 +98,8 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = servletRequest.getHeader(OAuth2Constants.REFRESH_TOKEN);
         LoginResponseDto responseDto = getRefreshToken(refreshToken);
 
-        servletResponse.addHeader(OAuth2Constants.ACCESS_TOKEN, responseDto.access_token());
-        servletResponse.addHeader(OAuth2Constants.EXPIRES_IN, String.valueOf(responseDto.expires_in()));
+        servletResponse.addHeader(OAuth2Constants.ACCESS_TOKEN, responseDto.accessToken());
+        servletResponse.addHeader(OAuth2Constants.EXPIRES_IN, String.valueOf(responseDto.expiresIn()));
 
         return responseDto;
     }

@@ -53,7 +53,7 @@ public class RideStepsDefinitions {
                 .post(URL_AUTHENTICATION);
 
         LoginResponseDto loginResponse = response.as(LoginResponseDto.class);
-        accessToken = loginResponse.access_token();
+        accessToken = loginResponse.accessToken();
     }
 
     @Given("Ride create request dto")

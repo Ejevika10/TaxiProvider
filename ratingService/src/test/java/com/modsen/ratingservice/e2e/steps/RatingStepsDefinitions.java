@@ -43,7 +43,7 @@ public class RatingStepsDefinitions {
                 .post(URL_AUTHENTICATION);
 
         LoginResponseDto loginResponse = response.as(LoginResponseDto.class);
-        accessToken = loginResponse.access_token();
+        accessToken = loginResponse.accessToken();
     }
 
     @Given("Rating request dto")

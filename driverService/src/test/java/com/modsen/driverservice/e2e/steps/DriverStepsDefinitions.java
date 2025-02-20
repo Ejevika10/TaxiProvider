@@ -46,7 +46,7 @@ public class DriverStepsDefinitions {
                 .when()
                 .post(URL_AUTHENTICATION);
         LoginResponseDto loginResponse = response.body().as(LoginResponseDto.class);
-        accessToken = loginResponse.access_token();
+        accessToken = loginResponse.accessToken();
     }
 
     @Given("Car request dto")

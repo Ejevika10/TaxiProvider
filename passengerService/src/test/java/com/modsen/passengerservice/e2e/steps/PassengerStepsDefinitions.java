@@ -41,7 +41,7 @@ public class PassengerStepsDefinitions {
                 .post(URL_AUTHENTICATION);
 
         LoginResponseDto loginResponse = response.as(LoginResponseDto.class);
-        accessToken = loginResponse.access_token();
+        accessToken = loginResponse.accessToken();
     }
 
     @Given("Passenger create request dto")

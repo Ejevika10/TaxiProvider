@@ -1,11 +1,26 @@
 package com.modsen.driverservice.e2e.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record LoginResponseDto(
-    String access_token,
-    String refresh_token,
-    String expires_in,
-    String refresh_expires_in,
-    String token_type,
-    String session_state,
-    String scope) {
+        @JsonProperty("access_token")
+        String accessToken,
+
+        @JsonProperty("refresh_token")
+        String refreshToken,
+
+        @JsonProperty("expires_in")
+        String expiresIn,
+
+        @JsonProperty("refresh_expires_in")
+        String refreshExpiresIn,
+
+        @JsonProperty("token_type")
+        String tokenType,
+
+        @JsonProperty("session_state")
+        String sessionState,
+
+        @JsonProperty("scope")
+        String scope) {
 }
