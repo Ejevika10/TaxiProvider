@@ -5,12 +5,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import com.modsen.exceptionstarter.message.ErrorMessage;
+import com.modsen.exceptionstarter.message.ListErrorMessage;
 import com.modsen.rideservice.dto.PageDto;
+import com.modsen.rideservice.dto.RideAcceptRequestDto;
+import com.modsen.rideservice.dto.RideCreateRequestDto;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
-import com.modsen.rideservice.exception.ErrorMessage;
-import com.modsen.rideservice.exception.ListErrorMessage;
 import com.modsen.rideservice.model.RideState;
 import com.modsen.rideservice.util.TestServiceInstanceListSupplier;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
@@ -27,7 +29,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -38,17 +39,19 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 import java.util.Map;
 
+import static com.modsen.rideservice.util.TestData.AUTHORIZATION;
+import static com.modsen.rideservice.util.TestData.AUTHORIZATION_VALUE;
 import static com.modsen.rideservice.util.TestData.DRIVER_ID;
 import static com.modsen.rideservice.util.TestData.DRIVER_NOT_FOUND;
 import static com.modsen.rideservice.util.TestData.DRIVER_SERVICE_NAME;
 import static com.modsen.rideservice.util.TestData.DRIVER_SERVICE_PORT;
 import static com.modsen.rideservice.util.TestData.EXCEEDED_LIMIT_VALUE;
 import static com.modsen.rideservice.util.TestData.EXCEEDED_OFFSET_VALUE;
-import static com.modsen.rideservice.util.TestData.INSUFFICIENT_DRIVER_ID;
 import static com.modsen.rideservice.util.TestData.INSUFFICIENT_LIMIT_VALUE;
 import static com.modsen.rideservice.util.TestData.INSUFFICIENT_OFFSET_VALUE;
-import static com.modsen.rideservice.util.TestData.INSUFFICIENT_PASSENGER_ID;
 import static com.modsen.rideservice.util.TestData.INSUFFICIENT_RIDE_ID;
+import static com.modsen.rideservice.util.TestData.INVALID_DRIVER_ID;
+import static com.modsen.rideservice.util.TestData.INVALID_PASSENGER_ID;
 import static com.modsen.rideservice.util.TestData.LIMIT;
 import static com.modsen.rideservice.util.TestData.LIMIT_VALUE;
 import static com.modsen.rideservice.util.TestData.OFFSET;
@@ -64,11 +67,19 @@ import static com.modsen.rideservice.util.TestData.RIDE_SCRIPT;
 import static com.modsen.rideservice.util.TestData.URL_RIDE;
 import static com.modsen.rideservice.util.TestData.URL_RIDE_DRIVER_ID;
 import static com.modsen.rideservice.util.TestData.URL_RIDE_ID;
+import static com.modsen.rideservice.util.TestData.URL_RIDE_ID_ACCEPT;
+import static com.modsen.rideservice.util.TestData.URL_RIDE_ID_CANCEL;
 import static com.modsen.rideservice.util.TestData.URL_RIDE_ID_STATE;
 import static com.modsen.rideservice.util.TestData.URL_RIDE_PASSENGER_ID;
+import static com.modsen.rideservice.util.TestData.getEmptyRideAcceptRequestDto;
+import static com.modsen.rideservice.util.TestData.getEmptyRideCreateRequestDto;
 import static com.modsen.rideservice.util.TestData.getEmptyRideRequestDto;
+import static com.modsen.rideservice.util.TestData.getInvalidRideAcceptRequestDto;
+import static com.modsen.rideservice.util.TestData.getInvalidRideCreateRequestDto;
 import static com.modsen.rideservice.util.TestData.getInvalidRideRequestDto;
 import static com.modsen.rideservice.util.TestData.getPageRideResponseDto;
+import static com.modsen.rideservice.util.TestData.getRideAcceptRequestDto;
+import static com.modsen.rideservice.util.TestData.getRideCreateRequestDto;
 import static com.modsen.rideservice.util.TestData.getRideRequestDto;
 import static com.modsen.rideservice.util.TestData.getRideResponseDto;
 import static com.modsen.rideservice.util.TestData.getRideResponseDtoBuilder;
@@ -77,6 +88,7 @@ import static com.modsen.rideservice.util.TestData.getRideStateRequestDtoBuilder
 import static com.modsen.rideservice.util.ViolationData.DESTINATION_ADDRESS_INVALID;
 import static com.modsen.rideservice.util.ViolationData.DESTINATION_ADDRESS_MANDATORY;
 import static com.modsen.rideservice.util.ViolationData.DRIVER_ID_INVALID;
+import static com.modsen.rideservice.util.ViolationData.DRIVER_ID_MANDATORY;
 import static com.modsen.rideservice.util.ViolationData.ID_INVALID;
 import static com.modsen.rideservice.util.ViolationData.LIMIT_EXCEEDED;
 import static com.modsen.rideservice.util.ViolationData.LIMIT_INSUFFICIENT;
@@ -93,7 +105,6 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = "classpath:test.properties")
 @Sql(
         scripts = RIDE_SCRIPT,
         executionPhase = BEFORE_TEST_METHOD
@@ -310,7 +321,7 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void getPageRidesByDriverId_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+    void getPageRidesByDriverId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(DRIVER_ID_INVALID));
@@ -320,7 +331,7 @@ public class RideControllerIntegrationTest {
                 .param(OFFSET, OFFSET_VALUE)
                 .param(LIMIT, LIMIT_VALUE)
                 .when()
-                .get(URL_RIDE_DRIVER_ID, INSUFFICIENT_DRIVER_ID.toString())
+                .get(URL_RIDE_DRIVER_ID, INVALID_DRIVER_ID)
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -411,7 +422,7 @@ public class RideControllerIntegrationTest {
     }
 
     @Test
-    void getPageRidesByPassengerId_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+    void getPageRidesByPassengerId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(PASSENGER_ID_INVALID));
@@ -421,7 +432,7 @@ public class RideControllerIntegrationTest {
                 .param(OFFSET, OFFSET_VALUE)
                 .param(LIMIT, LIMIT_VALUE)
                 .when()
-                .get(URL_RIDE_PASSENGER_ID, INSUFFICIENT_PASSENGER_ID.toString())
+                .get(URL_RIDE_PASSENGER_ID, INVALID_PASSENGER_ID)
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -470,15 +481,17 @@ public class RideControllerIntegrationTest {
 
     @Test
     void createRide_whenValidInput_thenReturns201AndResponseDto() throws Exception {
-        RideRequestDto rideRequestDto = getRideRequestDto();
+        RideCreateRequestDto rideRequestDto = getRideCreateRequestDto();
         feignClientStubs.stubForPassengerServiceWithExistingPassenger(PASSENGER_ID, PASSENGER_SERVICE);
         feignClientStubs.stubForDriverServiceWithExistingDriver(DRIVER_ID, DRIVER_SERVICE);
         RideResponseDto expectedRideResponseDto = getRideResponseDtoBuilder()
                 .id(2L)
+                .driverId(null)
                 .build();
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideRequestDto)
                 .when()
@@ -488,44 +501,21 @@ public class RideControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .extract()
                 .asString();
-        RideResponseDto actualCarResponseDto = objectMapper.readValue(responseJson, RideResponseDto.class);
+        RideResponseDto actualRideResponseDto = objectMapper.readValue(responseJson, RideResponseDto.class);
 
-        assertEqualsWithoutTimeAndCost(expectedRideResponseDto, actualCarResponseDto);
+        assertEqualsWithoutTimeAndCost(expectedRideResponseDto, actualRideResponseDto);
     }
 
     @Test
     void createRide_whenPassengerDoesntExist_thenReturns404AndErrorResult() throws Exception {
-        RideRequestDto rideRequestDto = getRideRequestDto();
+        RideCreateRequestDto rideRequestDto = getRideCreateRequestDto();
         feignClientStubs.stubForPassengerServiceWithNonExistingPassenger(PASSENGER_ID, PASSENGER_SERVICE);
         ErrorMessage expectedErrorResponse = new ErrorMessage(
                 HttpStatus.NOT_FOUND.value(), PASSENGER_NOT_FOUND);
 
         String responseJson = RestAssuredMockMvc
                 .given()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(rideRequestDto)
-                .when()
-                .post(URL_RIDE)
-                .then()
-                .statusCode(HttpStatus.NOT_FOUND.value())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .extract()
-                .asString();
-        ErrorMessage actualErrorResponse = objectMapper.readValue(responseJson, ErrorMessage.class);
-
-        assertEquals(expectedErrorResponse, actualErrorResponse);
-    }
-
-    @Test
-    void createRide_whenDriverDoesntExist_thenReturns404AndErrorResult() throws Exception {
-        RideRequestDto rideRequestDto = getRideRequestDto();
-        feignClientStubs.stubForPassengerServiceWithExistingPassenger(PASSENGER_ID, PASSENGER_SERVICE);
-        feignClientStubs.stubForDriverServiceWithNonExistingDriver(DRIVER_ID, DRIVER_SERVICE);
-        ErrorMessage expectedErrorResponse = new ErrorMessage(
-                HttpStatus.NOT_FOUND.value(), DRIVER_NOT_FOUND);
-
-        String responseJson = RestAssuredMockMvc
-                .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideRequestDto)
                 .when()
@@ -542,13 +532,14 @@ public class RideControllerIntegrationTest {
 
     @Test
     void createRide_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        RideRequestDto rideRequestDto = getEmptyRideRequestDto();
+        RideCreateRequestDto rideRequestDto = getEmptyRideCreateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(PASSENGER_ID_MANDATORY, DESTINATION_ADDRESS_MANDATORY, SOURCE_ADDRESS_MANDATORY));
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideRequestDto)
                 .when()
@@ -568,17 +559,194 @@ public class RideControllerIntegrationTest {
 
     @Test
     void createRide_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
-        RideRequestDto rideRequestDto = getInvalidRideRequestDto();
+        RideCreateRequestDto rideRequestDto = getInvalidRideCreateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(PASSENGER_ID_INVALID, DRIVER_ID_INVALID, DESTINATION_ADDRESS_INVALID, SOURCE_ADDRESS_INVALID));
+                List.of(PASSENGER_ID_INVALID, DESTINATION_ADDRESS_INVALID, SOURCE_ADDRESS_INVALID));
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideRequestDto)
                 .when()
                 .post(URL_RIDE)
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .extract()
+                .asString();
+        ListErrorMessage actualErrorResponse = objectMapper.readValue(responseJson, ListErrorMessage.class);
+
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+    }
+
+    @Test
+    void acceptRide_whenValidInput_thenReturns200AndResponseDto() throws Exception {
+        RideAcceptRequestDto rideAcceptRequestDto = getRideAcceptRequestDto();
+        feignClientStubs.stubForDriverServiceWithExistingDriver(DRIVER_ID, DRIVER_SERVICE);
+        String responseJson = RestAssuredMockMvc
+                .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(rideAcceptRequestDto)
+                .when()
+                .put(URL_RIDE_ID_ACCEPT, RIDE_ID.toString())
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .extract()
+                .asString();
+
+        RideResponseDto expectedRideResponseDto = getRideResponseDtoBuilder()
+                .rideState(RideState.ACCEPTED)
+                .driverId(DRIVER_ID)
+                .build();
+        RideResponseDto actualRideResponseDto = objectMapper.readValue(responseJson, RideResponseDto.class);
+
+        assertEqualsWithoutTimeAndCost(expectedRideResponseDto, actualRideResponseDto);
+    }
+
+    @Test
+    void acceptRide_whenDriverDoesntExist_thenReturns404AndErrorResult() throws Exception {
+        RideAcceptRequestDto rideAcceptRequestDto = getRideAcceptRequestDto();
+        feignClientStubs.stubForDriverServiceWithNonExistingDriver(DRIVER_ID, DRIVER_SERVICE);
+        ErrorMessage expectedErrorResponse = new ErrorMessage(
+                HttpStatus.NOT_FOUND.value(), DRIVER_NOT_FOUND);
+
+        String responseJson = RestAssuredMockMvc
+                .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(rideAcceptRequestDto)
+                .when()
+                .put(URL_RIDE_ID_ACCEPT, RIDE_ID.toString())
+                .then()
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .extract()
+                .asString();
+        ErrorMessage actualErrorResponse = objectMapper.readValue(responseJson, ErrorMessage.class);
+
+        assertEquals(expectedErrorResponse, actualErrorResponse);
+    }
+
+    @Test
+    void acceptRide_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
+        RideAcceptRequestDto rideAcceptRequestDto = getEmptyRideAcceptRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                List.of(DRIVER_ID_MANDATORY));
+
+        String responseJson = RestAssuredMockMvc
+                .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(rideAcceptRequestDto)
+                .when()
+                .put(URL_RIDE_ID_ACCEPT, RIDE_ID.toString())
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .extract()
+                .asString();
+        ListErrorMessage actualErrorResponse = objectMapper.readValue(responseJson, ListErrorMessage.class);
+
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+    }
+
+    @Test
+    void acceptRide_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
+        RideAcceptRequestDto rideAcceptRequestDto = getInvalidRideAcceptRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                List.of(DRIVER_ID_INVALID));
+
+        String responseJson = RestAssuredMockMvc
+                .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(rideAcceptRequestDto)
+                .when()
+                .put(URL_RIDE_ID_ACCEPT, RIDE_ID.toString())
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .extract()
+                .asString();
+        ListErrorMessage actualErrorResponse = objectMapper.readValue(responseJson, ListErrorMessage.class);
+
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+    }
+
+    @Test
+    void acceptRide_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+        RideAcceptRequestDto rideAcceptRequestDto = getRideAcceptRequestDto();
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                List.of(ID_INVALID));
+
+        String responseJson = RestAssuredMockMvc
+                .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(rideAcceptRequestDto)
+                .when()
+                .put(URL_RIDE_ID_ACCEPT, INSUFFICIENT_RIDE_ID.toString())
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .extract()
+                .asString();
+        ListErrorMessage actualErrorResponse = objectMapper.readValue(responseJson, ListErrorMessage.class);
+
+        assertThat(actualErrorResponse.errorCode())
+                .isEqualTo(expectedErrorResponse.errorCode());
+        assertThat(actualErrorResponse.errorMessages())
+                .containsExactlyInAnyOrderElementsOf(expectedErrorResponse.errorMessages());
+    }
+
+    @Test
+    void cancelRide_whenValidInput_thenReturns200AndResponseDto() throws Exception {
+        String responseJson = RestAssuredMockMvc
+                .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
+                .when()
+                .put(URL_RIDE_ID_CANCEL, RIDE_ID.toString())
+                .then()
+                .statusCode(HttpStatus.OK.value())
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .extract()
+                .asString();
+
+        RideResponseDto expectedRideResponseDto = getRideResponseDtoBuilder()
+                .rideState(RideState.CANCELLED)
+                .build();
+        RideResponseDto actualRideResponseDto = objectMapper.readValue(responseJson, RideResponseDto.class);
+
+        assertEqualsWithoutTimeAndCost(expectedRideResponseDto, actualRideResponseDto);
+    }
+
+    @Test
+    void cancelRide_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+        ListErrorMessage expectedErrorResponse = new ListErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                List.of(ID_INVALID));
+
+        String responseJson = RestAssuredMockMvc
+                .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
+                .when()
+                .put(URL_RIDE_ID_CANCEL, INSUFFICIENT_RIDE_ID.toString())
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -599,6 +767,7 @@ public class RideControllerIntegrationTest {
         feignClientStubs.stubForDriverServiceWithExistingDriver(DRIVER_ID, DRIVER_SERVICE);
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideRequestDto)
                 .when()
@@ -622,6 +791,7 @@ public class RideControllerIntegrationTest {
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideRequestDto)
                 .when()
@@ -646,6 +816,7 @@ public class RideControllerIntegrationTest {
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideRequestDto)
                 .when()
@@ -669,6 +840,7 @@ public class RideControllerIntegrationTest {
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideRequestDto)
                 .when()
@@ -695,6 +867,7 @@ public class RideControllerIntegrationTest {
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideRequestDto)
                 .when()
@@ -721,6 +894,7 @@ public class RideControllerIntegrationTest {
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideRequestDto)
                 .when()
@@ -747,6 +921,7 @@ public class RideControllerIntegrationTest {
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideStateRequestDto)
                 .when()
@@ -771,6 +946,7 @@ public class RideControllerIntegrationTest {
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(rideStateRequestDto)
                 .when()

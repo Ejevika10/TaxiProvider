@@ -2,16 +2,19 @@ package com.modsen.driverservice.util;
 
 import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.dto.CarResponseDto;
-import com.modsen.driverservice.dto.DriverRequestDto;
+import com.modsen.driverservice.dto.DriverCreateRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
+import com.modsen.driverservice.dto.DriverUpdateRequestDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.dto.UserRatingDto;
+import com.modsen.driverservice.e2e.dto.LoginRequestDto;
 import com.modsen.driverservice.model.Car;
 import com.modsen.driverservice.model.Driver;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TestData {
@@ -26,6 +29,8 @@ public final class TestData {
     public static final String LIMIT = "limit";
     public static final String PAGE_SIZE = "pageSize";
     public static final String PAGE_NUMBER = "pageNumber";
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String BEARER = "Bearer ";
     public static final Integer OFFSET_VALUE = 0;
     public static final Integer LIMIT_VALUE = 5;
     public static final Integer INSUFFICIENT_OFFSET_VALUE = -1;
@@ -38,14 +43,15 @@ public final class TestData {
     private static final String MODEL = "sedan";
     private static final String BRAND = "audi";
     private static final String NUMBER = "12345";
-    public static final Long DRIVER_ID = 1L;
+    public static final UUID DRIVER_ID = new UUID(1,1);
+    public static final UUID DRIVER_ID_2 = new UUID(1,2);
 
     public static final Long INSUFFICIENT_CAR_ID = -1L;
     private static final String INVALID_COLOR = "r";
     private static final String INVALID_MODEL = "s";
     private static final String INVALID_BRAND = "a";
     private static final String INVALID_NUMBER = "1";
-    public static final Long INSUFFICIENT_DRIVER_ID = -1L;
+    public static final String INVALID_DRIVER_ID = "invalid-uuid-string";
 
     private static final String NAME = "Driver";
     private static final String EMAIL = "driver@email.com";
@@ -61,8 +67,12 @@ public final class TestData {
     public static final String UNIQUE_NUMBER = "11111";
     public static final String UNIQUE_EMAIL = "driver_unique@email.com";
 
-    public static final String DRIVER_SCRIPT = "driver-controller-preparation.sql";
-    public static final String CAR_SCRIPT = "car-controller-preparation.sql";
+    public static final String URL_AUTHENTICATION = "http://localhost:8085/api/v1/auth/login";
+    public static final String USERNAME = "admin";
+    public static final String PASSWORD = "admin";
+
+    public static final String DRIVER_SCRIPT = "classpath:/integration/driver-controller-preparation.sql";
+    public static final String CAR_SCRIPT = "classpath:/integration/car-controller-preparation.sql";
 
     public static Car.CarBuilder getCarBuilder() {
         return Car.builder()
@@ -85,7 +95,7 @@ public final class TestData {
                 .color(COLOR)
                 .model(MODEL)
                 .number(NUMBER)
-                .driverId(DRIVER_ID);
+                .driverId(String.valueOf(DRIVER_ID));
     }
 
     public static CarRequestDto getCarRequestDto() {
@@ -98,7 +108,6 @@ public final class TestData {
                 .color(null)
                 .model(null)
                 .number(null)
-                .driverId(null)
                 .build();
     }
 
@@ -108,7 +117,7 @@ public final class TestData {
                 .color(INVALID_COLOR)
                 .model(INVALID_MODEL)
                 .number(INVALID_NUMBER)
-                .driverId(INSUFFICIENT_DRIVER_ID)
+                .driverId(INVALID_DRIVER_ID)
                 .build();
     }
 
@@ -169,21 +178,21 @@ public final class TestData {
         return getDriverBuilder().build();
     }
 
-    public static DriverRequestDto.DriverRequestDtoBuilder getDriverRequestDtoBuilder() {
-        return DriverRequestDto.builder()
-                .name(NAME)
+    public static DriverCreateRequestDto.DriverCreateRequestDtoBuilder getDriverCreateRequestDtoBuilder() {
+        return DriverCreateRequestDto.builder()
+                .id(String.valueOf(DRIVER_ID))
                 .name(NAME)
                 .email(EMAIL)
                 .phone(PHONE)
                 .rating(RATING);
     }
 
-    public static DriverRequestDto getDriverRequestDto() {
-        return getDriverRequestDtoBuilder().build();
+    public static DriverCreateRequestDto getDriverCreateRequestDto() {
+        return getDriverCreateRequestDtoBuilder().build();
     }
 
-    public static DriverRequestDto getInvalidDriverRequestDto() {
-        return getDriverRequestDtoBuilder()
+    public static DriverCreateRequestDto getInvalidDriverCreateRequestDto() {
+        return getDriverCreateRequestDtoBuilder()
                 .name(INVALID_NAME)
                 .email(INVALID_EMAIL)
                 .phone(INVALID_PHONE)
@@ -191,12 +200,40 @@ public final class TestData {
                 .build();
     }
 
-    public static DriverRequestDto getEmptyDriverRequestDto() {
-        return getDriverRequestDtoBuilder()
+    public static DriverCreateRequestDto getEmptyDriverCreateRequestDto() {
+        return getDriverCreateRequestDtoBuilder()
+                .id(null)
                 .name(null)
                 .email(null)
                 .phone(null)
                 .rating(null)
+                .build();
+    }
+
+    public static DriverUpdateRequestDto.DriverUpdateRequestDtoBuilder getDriverUpdateRequestDtoBuilder() {
+        return DriverUpdateRequestDto.builder()
+                .name(NAME)
+                .email(EMAIL)
+                .phone(PHONE);
+    }
+
+    public static DriverUpdateRequestDto getDriverUpdateRequestDto() {
+        return getDriverUpdateRequestDtoBuilder().build();
+    }
+
+    public static DriverUpdateRequestDto getInvalidDriverUpdateRequestDto() {
+        return getDriverUpdateRequestDtoBuilder()
+                .name(INVALID_NAME)
+                .email(INVALID_EMAIL)
+                .phone(INVALID_PHONE)
+                .build();
+    }
+
+    public static DriverUpdateRequestDto getEmptyDriverUpdateRequestDto() {
+        return getDriverUpdateRequestDtoBuilder()
+                .name(null)
+                .email(null)
+                .phone(null)
                 .build();
     }
 
@@ -229,5 +266,15 @@ public final class TestData {
 
     public static UserRatingDto getUserRatingDto() {
         return getUserRatingDtoBuilder().build();
+    }
+
+    public static LoginRequestDto.LoginRequestDtoBuilder getLoginRequestDtoBuilder() {
+        return LoginRequestDto.builder()
+                .username(USERNAME)
+                .password(PASSWORD);
+    }
+
+    public static LoginRequestDto getLoginRequestDto() {
+        return getLoginRequestDtoBuilder().build();
     }
 }

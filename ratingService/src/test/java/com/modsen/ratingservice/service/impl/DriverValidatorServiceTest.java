@@ -1,10 +1,10 @@
 package com.modsen.ratingservice.service.impl;
 
+import com.modsen.exceptionstarter.exception.DuplicateFieldException;
+import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
+import com.modsen.exceptionstarter.exception.InvalidStateException;
 import com.modsen.ratingservice.client.ride.RideClientService;
 import com.modsen.ratingservice.dto.RatingRequestDto;
-import com.modsen.ratingservice.exception.DuplicateFieldException;
-import com.modsen.ratingservice.exception.InvalidFieldValueException;
-import com.modsen.ratingservice.exception.InvalidStateException;
 import com.modsen.ratingservice.repository.DriverRatingRepository;
 import com.modsen.ratingservice.util.AppConstants;
 import org.junit.jupiter.api.Test;
@@ -13,13 +13,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static com.modsen.ratingservice.util.TestData.INVALID_USER_ID;
+import static com.modsen.ratingservice.util.TestData.AUTHORIZATION_VALUE;
+import static com.modsen.ratingservice.util.TestData.USER_ID_2;
 import static com.modsen.ratingservice.util.TestData.getRatingRequestDto;
 import static com.modsen.ratingservice.util.TestData.getRatingRequestDtoBuilder;
 import static com.modsen.ratingservice.util.TestData.getRideResponseDto;
 import static com.modsen.ratingservice.util.TestData.getRideResponseDtoWithInvalidState;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,11 +40,11 @@ class DriverValidatorServiceTest {
     void validateForCreate_NonExistingRatingAndCorrectUserIdAndCorrectRideState() {
         //Arrange
         when(driverRatingRepository.existsByRideIdAndDeletedIsFalse(anyLong())).thenReturn(false);
-        when(rideClientService.getRideById(anyLong())).thenReturn(getRideResponseDto());
+        when(rideClientService.getRideById(anyLong(), anyString())).thenReturn(getRideResponseDto());
 
         //Act
         //Assert
-        assertDoesNotThrow(() -> validator.validateForCreate(getRatingRequestDto()));
+        assertDoesNotThrow(() -> validator.validateForCreate(getRatingRequestDto(), AUTHORIZATION_VALUE));
     }
 
     @Test
@@ -53,7 +55,7 @@ class DriverValidatorServiceTest {
         //Act
         //Assert
         assertThrows(DuplicateFieldException.class,
-                () -> validator.validateForCreate(getRatingRequestDto()),
+                () -> validator.validateForCreate(getRatingRequestDto(), AUTHORIZATION_VALUE),
                 AppConstants.RATING_FOR_RIDE_ALREADY_EXIST);
     }
 
@@ -61,15 +63,15 @@ class DriverValidatorServiceTest {
     void validateForCreate_NonExistingRatingAndNotCorrectUserId() {
         //Arrange
         RatingRequestDto ratingRequestDto = getRatingRequestDtoBuilder()
-                .userId(INVALID_USER_ID)
+                .userId(String.valueOf(USER_ID_2))
                 .build();
         when(driverRatingRepository.existsByRideIdAndDeletedIsFalse(anyLong())).thenReturn(false);
-        when(rideClientService.getRideById(anyLong())).thenReturn(getRideResponseDto());
+        when(rideClientService.getRideById(anyLong(), anyString())).thenReturn(getRideResponseDto());
 
         //Act
         //Assert
         assertThrows(InvalidFieldValueException.class,
-                () -> validator.validateForCreate(ratingRequestDto),
+                () -> validator.validateForCreate(ratingRequestDto, AUTHORIZATION_VALUE),
                 AppConstants.RATING_FOR_RIDE_ALREADY_EXIST);
     }
 
@@ -78,12 +80,12 @@ class DriverValidatorServiceTest {
         //Arrange
         RatingRequestDto ratingRequestDto = getRatingRequestDto();
         when(driverRatingRepository.existsByRideIdAndDeletedIsFalse(anyLong())).thenReturn(false);
-        when(rideClientService.getRideById(anyLong())).thenReturn(getRideResponseDtoWithInvalidState());
+        when(rideClientService.getRideById(anyLong(), anyString())).thenReturn(getRideResponseDtoWithInvalidState());
 
         //Act
         //Assert
         assertThrows(InvalidStateException.class,
-                () -> validator.validateForCreate(ratingRequestDto),
+                () -> validator.validateForCreate(ratingRequestDto, AUTHORIZATION_VALUE),
                 AppConstants.INVALID_RIDE_STATE);
     }
 }

@@ -3,11 +3,11 @@ package com.modsen.passengerservice.integration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.modsen.exceptionstarter.message.ListErrorMessage;
 import com.modsen.passengerservice.dto.PageDto;
-import com.modsen.passengerservice.dto.PassengerRequestDto;
+import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
-import com.modsen.passengerservice.exception.ListErrorMessage;
-import com.modsen.passengerservice.repository.PassengerRepository;
+import com.modsen.passengerservice.dto.PassengerUpdateRequestDto;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,13 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -32,7 +32,7 @@ import static com.modsen.passengerservice.util.TestData.EXCEEDED_LIMIT_VALUE;
 import static com.modsen.passengerservice.util.TestData.EXCEEDED_OFFSET_VALUE;
 import static com.modsen.passengerservice.util.TestData.INSUFFICIENT_LIMIT_VALUE;
 import static com.modsen.passengerservice.util.TestData.INSUFFICIENT_OFFSET_VALUE;
-import static com.modsen.passengerservice.util.TestData.INSUFFICIENT_PASSENGER_ID;
+import static com.modsen.passengerservice.util.TestData.INVALID_PASSENGER_ID;
 import static com.modsen.passengerservice.util.TestData.LIMIT;
 import static com.modsen.passengerservice.util.TestData.LIMIT_VALUE;
 import static com.modsen.passengerservice.util.TestData.OFFSET;
@@ -44,23 +44,26 @@ import static com.modsen.passengerservice.util.TestData.PASSENGER_SCRIPT;
 import static com.modsen.passengerservice.util.TestData.UNIQUE_EMAIL;
 import static com.modsen.passengerservice.util.TestData.URL_PASSENGER;
 import static com.modsen.passengerservice.util.TestData.URL_PASSENGER_ID;
-import static com.modsen.passengerservice.util.TestData.getEmptyPassengerRequestDto;
-import static com.modsen.passengerservice.util.TestData.getInvalidPassengerRequestDto;
+import static com.modsen.passengerservice.util.TestData.getEmptyPassengerCreateRequestDto;
+import static com.modsen.passengerservice.util.TestData.getEmptyPassengerUpdateRequestDto;
+import static com.modsen.passengerservice.util.TestData.getInvalidPassengerCreateRequestDto;
+import static com.modsen.passengerservice.util.TestData.getInvalidPassengerUpdateRequestDto;
 import static com.modsen.passengerservice.util.TestData.getPagePassengerResponseDto;
-import static com.modsen.passengerservice.util.TestData.getPassengerRequestDto;
-import static com.modsen.passengerservice.util.TestData.getPassengerRequestDtoBuilder;
+import static com.modsen.passengerservice.util.TestData.getPassengerCreateRequestDtoBuilder;
 import static com.modsen.passengerservice.util.TestData.getPassengerResponseDto;
 import static com.modsen.passengerservice.util.TestData.getPassengerResponseDtoBuilder;
+import static com.modsen.passengerservice.util.TestData.getPassengerUpdateRequestDto;
 import static com.modsen.passengerservice.util.ViolationData.LIMIT_EXCEEDED;
 import static com.modsen.passengerservice.util.ViolationData.LIMIT_INSUFFICIENT;
 import static com.modsen.passengerservice.util.ViolationData.OFFSET_INSUFFICIENT;
 import static com.modsen.passengerservice.util.ViolationData.PASSENGER_EMAIL_INVALID;
 import static com.modsen.passengerservice.util.ViolationData.PASSENGER_EMAIL_MANDATORY;
-import static com.modsen.passengerservice.util.ViolationData.PASSENGER_ID_INVALID;
+import static com.modsen.passengerservice.util.ViolationData.PASSENGER_ID_MANDATORY;
 import static com.modsen.passengerservice.util.ViolationData.PASSENGER_NAME_INVALID;
 import static com.modsen.passengerservice.util.ViolationData.PASSENGER_NAME_MANDATORY;
 import static com.modsen.passengerservice.util.ViolationData.PASSENGER_PHONE_INVALID;
 import static com.modsen.passengerservice.util.ViolationData.PASSENGER_PHONE_MANDATORY;
+import static com.modsen.passengerservice.util.ViolationData.UUID_INVALID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -76,11 +79,22 @@ public class PassengerControllerIntegrationTest {
     @Container
     public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:13.3");
 
+    @Container
+    public static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:management");
+
     @DynamicPropertySource
     static void postgreSQLProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+    }
+
+    @DynamicPropertySource
+    static void registerProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.rabbitmq.host", rabbitMQContainer::getHost);
+        registry.add("spring.rabbitmq.port", rabbitMQContainer::getAmqpPort);
+        registry.add("spring.rabbitmq.username", rabbitMQContainer::getAdminUsername);
+        registry.add("spring.rabbitmq.password", rabbitMQContainer::getAdminPassword);
     }
 
     @Autowired
@@ -92,6 +106,7 @@ public class PassengerControllerIntegrationTest {
     @BeforeAll
     static void init() {
         postgreSQLContainer.start();
+        rabbitMQContainer.start();
     }
 
     @BeforeEach
@@ -195,15 +210,15 @@ public class PassengerControllerIntegrationTest {
     }
 
     @Test
-    void getPassenger_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+    void getPassenger_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(PASSENGER_ID_INVALID));
+                List.of(UUID_INVALID));
 
         String responseJson = RestAssuredMockMvc
                 .given()
                 .when()
-                .get(URL_PASSENGER_ID, INSUFFICIENT_PASSENGER_ID.toString())
+                .get(URL_PASSENGER_ID, INVALID_PASSENGER_ID)
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -216,11 +231,11 @@ public class PassengerControllerIntegrationTest {
 
     @Test
     void createPassenger_whenValidInput_thenReturns201AndResponseDto() throws Exception {
-        PassengerRequestDto passengerRequestDto = getPassengerRequestDtoBuilder()
+        PassengerCreateRequestDto passengerRequestDto = getPassengerCreateRequestDtoBuilder()
                 .email(UNIQUE_EMAIL)
                 .build();
         PassengerResponseDto expectedPassengerResponseDto = getPassengerResponseDtoBuilder()
-                .id(2L)
+                .id(PASSENGER_ID)
                 .email(UNIQUE_EMAIL)
                 .build();
         String responseJson = RestAssuredMockMvc
@@ -241,10 +256,10 @@ public class PassengerControllerIntegrationTest {
 
     @Test
     void createPassenger_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        PassengerRequestDto passengerRequestDto = getEmptyPassengerRequestDto();
+        PassengerCreateRequestDto passengerRequestDto = getEmptyPassengerCreateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(PASSENGER_PHONE_MANDATORY, PASSENGER_NAME_MANDATORY, PASSENGER_EMAIL_MANDATORY));
+                List.of(PASSENGER_ID_MANDATORY, PASSENGER_PHONE_MANDATORY, PASSENGER_NAME_MANDATORY, PASSENGER_EMAIL_MANDATORY));
 
         String responseJson = RestAssuredMockMvc
                 .given()
@@ -267,7 +282,7 @@ public class PassengerControllerIntegrationTest {
 
     @Test
     void createPassenger_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
-        PassengerRequestDto driverRequestDto = getInvalidPassengerRequestDto();
+        PassengerCreateRequestDto driverRequestDto = getInvalidPassengerCreateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(PASSENGER_PHONE_INVALID, PASSENGER_NAME_INVALID, PASSENGER_EMAIL_INVALID));
@@ -293,7 +308,7 @@ public class PassengerControllerIntegrationTest {
 
     @Test
     void updatePassenger_whenValidInput_thenReturns200AndResponseDto() throws Exception {
-        PassengerRequestDto passengerRequestDto = getPassengerRequestDto();
+        PassengerUpdateRequestDto passengerRequestDto = getPassengerUpdateRequestDto();
 
         String responseJson = RestAssuredMockMvc
                 .given()
@@ -313,7 +328,7 @@ public class PassengerControllerIntegrationTest {
 
     @Test
     void updatePassenger_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
-        PassengerRequestDto passengerRequestDto = getEmptyPassengerRequestDto();
+        PassengerUpdateRequestDto passengerRequestDto = getEmptyPassengerUpdateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(PASSENGER_PHONE_MANDATORY, PASSENGER_NAME_MANDATORY, PASSENGER_EMAIL_MANDATORY));
@@ -339,7 +354,7 @@ public class PassengerControllerIntegrationTest {
 
     @Test
     void updatePassenger_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
-        PassengerRequestDto driverRequestDto = getInvalidPassengerRequestDto();
+        PassengerUpdateRequestDto driverRequestDto = getInvalidPassengerUpdateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(PASSENGER_PHONE_INVALID, PASSENGER_NAME_INVALID, PASSENGER_EMAIL_INVALID));
@@ -364,18 +379,18 @@ public class PassengerControllerIntegrationTest {
     }
 
     @Test
-    void updatePassenger_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
-        PassengerRequestDto driverRequestDto = getPassengerRequestDto();
+    void updatePassenger_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
+        PassengerUpdateRequestDto driverRequestDto = getPassengerUpdateRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(PASSENGER_ID_INVALID));
+                List.of(UUID_INVALID));
 
         String responseJson = RestAssuredMockMvc
                 .given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(driverRequestDto)
                 .when()
-                .put(URL_PASSENGER_ID, INSUFFICIENT_PASSENGER_ID.toString())
+                .put(URL_PASSENGER_ID, INVALID_PASSENGER_ID)
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -399,14 +414,14 @@ public class PassengerControllerIntegrationTest {
     }
 
     @Test
-    void deletePassenger_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+    void deletePassenger_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
-                List.of(PASSENGER_ID_INVALID));
+                List.of(UUID_INVALID));
 
         String responseJson = RestAssuredMockMvc
                 .when()
-                .delete(URL_PASSENGER_ID, INSUFFICIENT_PASSENGER_ID.toString())
+                .delete(URL_PASSENGER_ID, INVALID_PASSENGER_ID)
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

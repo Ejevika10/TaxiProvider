@@ -3,15 +3,18 @@ package com.modsen.driverservice.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.dto.CarResponseDto;
-import com.modsen.driverservice.exception.ListErrorMessage;
 import com.modsen.driverservice.service.CarService;
+import com.modsen.exceptionstarter.GlobalExceptionHandler;
+import com.modsen.exceptionstarter.message.ListErrorMessage;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -19,9 +22,9 @@ import java.util.List;
 
 import static com.modsen.driverservice.util.TestData.EXCEEDED_LIMIT_VALUE;
 import static com.modsen.driverservice.util.TestData.EXCEEDED_OFFSET_VALUE;
-import static com.modsen.driverservice.util.TestData.INSUFFICIENT_DRIVER_ID;
 import static com.modsen.driverservice.util.TestData.INSUFFICIENT_LIMIT_VALUE;
 import static com.modsen.driverservice.util.TestData.INSUFFICIENT_OFFSET_VALUE;
+import static com.modsen.driverservice.util.TestData.INVALID_DRIVER_ID;
 import static com.modsen.driverservice.util.TestData.LIMIT;
 import static com.modsen.driverservice.util.TestData.LIMIT_VALUE;
 import static com.modsen.driverservice.util.TestData.OFFSET;
@@ -54,6 +57,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -61,6 +65,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CarController.class)
+@WithMockUser
+@Import(GlobalExceptionHandler.class)
 class CarControllerTest {
 
     @Autowired
@@ -113,7 +119,8 @@ class CarControllerTest {
 
         MvcResult mvcResult = mockMvc.perform(get(URL_CAR)
                         .param(OFFSET, EXCEEDED_OFFSET_VALUE.toString())
-                        .param(LIMIT, EXCEEDED_LIMIT_VALUE.toString()))
+                        .param(LIMIT, EXCEEDED_LIMIT_VALUE.toString())
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -151,7 +158,8 @@ class CarControllerTest {
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(ID_INVALID));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL_CAR_ID, INSUFFICIENT_CAR_ID))
+        MvcResult mvcResult = mockMvc.perform(get(URL_CAR_ID, INSUFFICIENT_CAR_ID)
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -220,11 +228,12 @@ class CarControllerTest {
     }
 
     @Test
-    void getPageCarsByDriverId_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+    void getPageCarsByDriverId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(400,
                 List.of(DRIVER_ID_INVALID));
 
-        MvcResult mvcResult = mockMvc.perform(get(URL_CAR_DRIVER_ID, INSUFFICIENT_DRIVER_ID))
+        MvcResult mvcResult = mockMvc.perform(get(URL_CAR_DRIVER_ID, INVALID_DRIVER_ID)
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -242,7 +251,8 @@ class CarControllerTest {
 
         mockMvc.perform(post(URL_CAR)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(carRequestDto)))
+                        .content(objectMapper.writeValueAsString(carRequestDto))
+                        .with(csrf()))
                 .andExpect(status().isCreated());
     }
 
@@ -252,7 +262,8 @@ class CarControllerTest {
 
         mockMvc.perform(post(URL_CAR)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(carRequestDto)))
+                        .content(objectMapper.writeValueAsString(carRequestDto))
+                        .with(csrf()))
                 .andExpect(status().isCreated());
 
         ArgumentCaptor<CarRequestDto> carCaptor = ArgumentCaptor.forClass(CarRequestDto.class);
@@ -261,14 +272,15 @@ class CarControllerTest {
     }
 
     @Test
-    void createDriver_whenValidInput_thenReturnsResponseDto() throws Exception {
+    void createCar_whenValidInput_thenReturnsResponseDto() throws Exception {
         CarRequestDto carRequestDto = getCarRequestDto();
         CarResponseDto carResponseDto = getCarResponseDto();
         when(carService.addCar(carRequestDto)).thenReturn(carResponseDto);
 
         MvcResult mvcResult = mockMvc.perform(post(URL_CAR)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(carRequestDto)))
+                        .content(objectMapper.writeValueAsString(carRequestDto))
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -278,7 +290,7 @@ class CarControllerTest {
     }
 
     @Test
-    void createDriver_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
+    void createCar_whenEmptyValue_thenReturns400AndErrorResult() throws Exception {
         CarRequestDto emptyCarRequestDto = getEmptyCarRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
@@ -286,7 +298,8 @@ class CarControllerTest {
 
         MvcResult mvcResult = mockMvc.perform(post(URL_CAR)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(emptyCarRequestDto)))
+                        .content(objectMapper.writeValueAsString(emptyCarRequestDto))
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -299,7 +312,7 @@ class CarControllerTest {
     }
 
     @Test
-    void createDriver_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
+    void createCar_whenInvalidValue_thenReturns400AndErrorResult() throws Exception {
         CarRequestDto invalidCarRequestDto = getInvalidCarRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
@@ -307,7 +320,8 @@ class CarControllerTest {
 
         MvcResult mvcResult = mockMvc.perform(post(URL_CAR)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidCarRequestDto)))
+                        .content(objectMapper.writeValueAsString(invalidCarRequestDto))
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -325,7 +339,8 @@ class CarControllerTest {
 
         mockMvc.perform(put(URL_CAR_ID, CAR_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(carRequestDto)))
+                        .content(objectMapper.writeValueAsString(carRequestDto))
+                        .with(csrf()))
                 .andExpect(status().isOk());
     }
 
@@ -335,7 +350,8 @@ class CarControllerTest {
 
         mockMvc.perform(put(URL_CAR_ID, CAR_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(carRequestDto)))
+                        .content(objectMapper.writeValueAsString(carRequestDto))
+                        .with(csrf()))
                 .andExpect(status().isOk());
 
         ArgumentCaptor<CarRequestDto> carCaptor = ArgumentCaptor.forClass(CarRequestDto.class);
@@ -345,14 +361,15 @@ class CarControllerTest {
     }
 
     @Test
-    void updateDriver_whenValidInput_thenReturnsResponseDto() throws Exception {
+    void updateCar_whenValidInput_thenReturnsResponseDto() throws Exception {
         CarRequestDto carRequestDto = getCarRequestDto();
         CarResponseDto carResponseDto = getCarResponseDto();
         when(carService.updateCar(CAR_ID, carRequestDto)).thenReturn(carResponseDto);
 
         MvcResult mvcResult = mockMvc.perform(put(URL_CAR_ID, CAR_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(carRequestDto)))
+                        .content(objectMapper.writeValueAsString(carRequestDto))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -370,7 +387,8 @@ class CarControllerTest {
 
         MvcResult mvcResult = mockMvc.perform(put(URL_CAR_ID, CAR_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(emptyCarRequestDto)))
+                        .content(objectMapper.writeValueAsString(emptyCarRequestDto))
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -391,7 +409,8 @@ class CarControllerTest {
 
         MvcResult mvcResult = mockMvc.perform(put(URL_CAR_ID, CAR_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidCarRequestDto)))
+                        .content(objectMapper.writeValueAsString(invalidCarRequestDto))
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -404,14 +423,15 @@ class CarControllerTest {
     }
 
     @Test
-    void updateDriver_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+    void updateCar_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         CarRequestDto carRequestDto = getCarRequestDto();
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(HttpStatus.BAD_REQUEST.value(),
                 List.of(ID_INVALID));
 
         MvcResult mvcResult = mockMvc.perform(put(URL_CAR_ID, INSUFFICIENT_CAR_ID)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(carRequestDto)))
+                        .content(objectMapper.writeValueAsString(carRequestDto))
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();
@@ -425,17 +445,19 @@ class CarControllerTest {
 
     @Test
     void deleteCar_whenValidId_thenReturns204() throws Exception {
-        mockMvc.perform(delete(URL_CAR_ID, CAR_ID))
+        mockMvc.perform(delete(URL_CAR_ID, CAR_ID)
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    void deleteDriver_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+    void deleteCar_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(ID_INVALID));
 
-        MvcResult mvcResult = mockMvc.perform(delete(URL_CAR_ID, INSUFFICIENT_CAR_ID))
+        MvcResult mvcResult = mockMvc.perform(delete(URL_CAR_ID, INSUFFICIENT_CAR_ID)
+                        .with(csrf()))
                 .andExpect(status().isBadRequest())
                 .andReturn();
         String actualResponseBody = mvcResult.getResponse().getContentAsString();

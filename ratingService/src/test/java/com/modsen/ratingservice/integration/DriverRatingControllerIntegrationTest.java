@@ -5,11 +5,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import com.modsen.exceptionstarter.message.ErrorMessage;
+import com.modsen.exceptionstarter.message.ListErrorMessage;
 import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
-import com.modsen.ratingservice.exception.ErrorMessage;
-import com.modsen.ratingservice.exception.ListErrorMessage;
 import com.modsen.ratingservice.repository.DriverRatingRepository;
 import com.modsen.ratingservice.util.TestServiceInstanceListSupplier;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
@@ -17,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
@@ -30,12 +32,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.List;
 import java.util.Map;
 
+import static com.modsen.ratingservice.util.TestData.AUTHORIZATION;
+import static com.modsen.ratingservice.util.TestData.AUTHORIZATION_VALUE;
 import static com.modsen.ratingservice.util.TestData.DRIVER_ID_INVALID;
 import static com.modsen.ratingservice.util.TestData.EXCEEDED_LIMIT_VALUE;
 import static com.modsen.ratingservice.util.TestData.EXCEEDED_OFFSET_VALUE;
 import static com.modsen.ratingservice.util.TestData.INSUFFICIENT_LIMIT_VALUE;
 import static com.modsen.ratingservice.util.TestData.INSUFFICIENT_OFFSET_VALUE;
-import static com.modsen.ratingservice.util.TestData.INSUFFICIENT_USER_ID;
 import static com.modsen.ratingservice.util.TestData.INVALID_USER_ID;
 import static com.modsen.ratingservice.util.TestData.LIMIT;
 import static com.modsen.ratingservice.util.TestData.LIMIT_VALUE;
@@ -53,6 +56,7 @@ import static com.modsen.ratingservice.util.TestData.URL_DRIVER_RATING;
 import static com.modsen.ratingservice.util.TestData.URL_DRIVER_RATING_ID;
 import static com.modsen.ratingservice.util.TestData.URL_DRIVER_RATING_USER_ID;
 import static com.modsen.ratingservice.util.TestData.USER_ID;
+import static com.modsen.ratingservice.util.TestData.USER_ID_2;
 import static com.modsen.ratingservice.util.TestData.getDriverRating;
 import static com.modsen.ratingservice.util.TestData.getEmptyRatingRequestDto;
 import static com.modsen.ratingservice.util.TestData.getInvalidRatingRequestDto;
@@ -74,6 +78,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Testcontainers
+@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class DriverRatingControllerIntegrationTest extends ControllerIntegrationTest{
 
@@ -287,7 +292,7 @@ public class DriverRatingControllerIntegrationTest extends ControllerIntegration
     }
 
     @Test
-    void getPageRatingsByUserId_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+    void getPageRatingsByUserId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(USER_ID_INVALID));
@@ -297,7 +302,7 @@ public class DriverRatingControllerIntegrationTest extends ControllerIntegration
                 .param(OFFSET, OFFSET_VALUE)
                 .param(LIMIT, LIMIT_VALUE)
                 .when()
-                .get(URL_DRIVER_RATING_USER_ID, INSUFFICIENT_USER_ID.toString())
+                .get(URL_DRIVER_RATING_USER_ID, INVALID_USER_ID)
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -319,6 +324,7 @@ public class DriverRatingControllerIntegrationTest extends ControllerIntegration
                 .build();
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ratingRequestDto)
                 .when()
@@ -344,6 +350,7 @@ public class DriverRatingControllerIntegrationTest extends ControllerIntegration
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ratingRequestDto)
                 .when()
@@ -362,13 +369,14 @@ public class DriverRatingControllerIntegrationTest extends ControllerIntegration
         feignClientStubs.stubForRideServiceWithExistingRide(UNIQUE_RIDE_ID, RIDE_SERVICE);
         RatingRequestDto ratingRequestDto = getRatingRequestDtoBuilder()
                 .rideId(UNIQUE_RIDE_ID)
-                .userId(INVALID_USER_ID)
+                .userId(String.valueOf(USER_ID_2))
                 .build();
         ErrorMessage expectedErrorResponse = new ErrorMessage(
                 HttpStatus.BAD_REQUEST.value(), DRIVER_ID_INVALID);
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ratingRequestDto)
                 .when()
@@ -445,6 +453,7 @@ public class DriverRatingControllerIntegrationTest extends ControllerIntegration
                 .build();
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ratingRequestDto)
                 .when()
@@ -470,6 +479,7 @@ public class DriverRatingControllerIntegrationTest extends ControllerIntegration
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ratingRequestDto)
                 .when()
@@ -487,13 +497,14 @@ public class DriverRatingControllerIntegrationTest extends ControllerIntegration
     void updateRating_whenUserIdInvalid_thenReturns409AndErrorResult() throws Exception {
         feignClientStubs.stubForRideServiceWithExistingRide(RIDE_ID, RIDE_SERVICE);
         RatingRequestDto ratingRequestDto = getRatingRequestDtoBuilder()
-                .userId(INVALID_USER_ID)
+                .userId(String.valueOf(USER_ID_2))
                 .build();
         ErrorMessage expectedErrorResponse = new ErrorMessage(
                 HttpStatus.BAD_REQUEST.value(), DRIVER_ID_INVALID);
 
         String responseJson = RestAssuredMockMvc
                 .given()
+                .header(AUTHORIZATION, AUTHORIZATION_VALUE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(ratingRequestDto)
                 .when()

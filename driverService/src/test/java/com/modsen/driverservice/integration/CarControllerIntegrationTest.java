@@ -5,8 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.dto.CarResponseDto;
 import com.modsen.driverservice.dto.PageDto;
-import com.modsen.driverservice.exception.ListErrorMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.modsen.exceptionstarter.message.ListErrorMessage;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static com.modsen.driverservice.util.TestData.DRIVER_SCRIPT;
 import static com.modsen.driverservice.util.TestData.EXCEEDED_LIMIT_VALUE;
 import static com.modsen.driverservice.util.TestData.EXCEEDED_OFFSET_VALUE;
 import static com.modsen.driverservice.util.TestData.INSUFFICIENT_CAR_ID;
-import static com.modsen.driverservice.util.TestData.INSUFFICIENT_DRIVER_ID;
+import static com.modsen.driverservice.util.TestData.INVALID_DRIVER_ID;
 import static com.modsen.driverservice.util.TestData.INSUFFICIENT_LIMIT_VALUE;
 import static com.modsen.driverservice.util.TestData.INSUFFICIENT_OFFSET_VALUE;
 import static com.modsen.driverservice.util.TestData.LIMIT;
@@ -281,7 +281,7 @@ public class CarControllerIntegrationTest extends ControllerIntegrationTest {
     }
 
     @Test
-    void getPageCarsByDriverId_whenInsufficientId_thenReturns400AndErrorResult() throws Exception {
+    void getPageCarsByDriverId_whenInvalidId_thenReturns400AndErrorResult() throws Exception {
         ListErrorMessage expectedErrorResponse = new ListErrorMessage(
                 HttpStatus.BAD_REQUEST.value(),
                 List.of(DRIVER_ID_INVALID));
@@ -291,7 +291,7 @@ public class CarControllerIntegrationTest extends ControllerIntegrationTest {
                 .param(OFFSET, OFFSET_VALUE)
                 .param(LIMIT, LIMIT_VALUE)
                 .when()
-                .get(URL_CAR_DRIVER_ID, INSUFFICIENT_DRIVER_ID.toString())
+                .get(URL_CAR_DRIVER_ID, INVALID_DRIVER_ID)
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)

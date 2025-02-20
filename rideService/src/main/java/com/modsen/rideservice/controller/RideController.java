@@ -68,21 +68,21 @@ public class RideController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RideResponseDto createRide(@RequestBody RideCreateRequestDto rideRequestDto,
+    public RideResponseDto createRide(@Validated @RequestBody RideCreateRequestDto rideRequestDto,
                                       @RequestHeader("Authorization") String authorizationToken) {
         return rideService.createRide(rideRequestDto, authorizationToken);
     }
 
     @PutMapping("/{id}")
     public RideResponseDto updateRide(@PathVariable @Min(0) Long id,
-                                      @RequestBody RideRequestDto rideRequestDto,
+                                      @Validated @RequestBody RideRequestDto rideRequestDto,
                                       @RequestHeader("Authorization") String authorizationToken) {
         return rideService.updateRide(id, rideRequestDto, authorizationToken);
     }
 
     @PutMapping("/{id}/accept")
     public RideResponseDto acceptRide(@PathVariable @Min(0) Long id,
-                                      @RequestBody RideAcceptRequestDto rideRequestDto,
+                                      @Validated @RequestBody RideAcceptRequestDto rideRequestDto,
                                       @RequestHeader("Authorization") String authorizationToken) {
         return rideService.acceptRide(id, rideRequestDto, authorizationToken);
     }
@@ -95,7 +95,7 @@ public class RideController {
 
     @PutMapping("/{id}/state")
     public RideResponseDto updateRideState(@PathVariable @Min(0) Long id,
-                                           @RequestBody RideStateRequestDto state) {
+                                           @Validated @RequestBody RideStateRequestDto state) {
         return rideService.setNewState(id, state);
     }
 }

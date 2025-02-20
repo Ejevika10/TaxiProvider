@@ -1,9 +1,9 @@
 package com.modsen.ratingservice.service.impl;
 
+import com.modsen.exceptionstarter.exception.NotFoundException;
 import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
-import com.modsen.ratingservice.exception.NotFoundException;
 import com.modsen.ratingservice.mapper.PageMapper;
 import com.modsen.ratingservice.mapper.RatingListMapper;
 import com.modsen.ratingservice.mapper.RatingMapper;
@@ -22,7 +22,9 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import static com.modsen.ratingservice.util.TestData.AUTHORIZATION_VALUE;
 import static com.modsen.ratingservice.util.TestData.LIMIT_VALUE;
 import static com.modsen.ratingservice.util.TestData.NON_EXISTING_RATING_ID;
 import static com.modsen.ratingservice.util.TestData.OFFSET_VALUE;
@@ -38,7 +40,6 @@ import static com.modsen.ratingservice.util.TestData.NEW_COMMENT;
 import static com.modsen.ratingservice.util.TestData.NEW_RATING;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -121,14 +122,14 @@ class DriverRatingServiceImplTest {
         RatingRequestDto driverRatingRequestDto = getRatingRequestDto();
         List<DriverRating> driverRatingList = getDriverRatingList();
         List<RatingResponseDto> driverRatingResponseDtoList = getRatingResponseDtoList();
-        when(driverRatingRepository.findAllByUserIdAndDeletedIsFalse(anyLong())).thenReturn(driverRatingList);
+        when(driverRatingRepository.findAllByUserIdAndDeletedIsFalse(any(UUID.class))).thenReturn(driverRatingList);
         when(ratingListMapper.toDriverRatingResponseDtoList(driverRatingList)).thenReturn(driverRatingResponseDtoList);
 
         //Act
-        List<RatingResponseDto> actual = driverRatingService.getAllRatingsByUserId(driverRatingRequestDto.userId());
+        List<RatingResponseDto> actual = driverRatingService.getAllRatingsByUserId(UUID.fromString(driverRatingRequestDto.userId()));
 
         //Assert
-        verify(driverRatingRepository).findAllByUserIdAndDeletedIsFalse(driverRatingRequestDto.userId());
+        verify(driverRatingRepository).findAllByUserIdAndDeletedIsFalse(UUID.fromString(driverRatingRequestDto.userId()));
         verify(ratingListMapper).toDriverRatingResponseDtoList(driverRatingList);
         assertEquals(driverRatingResponseDtoList.size(), actual.size());
         assertIterableEquals(driverRatingResponseDtoList, actual);
@@ -201,10 +202,10 @@ class DriverRatingServiceImplTest {
         when(ratingMapper.toRatingResponseDto(driverRating)).thenReturn(driverRatingResponseDto);
 
         //Act
-        RatingResponseDto actual = driverRatingService.addRating(driverRatingRequestDto);
+        RatingResponseDto actual = driverRatingService.addRating(driverRatingRequestDto, AUTHORIZATION_VALUE);
 
         //Assert
-        verify(validator).validateForCreate(driverRatingRequestDto);
+        verify(validator).validateForCreate(driverRatingRequestDto, AUTHORIZATION_VALUE);
         verify(ratingMapper).toDriverRating(driverRatingRequestDto);
         verify(driverRatingRepository).save(driverRating);
         verify(ratingMapper).toRatingResponseDto(driverRating);
@@ -225,11 +226,11 @@ class DriverRatingServiceImplTest {
         when(ratingMapper.toRatingResponseDto(driverRating)).thenReturn(driverRatingResponseDto);
 
         //Act
-        RatingResponseDto actual = driverRatingService.updateRating(driverRating.getId(), driverRatingRequestDto);
+        RatingResponseDto actual = driverRatingService.updateRating(driverRating.getId(), driverRatingRequestDto, "");
 
         //Assert
         verify(driverRatingRepository).findByIdAndDeletedIsFalse(driverRating.getId());
-        verify(validator).validateForUpdate(driverRatingRequestDto);
+        verify(validator).validateForUpdate(driverRatingRequestDto, AUTHORIZATION_VALUE);
         verify(ratingMapper).updateDriverRating(driverRatingRequestDto, driverRating);
         verify(driverRatingRepository).save(driverRating);
         verify(ratingMapper).toRatingResponseDto(driverRating);
@@ -244,7 +245,7 @@ class DriverRatingServiceImplTest {
         //Act
         //Assert
         assertThrows(NotFoundException.class,
-                () -> driverRatingService.updateRating(NON_EXISTING_RATING_ID, driverRatingRequestDto),
+                () -> driverRatingService.updateRating(NON_EXISTING_RATING_ID, driverRatingRequestDto, AUTHORIZATION_VALUE),
                 AppConstants.RATING_NOT_FOUND);
         verify(driverRatingRepository).findByIdAndDeletedIsFalse(NON_EXISTING_RATING_ID);
     }

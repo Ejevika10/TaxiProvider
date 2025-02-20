@@ -3,12 +3,13 @@ package com.modsen.rideservice.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import com.modsen.rideservice.exception.ErrorMessage;
-import org.springframework.context.annotation.PropertySource;
+import com.modsen.exceptionstarter.message.ErrorMessage;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+
+import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -20,7 +21,6 @@ import static com.modsen.rideservice.util.TestData.getDriverResponseDto;
 import static com.modsen.rideservice.util.TestData.getPassengerResponseDto;
 
 @Component
-@PropertySource("classpath:test.properties")
 public class FeignClientStubs {
 
     private final ObjectMapper objectMapper;
@@ -29,7 +29,7 @@ public class FeignClientStubs {
         this.objectMapper = objectMapper;
     }
 
-    public void stubForPassengerServiceWithExistingPassenger(Long userId, WireMockExtension PASSENGER_SERVICE) throws Exception {
+    public void stubForPassengerServiceWithExistingPassenger(UUID userId, WireMockExtension PASSENGER_SERVICE) throws Exception {
         PASSENGER_SERVICE.stubFor(WireMock.get(urlPathEqualTo(URL_PASSENGER_ID + userId))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
@@ -37,7 +37,7 @@ public class FeignClientStubs {
                         .withBody(objectMapper.writeValueAsString(getPassengerResponseDto()))));
     }
 
-    public void stubForPassengerServiceWithNonExistingPassenger(Long userId, WireMockExtension PASSENGER_SERVICE) throws Exception {
+    public void stubForPassengerServiceWithNonExistingPassenger(UUID userId, WireMockExtension PASSENGER_SERVICE) throws Exception {
         ErrorMessage errorMessage = new ErrorMessage(HttpStatus.NOT_FOUND.value(), PASSENGER_NOT_FOUND);
         PASSENGER_SERVICE.stubFor(WireMock.get(urlPathEqualTo(URL_PASSENGER_ID + userId))
                 .willReturn(aResponse()
@@ -47,7 +47,7 @@ public class FeignClientStubs {
                 ));
     }
 
-    public void stubForDriverServiceWithExistingDriver(Long userId, WireMockExtension DRIVER_SERVICE) throws Exception {
+    public void stubForDriverServiceWithExistingDriver(UUID userId, WireMockExtension DRIVER_SERVICE) throws Exception {
         DRIVER_SERVICE.stubFor(WireMock.get(urlPathEqualTo(URL_DRIVER_ID + userId))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
@@ -56,7 +56,7 @@ public class FeignClientStubs {
                 ));
     }
 
-    public void stubForDriverServiceWithNonExistingDriver(Long userId, WireMockExtension DRIVER_SERVICE) throws Exception {
+    public void stubForDriverServiceWithNonExistingDriver(UUID userId, WireMockExtension DRIVER_SERVICE) throws Exception {
         ErrorMessage errorMessage = new ErrorMessage(HttpStatus.NOT_FOUND.value(), DRIVER_NOT_FOUND);
         DRIVER_SERVICE.stubFor(WireMock.get(urlPathEqualTo(URL_DRIVER_ID + userId))
                 .willReturn(aResponse()

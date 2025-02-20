@@ -4,13 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.dto.CarResponseDto;
-import com.modsen.driverservice.dto.DriverRequestDto;
+import com.modsen.driverservice.dto.DriverCreateRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
+import com.modsen.driverservice.dto.DriverUpdateRequestDto;
 import com.modsen.driverservice.dto.PageDto;
+import com.modsen.driverservice.e2e.dto.LoginResponseDto;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.springframework.http.MediaType;
 
@@ -19,6 +22,10 @@ import static com.modsen.driverservice.util.E2ETestData.URL_CAR_DRIVER_ID;
 import static com.modsen.driverservice.util.E2ETestData.URL_CAR_ID;
 import static com.modsen.driverservice.util.E2ETestData.URL_DRIVER;
 import static com.modsen.driverservice.util.E2ETestData.URL_DRIVER_ID;
+import static com.modsen.driverservice.util.TestData.AUTHORIZATION;
+import static com.modsen.driverservice.util.TestData.BEARER;
+import static com.modsen.driverservice.util.TestData.URL_AUTHENTICATION;
+import static com.modsen.driverservice.util.TestData.getLoginRequestDto;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -26,8 +33,21 @@ public class DriverStepsDefinitions {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private Response response;
-    private DriverRequestDto driverRequestDto;
+    private String accessToken;
+    private DriverCreateRequestDto driverCreateRequestDto;
+    private DriverUpdateRequestDto driverUpdateRequestDto;
     private CarRequestDto carRequestDto;
+
+    @Given("Access token")
+    public void accessToken() throws JsonProcessingException{
+        Response response = given()
+                .contentType(ContentType.JSON)
+                .body(getLoginRequestDto())
+                .when()
+                .post(URL_AUTHENTICATION);
+        LoginResponseDto loginResponse = response.body().as(LoginResponseDto.class);
+        accessToken = loginResponse.accessToken();
+    }
 
     @Given("Car request dto")
     public void carRequestDto(String requestBody) throws JsonProcessingException {
@@ -37,13 +57,15 @@ public class DriverStepsDefinitions {
     @When("Get page of cars")
     public void getPageOfCars() {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .get(URL_CAR);
     }
 
-    @When("Get page of cars by driver id {long}")
-    public void getPageOfCarsByDriverId(long id) {
+    @When("Get page of cars by driver id {string}")
+    public void getPageOfCarsByDriverId(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .get(URL_CAR_DRIVER_ID, id);
     }
@@ -51,6 +73,7 @@ public class DriverStepsDefinitions {
     @When("Get car by id {long}")
     public void getCarById(long id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .get(URL_CAR_ID, id);
     }
@@ -58,6 +81,7 @@ public class DriverStepsDefinitions {
     @When("Create car")
     public void createCar() {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(carRequestDto)
                 .when()
@@ -67,6 +91,7 @@ public class DriverStepsDefinitions {
     @When("Update car with id {long}")
     public void updateCarWithId(long id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(carRequestDto)
                 .when()
@@ -76,6 +101,7 @@ public class DriverStepsDefinitions {
     @When("Delete car with id {long}")
     public void deleteCarWithId(long id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .delete(URL_CAR_ID, id);
     }
@@ -89,21 +115,28 @@ public class DriverStepsDefinitions {
         assertEquals(expected, actual);
     }
 
-    @Given("Driver request dto")
-    public void driverRequestDto(String requestBody) throws JsonProcessingException {
-        driverRequestDto = objectMapper.readValue(requestBody, DriverRequestDto.class);
+    @Given("Driver create request dto")
+    public void driverCreateRequestDto(String requestBody) throws JsonProcessingException {
+        driverCreateRequestDto = objectMapper.readValue(requestBody, DriverCreateRequestDto.class);
+    }
+
+    @Given("Driver update request dto")
+    public void driverUpdateRequestDto(String requestBody) throws JsonProcessingException {
+        driverUpdateRequestDto = objectMapper.readValue(requestBody, DriverUpdateRequestDto.class);
     }
 
     @When("Get page of drivers")
     public void getPageOfDrivers() {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .get(URL_DRIVER);
     }
 
-    @When("Get driver by id {long}")
-    public void getDriverById(long id) {
+    @When("Get driver by id {string}")
+    public void getDriverById(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .get(URL_DRIVER_ID, id);
     }
@@ -111,24 +144,27 @@ public class DriverStepsDefinitions {
     @When("Create driver")
     public void createDriver() {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(driverRequestDto)
+                .body(driverCreateRequestDto)
                 .when()
                 .post(URL_DRIVER);
     }
 
-    @When("Update driver with id {long}")
-    public void updateDriverWithId(long id) {
+    @When("Update driver with id {string}")
+    public void updateDriverWithId(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(driverRequestDto)
+                .body(driverUpdateRequestDto)
                 .when()
                 .put(URL_DRIVER_ID, id);
     }
 
-    @When("Delete driver with id {long}")
-    public void deleteDriverWithId(long id) {
+    @When("Delete driver with id {string}")
+    public void deleteDriverWithId(String id) {
         response = given()
+                .header(AUTHORIZATION, BEARER + accessToken)
                 .when()
                 .delete(URL_DRIVER_ID, id);
     }

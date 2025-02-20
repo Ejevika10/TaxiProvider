@@ -4,6 +4,7 @@ import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
 import com.modsen.ratingservice.dto.RideResponseDto;
+import com.modsen.ratingservice.e2e.dto.LoginRequestDto;
 import com.modsen.ratingservice.model.DriverRating;
 import com.modsen.ratingservice.model.PassengerRating;
 import com.modsen.ratingservice.model.RideState;
@@ -12,14 +13,16 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TestData {
     public static final String RATING_ID = "qwertyuiop1234";
     public static final String NON_EXISTING_RATING_ID = "qwertyuiop1234";
-    public static final Long USER_ID = 1L;
-    public static final Long INVALID_USER_ID = 2L;
-    public static final Long INSUFFICIENT_USER_ID = -1L;
+    public static final UUID USER_ID = new UUID(1, 1);
+    public static final UUID USER_ID_2 = new UUID(1, 2);
+    public static final String INVALID_USER_ID = "invalid-uuid-string";
+
     public static final Long RIDE_ID = 1L;
     public static final Long UNIQUE_RIDE_ID = 2L;
     public static final Long INSUFFICIENT_RIDE_ID = -1L;
@@ -41,18 +44,25 @@ public final class TestData {
     public static final String PAGE_NUMBER = "pageNumber";
     public static final String OFFSET = "offset";
     public static final String LIMIT = "limit";
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String BEARER = "Bearer ";
     public static final Integer OFFSET_VALUE = 0;
     public static final Integer LIMIT_VALUE = 5;
     public static final Integer INSUFFICIENT_OFFSET_VALUE = -1;
     public static final Integer INSUFFICIENT_LIMIT_VALUE = -1;
     public static final Integer EXCEEDED_OFFSET_VALUE = 100;
     public static final Integer EXCEEDED_LIMIT_VALUE = 100;
+    public static final String AUTHORIZATION_VALUE = "Authorization_value";
 
     private static final Integer RATING = 5;
     public static final Integer NEW_RATING = 3;
     private static final Integer INVALID_RATING = 7;
     private static final String COMMENT = "This is a comment";
     public static final String NEW_COMMENT = "This is a new comment";
+
+    public static final String URL_AUTHENTICATION = "http://localhost:8085/api/v1/auth/login";
+    public static final String USERNAME = "admin";
+    public static final String PASSWORD = "admin";
 
     public static final Integer FIRST_RATING = 1;
     public static final Integer SECOND_RATING = 2;
@@ -90,7 +100,7 @@ public final class TestData {
 
     public static RatingRequestDto.RatingRequestDtoBuilder getRatingRequestDtoBuilder() {
         return RatingRequestDto.builder()
-                .userId(USER_ID)
+                .userId(String.valueOf(USER_ID))
                 .rideId(RIDE_ID)
                 .rating(RATING)
                 .comment(COMMENT);
@@ -111,7 +121,7 @@ public final class TestData {
 
     public static RatingRequestDto getInvalidRatingRequestDto() {
         return getRatingRequestDtoBuilder()
-                .userId(INSUFFICIENT_USER_ID)
+                .userId(INVALID_USER_ID)
                 .rideId(INSUFFICIENT_RIDE_ID)
                 .rating(INVALID_RATING)
                 .comment(null)
@@ -176,5 +186,15 @@ public final class TestData {
 
     public static RideResponseDto getRideResponseDtoWithInvalidState() {
         return new RideResponseDto(RIDE_ID, USER_ID, USER_ID, "Sourse address", "Destination address", RideState.ACCEPTED, LocalDateTime.now(), 1000);
+    }
+
+    public static LoginRequestDto.LoginRequestDtoBuilder getLoginRequestDtoBuilder() {
+        return LoginRequestDto.builder()
+                .username(USERNAME)
+                .password(PASSWORD);
+    }
+
+    public static LoginRequestDto getLoginRequestDto() {
+        return getLoginRequestDtoBuilder().build();
     }
 }

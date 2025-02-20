@@ -3,9 +3,12 @@ package com.modsen.rideservice.util;
 import com.modsen.rideservice.dto.DriverResponseDto;
 import com.modsen.rideservice.dto.PageDto;
 import com.modsen.rideservice.dto.PassengerResponseDto;
+import com.modsen.rideservice.dto.RideAcceptRequestDto;
+import com.modsen.rideservice.dto.RideCreateRequestDto;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
+import com.modsen.rideservice.e2e.dto.LoginRequestDto;
 import com.modsen.rideservice.model.Ride;
 import com.modsen.rideservice.model.RideState;
 import lombok.AccessLevel;
@@ -13,6 +16,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TestData {
@@ -21,14 +25,18 @@ public final class TestData {
     public static final String URL_RIDE = "/api/v1/rides";
     public static final String URL_RIDE_ID = URL_RIDE + "/{rideId}";
     public static final String URL_RIDE_ID_STATE = URL_RIDE + "/{rideId}/state";
+    public static final String URL_RIDE_ID_ACCEPT = URL_RIDE + "/{rideId}/accept";
+    public static final String URL_RIDE_ID_CANCEL = URL_RIDE + "/{rideId}/cancel";
 
     public static final String URL_RIDE_DRIVER_ID = URL_RIDE + "/driver/{driverId}";
     public static final String URL_RIDE_PASSENGER_ID = URL_RIDE + "/passenger/{passengerId}";
     public static final String OFFSET = "offset";
     public static final String LIMIT = "limit";
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String BEARER = "Bearer ";
     public static final String PAGE_SIZE = "pageSize";
     public static final String PAGE_NUMBER = "pageNumber";
-
+    public static final String AUTHORIZATION_VALUE = "Authorization_value";
     public static final Integer OFFSET_VALUE = 0;
     public static final Integer LIMIT_VALUE = 5;
     public static final Integer INSUFFICIENT_OFFSET_VALUE = -1;
@@ -36,10 +44,10 @@ public final class TestData {
     public static final Integer EXCEEDED_OFFSET_VALUE = 100;
     public static final Integer EXCEEDED_LIMIT_VALUE = 100;
 
-    public static final Long DRIVER_ID = 1L;
-    public static final Long INSUFFICIENT_DRIVER_ID = -1L;
-    public static final Long PASSENGER_ID = 1L;
-    public static final Long INSUFFICIENT_PASSENGER_ID = -1L;
+    public static final UUID DRIVER_ID = new UUID(1,1);
+    public static final String INVALID_DRIVER_ID = "invalid-uuid-string";
+    public static final UUID PASSENGER_ID = new UUID(1,2);
+    public static final String INVALID_PASSENGER_ID = "invalid-uuid-string";
 
     public static final String URL_DRIVER_ID = "/api/v1/drivers/";
     public static final String URL_PASSENGER_ID = "/api/v1/passengers/";
@@ -58,7 +66,11 @@ public final class TestData {
     private static final String INVALID_SOURCE_ADDRESS = "addr";
     private static final String INVALID_DESTINATION_ADDRESS = "addr";
 
-    public static final String RIDE_SCRIPT = "ride-controller-preparation.sql";
+    public static final String URL_AUTHENTICATION = "http://localhost:8085/api/v1/auth/login";
+    public static final String USERNAME = "admin";
+    public static final String PASSWORD = "admin";
+
+    public static final String RIDE_SCRIPT = "classpath:/integration/ride-controller-preparation.sql";
 
     public static Ride.RideBuilder getRideBuilder() {
         return Ride.builder()
@@ -76,10 +88,38 @@ public final class TestData {
         return getRideBuilder().build();
     }
 
+    public static RideCreateRequestDto.RideCreateRequestDtoBuilder getRideCreateRequestDtoBuilder() {
+        return RideCreateRequestDto.builder()
+                .passengerId(String.valueOf(PASSENGER_ID))
+                .sourceAddress(SOURCE_ADDRESS)
+                .destinationAddress(DESTINATION_ADDRESS);
+    }
+
+    public static RideCreateRequestDto getRideCreateRequestDto()
+    {
+        return getRideCreateRequestDtoBuilder().build();
+    }
+
+    public static RideCreateRequestDto getInvalidRideCreateRequestDto() {
+        return getRideCreateRequestDtoBuilder()
+                .passengerId(INVALID_PASSENGER_ID)
+                .sourceAddress(INVALID_SOURCE_ADDRESS)
+                .destinationAddress(INVALID_DESTINATION_ADDRESS)
+                .build();
+    }
+
+    public static RideCreateRequestDto getEmptyRideCreateRequestDto() {
+        return getRideCreateRequestDtoBuilder()
+                .passengerId(null)
+                .sourceAddress(null)
+                .destinationAddress(null)
+                .build();
+    }
+
     public static RideRequestDto.RideRequestDtoBuilder getRideRequestDtoBuilder() {
         return RideRequestDto.builder()
-                .passengerId(PASSENGER_ID)
-                .driverId(DRIVER_ID)
+                .passengerId(String.valueOf(PASSENGER_ID))
+                .driverId(String.valueOf(DRIVER_ID))
                 .sourceAddress(SOURCE_ADDRESS)
                 .destinationAddress(DESTINATION_ADDRESS)
                 .rideState(RideState.CREATED)
@@ -93,8 +133,8 @@ public final class TestData {
 
     public static RideRequestDto getInvalidRideRequestDto() {
         return getRideRequestDtoBuilder()
-                .passengerId(INSUFFICIENT_PASSENGER_ID)
-                .driverId(INSUFFICIENT_DRIVER_ID)
+                .passengerId(INVALID_PASSENGER_ID)
+                .driverId(INVALID_DRIVER_ID)
                 .sourceAddress(INVALID_SOURCE_ADDRESS)
                 .destinationAddress(INVALID_DESTINATION_ADDRESS)
                 .rideState(null)
@@ -112,6 +152,27 @@ public final class TestData {
                 .rideState(null)
                 .rideCost(null)
                 .rideDateTime(null)
+                .build();
+    }
+
+    public static RideAcceptRequestDto.RideAcceptRequestDtoBuilder getRideAcceptRequestDtoBuilder() {
+        return RideAcceptRequestDto.builder()
+                .driverId(String.valueOf(DRIVER_ID));
+    }
+
+    public static RideAcceptRequestDto getRideAcceptRequestDto() {
+        return getRideAcceptRequestDtoBuilder().build();
+    }
+
+    public static RideAcceptRequestDto getInvalidRideAcceptRequestDto() {
+        return getRideAcceptRequestDtoBuilder()
+                .driverId(INVALID_DRIVER_ID)
+                .build();
+    }
+
+    public static RideAcceptRequestDto getEmptyRideAcceptRequestDto() {
+        return getRideAcceptRequestDtoBuilder()
+                .driverId(null)
                 .build();
     }
 
@@ -159,11 +220,21 @@ public final class TestData {
     }
 
     public static DriverResponseDto getDriverResponseDto() {
-        return new DriverResponseDto(1L, "Driver", "driver@mail.ru", "712345678");
+        return new DriverResponseDto(DRIVER_ID, "Driver", "driver@mail.ru", "712345678");
     }
 
     public static PassengerResponseDto getPassengerResponseDto() {
-        return new PassengerResponseDto(1L, "Passenger", "passenger@mail.ru", "712345678");
+        return new PassengerResponseDto(PASSENGER_ID, "Passenger", "passenger@mail.ru", "712345678");
 
+    }
+
+    public static LoginRequestDto.LoginRequestDtoBuilder getLoginRequestDtoBuilder() {
+        return LoginRequestDto.builder()
+                .username(USERNAME)
+                .password(PASSWORD);
+    }
+
+    public static LoginRequestDto getLoginRequestDto() {
+        return getLoginRequestDtoBuilder().build();
     }
 }

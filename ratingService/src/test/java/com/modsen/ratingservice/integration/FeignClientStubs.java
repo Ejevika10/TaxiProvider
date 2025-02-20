@@ -3,7 +3,7 @@ package com.modsen.ratingservice.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import com.modsen.ratingservice.exception.ErrorMessage;
+import com.modsen.exceptionstarter.message.ErrorMessage;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
