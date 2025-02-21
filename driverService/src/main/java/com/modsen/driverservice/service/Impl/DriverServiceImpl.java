@@ -18,6 +18,9 @@ import com.modsen.driverservice.service.DriverService;
 import com.modsen.exceptionstarter.exception.DuplicateFieldException;
 import com.modsen.exceptionstarter.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -55,12 +58,14 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    @Cacheable(value = "driver", key = "#id")
     public DriverResponseDto getDriverById(UUID id) {
         Driver driver = findByIdOrThrow(id);
         return driverMapper.toDriverResponseDTO(driver);
     }
 
     @Override
+    @Cacheable(value = "driver", key = "#result.id()")
     public DriverResponseDto getDriverByEmail(String email) {
         Driver driver = driverRepository.findByEmailAndDeletedIsFalse(email)
                 .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
@@ -69,6 +74,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
+    @CachePut(value = "driver", key = "#result.id()")
     public DriverResponseDto createDriver(DriverCreateRequestDto driverRequestDTO) {
         if (driverRepository.existsByEmailAndDeletedIsFalse(driverRequestDTO.email())) {
             throw new DuplicateFieldException(AppConstants.DRIVER_EMAIL_EXIST);
@@ -80,6 +86,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
+    @CachePut(value = "driver", key = "#id")
     public DriverResponseDto updateDriver(UUID id, DriverUpdateRequestDto driverRequestDTO) {
         Driver driverToSave = findByIdOrThrow(id);
         Optional<Driver> existingDriver = driverRepository.findByEmailAndDeletedIsFalse(driverRequestDTO.email());
@@ -100,6 +107,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
+    @CachePut(value = "driver", key = "#result.id()")
     public DriverResponseDto updateRating(UserRatingDto userRatingDto) {
         Driver driverToSave = findByIdOrThrow(userRatingDto.id());
         driverToSave.setRating(userRatingDto.rating());
@@ -109,6 +117,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "driver", key = "#id")
     public void deleteDriver(UUID id) {
         Driver driver = findByIdOrThrow(id);
         driver.setDeleted(true);

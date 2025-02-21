@@ -15,6 +15,9 @@ import com.modsen.driverservice.service.CarService;
 import com.modsen.exceptionstarter.exception.DuplicateFieldException;
 import com.modsen.exceptionstarter.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -64,12 +67,14 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
+    @Cacheable(value = "car", key = "#id")
     public CarResponseDto getCarById(Long id) {
         Car car = findCarByIdOrThrow(id);
         return carMapper.toCarResponseDTO(car);
     }
 
     @Override
+    @Cacheable(value = "car", key = "#result.id()")
     public CarResponseDto getCarByNumber(String number) {
         Car car = carRepository.findByNumberAndDeletedIsFalse(number)
                 .orElseThrow(() -> new NotFoundException(AppConstants.CAR_NOT_FOUND));
@@ -78,6 +83,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     @Transactional
+    @CachePut(value = "car", key = "#result.id()")
     public CarResponseDto addCar(CarRequestDto carRequestDTO) {
         Driver driver = findDriverByIdOrThrow(UUID.fromString(carRequestDTO.driverId()));
         if (carRepository.existsByNumberAndDeletedIsFalse(carRequestDTO.number())) {
@@ -92,6 +98,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     @Transactional
+    @CachePut(value = "car", key = "#id")
     public CarResponseDto updateCar(Long id, CarRequestDto carRequestDTO) {
         Car carToSave = findCarByIdOrThrow(id);
         Driver driver = findDriverByIdOrThrow(UUID.fromString(carRequestDTO.driverId()));
@@ -107,6 +114,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "car", key = "#id")
     public void deleteCar(Long id) {
         Car car = findCarByIdOrThrow(id);
         car.setDeleted(true);
