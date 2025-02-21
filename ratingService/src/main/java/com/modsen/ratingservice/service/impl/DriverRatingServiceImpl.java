@@ -15,6 +15,9 @@ import com.modsen.ratingservice.service.RatingService;
 import com.modsen.ratingservice.util.AppConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -63,12 +66,14 @@ public class DriverRatingServiceImpl implements RatingService {
     }
 
     @Override
+    @Cacheable(value = "driverRating", key = "#id")
     public RatingResponseDto getRatingById(String id) {
         DriverRating rating = findByIdOrThrow(id);
         return ratingMapper.toRatingResponseDto(rating);
     }
 
     @Override
+    @CachePut(value = "driverRating", key = "#result.id()")
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto, String authorizationToken) {
         validator.validateForCreate(ratingRequestDto, authorizationToken);
         DriverRating ratingToSave = ratingMapper.toDriverRating(ratingRequestDto);
@@ -79,6 +84,7 @@ public class DriverRatingServiceImpl implements RatingService {
     }
 
     @Override
+    @CachePut(value = "driverRating", key = "#id")
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto, String authorizationToken) {
         DriverRating ratingToSave = findByIdOrThrow(id);
         validator.validateForUpdate(ratingRequestDto, authorizationToken);
@@ -89,6 +95,7 @@ public class DriverRatingServiceImpl implements RatingService {
     }
 
     @Override
+    @CacheEvict(value = "driverRating", key = "#id")
     public void deleteRating(String id) {
         DriverRating rating = findByIdOrThrow(id);
         rating.setDeleted(true);
