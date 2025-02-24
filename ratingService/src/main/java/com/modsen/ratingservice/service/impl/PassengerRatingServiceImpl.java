@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+import static com.modsen.ratingservice.util.AppConstants.PASSENGER_RATING_CACHE_NAME;
+
 @Service
 @RequiredArgsConstructor
 @Qualifier("PassengerRatingServiceImpl")
@@ -66,14 +68,14 @@ public class PassengerRatingServiceImpl implements RatingService {
     }
 
     @Override
-    @Cacheable(value = "passengerRating", key = "#id")
+    @Cacheable(value = PASSENGER_RATING_CACHE_NAME, key = "#id")
     public RatingResponseDto getRatingById(String id) {
         PassengerRating rating = findByIdOrThrow(id);
         return ratingMapper.toRatingResponseDto(rating);
     }
 
     @Override
-    @CachePut(value = "passengerRating", key = "#result.id()")
+    @CachePut(value = PASSENGER_RATING_CACHE_NAME, key = "#result.id()")
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto, String authorizationToken) {
         validator.validateForCreate(ratingRequestDto, authorizationToken);
         PassengerRating ratingToSave = ratingMapper.toPassengerRating(ratingRequestDto);
@@ -84,7 +86,7 @@ public class PassengerRatingServiceImpl implements RatingService {
     }
 
     @Override
-    @CachePut(value = "passengerRating", key = "#id")
+    @CachePut(value = PASSENGER_RATING_CACHE_NAME, key = "#id")
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto, String authorizationToken) {
         PassengerRating ratingToSave = findByIdOrThrow(id);
         validator.validateForUpdate(ratingRequestDto, authorizationToken);
@@ -95,7 +97,7 @@ public class PassengerRatingServiceImpl implements RatingService {
     }
 
     @Override
-    @CacheEvict(value = "passengerRating", key = "#id")
+    @CacheEvict(value = PASSENGER_RATING_CACHE_NAME, key = "#id")
     public void deleteRating(String id) {
         PassengerRating rating = findByIdOrThrow(id);
         rating.setDeleted(true);

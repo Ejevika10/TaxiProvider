@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+import static com.modsen.ratingservice.util.AppConstants.DRIVER_RATING_CACHE_NAME;
+
 @Service
 @RequiredArgsConstructor
 @Qualifier("DriverRatingServiceImpl")
@@ -66,14 +68,14 @@ public class DriverRatingServiceImpl implements RatingService {
     }
 
     @Override
-    @Cacheable(value = "driverRating", key = "#id")
+    @Cacheable(value = DRIVER_RATING_CACHE_NAME, key = "#id")
     public RatingResponseDto getRatingById(String id) {
         DriverRating rating = findByIdOrThrow(id);
         return ratingMapper.toRatingResponseDto(rating);
     }
 
     @Override
-    @CachePut(value = "driverRating", key = "#result.id()")
+    @CachePut(value = DRIVER_RATING_CACHE_NAME, key = "#result.id()")
     public RatingResponseDto addRating(RatingRequestDto ratingRequestDto, String authorizationToken) {
         validator.validateForCreate(ratingRequestDto, authorizationToken);
         DriverRating ratingToSave = ratingMapper.toDriverRating(ratingRequestDto);
@@ -84,7 +86,7 @@ public class DriverRatingServiceImpl implements RatingService {
     }
 
     @Override
-    @CachePut(value = "driverRating", key = "#id")
+    @CachePut(value = DRIVER_RATING_CACHE_NAME, key = "#id")
     public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto, String authorizationToken) {
         DriverRating ratingToSave = findByIdOrThrow(id);
         validator.validateForUpdate(ratingRequestDto, authorizationToken);
@@ -95,7 +97,7 @@ public class DriverRatingServiceImpl implements RatingService {
     }
 
     @Override
-    @CacheEvict(value = "driverRating", key = "#id")
+    @CacheEvict(value = DRIVER_RATING_CACHE_NAME, key = "#id")
     public void deleteRating(String id) {
         DriverRating rating = findByIdOrThrow(id);
         rating.setDeleted(true);

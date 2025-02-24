@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.modsen.driverservice.util.AppConstants.CAR_CACHE_NAME;
+
 @Service
 @RequiredArgsConstructor
 public class CarServiceImpl implements CarService {
@@ -67,14 +69,14 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    @Cacheable(value = "car", key = "#id")
+    @Cacheable(value = CAR_CACHE_NAME, key = "#id")
     public CarResponseDto getCarById(Long id) {
         Car car = findCarByIdOrThrow(id);
         return carMapper.toCarResponseDTO(car);
     }
 
     @Override
-    @Cacheable(value = "car", key = "#result.id()")
+    @Cacheable(value = CAR_CACHE_NAME, key = "#result.id()")
     public CarResponseDto getCarByNumber(String number) {
         Car car = carRepository.findByNumberAndDeletedIsFalse(number)
                 .orElseThrow(() -> new NotFoundException(AppConstants.CAR_NOT_FOUND));
@@ -83,7 +85,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     @Transactional
-    @CachePut(value = "car", key = "#result.id()")
+    @CachePut(value = CAR_CACHE_NAME, key = "#result.id()")
     public CarResponseDto addCar(CarRequestDto carRequestDTO) {
         Driver driver = findDriverByIdOrThrow(UUID.fromString(carRequestDTO.driverId()));
         if (carRepository.existsByNumberAndDeletedIsFalse(carRequestDTO.number())) {
@@ -98,7 +100,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     @Transactional
-    @CachePut(value = "car", key = "#id")
+    @CachePut(value = CAR_CACHE_NAME, key = "#id")
     public CarResponseDto updateCar(Long id, CarRequestDto carRequestDTO) {
         Car carToSave = findCarByIdOrThrow(id);
         Driver driver = findDriverByIdOrThrow(UUID.fromString(carRequestDTO.driverId()));
@@ -114,7 +116,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "car", key = "#id")
+    @CacheEvict(value = CAR_CACHE_NAME, key = "#id")
     public void deleteCar(Long id) {
         Car car = findCarByIdOrThrow(id);
         car.setDeleted(true);

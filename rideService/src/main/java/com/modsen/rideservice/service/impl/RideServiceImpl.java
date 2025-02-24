@@ -32,6 +32,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static com.modsen.rideservice.util.AppConstants.RIDE_CACHE_NAME;
+
 @Service
 @RequiredArgsConstructor
 public class RideServiceImpl implements RideService {
@@ -85,7 +87,7 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    @Cacheable(value = "ride", key = "#id")
+    @Cacheable(value = RIDE_CACHE_NAME, key = "#id")
     public RideResponseDto getRideById(Long id) {
         Ride ride = findByIdOrThrow(id);
         return rideMapper.toRideResponseDto(ride);
@@ -93,7 +95,7 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    @CachePut(value = "ride", key = "#result.id()")
+    @CachePut(value = RIDE_CACHE_NAME, key = "#result.id()")
     public RideResponseDto createRide(RideCreateRequestDto rideRequestDto, String authorizationToken) {
         PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId(), authorizationToken);
         Ride rideToSave = rideMapper.toRide(rideRequestDto);
@@ -105,7 +107,7 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    @CachePut(value = "ride", key = "#id")
+    @CachePut(value = RIDE_CACHE_NAME, key = "#id")
     public RideResponseDto acceptRide(Long id, RideAcceptRequestDto rideRequestDto, String authorizationToken) {
         Ride rideToSave = findByIdOrThrow(id);
         DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId(), authorizationToken);
@@ -116,7 +118,7 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    @CachePut(value = "ride", key = "#id")
+    @CachePut(value = RIDE_CACHE_NAME, key = "#id")
     public RideResponseDto cancelRide(Long id, String authorizationToken) {
         Ride rideToSave = findByIdOrThrow(id);
         rideToSave.setRideState(RideState.CANCELLED);
@@ -126,7 +128,7 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    @CachePut(value = "ride", key = "#id")
+    @CachePut(value = RIDE_CACHE_NAME, key = "#id")
     public RideResponseDto updateRide(Long id, RideRequestDto rideRequestDto, String authorizationToken) {
         Ride rideToSave = findByIdOrThrow(id);
         PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId(), authorizationToken);
@@ -140,7 +142,7 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @Transactional
-    @CachePut(value = "ride", key = "#id")
+    @CachePut(value = RIDE_CACHE_NAME, key = "#id")
     public RideResponseDto setNewState(Long id, RideStateRequestDto newStateDto) {
         Ride rideToSave = findByIdOrThrow(id);
         RideState newState = RideState.fromValue(newStateDto.rideState());
