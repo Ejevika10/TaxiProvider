@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.modsen.rideservice.model.RideState;
 import lombok.Builder;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -29,5 +30,5 @@ public record RideResponseDto(
         @JsonDeserialize(using = LocalDateTimeDeserializer.class)
         LocalDateTime rideDateTime,
 
-        Integer rideCost) {
+        Integer rideCost) implements Serializable {
 }

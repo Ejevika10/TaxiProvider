@@ -2,10 +2,11 @@ package com.modsen.driverservice.dto;
 
 import lombok.Builder;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Builder
-public record DriverResponseDto(
+public record DriverResponseDto (
         UUID id,
 
         String name,
@@ -14,5 +15,5 @@ public record DriverResponseDto(
 
         String phone,
 
-        Double rating) {
+        Double rating) implements Serializable {
 }
