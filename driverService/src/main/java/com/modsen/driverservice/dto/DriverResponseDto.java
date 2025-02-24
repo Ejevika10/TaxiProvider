@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 @Builder
-public record DriverResponseDto (
+public record DriverResponseDto(
         UUID id,
 
         String name,
