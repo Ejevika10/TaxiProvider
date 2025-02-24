@@ -2,6 +2,7 @@ package com.modsen.passengerservice.dto;
 
 import lombok.Builder;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Builder
@@ -14,5 +15,5 @@ public record PassengerResponseDto(
 
     String phone,
 
-    Double rating){
+    Double rating) implements Serializable {
 }

@@ -19,4 +19,7 @@ public final class AppConstants {
 
     public static final String FORBIDDEN = "forbidden";
     public static final String UNAUTHORIZED = "unauthorized";
+
+    public static final String DRIVER_CACHE_NAME = "driver";
+    public static final String CAR_CACHE_NAME = "car";
 }

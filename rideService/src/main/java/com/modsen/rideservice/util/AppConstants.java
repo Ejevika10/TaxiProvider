@@ -23,4 +23,6 @@ public final class AppConstants {
     public static final String UNAUTHORIZED = "unauthorized";
 
     public static final String BODY_READ_ERROR = "body.read.error";
+
+    public static final String RIDE_CACHE_NAME = "ride";
 }

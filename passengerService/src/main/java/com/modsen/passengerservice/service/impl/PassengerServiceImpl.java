@@ -18,6 +18,9 @@ import com.modsen.passengerservice.model.Passenger;
 import com.modsen.passengerservice.repository.PassengerRepository;
 import com.modsen.passengerservice.service.PassengerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.modsen.passengerservice.util.AppConstants.PASSENGER_CACHE_NAME;
 
 @Service
 @RequiredArgsConstructor
@@ -55,12 +60,14 @@ public class PassengerServiceImpl implements PassengerService {
     }
 
     @Override
+    @Cacheable(value = PASSENGER_CACHE_NAME, key = "#id")
     public PassengerResponseDto getPassengerById(UUID id) {
         Passenger passenger = findByIdOrThrow(id);
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
     @Override
+    @Cacheable(value = PASSENGER_CACHE_NAME, key = "#result.id()")
     public PassengerResponseDto getPassengerByEmail(String email) {
         Passenger passenger = passengerRepository.findByEmailAndDeletedIsFalse(email)
                 .orElseThrow(() -> new NotFoundException(AppConstants.PASSENGER_NOT_FOUND));
@@ -69,6 +76,7 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     @Transactional
+    @CachePut(value = PASSENGER_CACHE_NAME, key = "#result.id()")
     public PassengerResponseDto addPassenger(PassengerCreateRequestDto requestDTO) {
         if(passengerRepository.existsByEmailAndDeletedIsFalse(requestDTO.email())) {
             throw new DuplicateFieldException(AppConstants.PASSENGER_EMAIL_EXISTS);
@@ -80,6 +88,7 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     @Transactional
+    @CachePut(value = PASSENGER_CACHE_NAME, key = "#id")
     public PassengerResponseDto updatePassenger(UUID id, PassengerUpdateRequestDto requestDTO) {
         Passenger passengerToSave = findByIdOrThrow(id);
         Optional<Passenger> existingPassenger = passengerRepository.findByEmailAndDeletedIsFalse(requestDTO.email());
@@ -100,6 +109,7 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     @Transactional
+    @CacheEvict(value = PASSENGER_CACHE_NAME, key = "#id")
     public void deletePassenger(UUID id) {
         Passenger passenger = findByIdOrThrow(id);
         passenger.setDeleted(true);
@@ -111,6 +121,7 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     @Transactional
+    @CachePut(value = PASSENGER_CACHE_NAME, key = "#result.id()")
     public PassengerResponseDto updateRating(UserRatingDto userRatingDTO) {
         Passenger passengerToSave = findByIdOrThrow(userRatingDTO.id());
         passengerToSave.setRating(userRatingDTO.rating());
