@@ -98,6 +98,7 @@ services:
       RABBITMQ_HOSTNAME: rabbitmq
       ZIPKIN_HOSTNAME: zipkin
       KEYCLOAK_HOSTNAME: keycloak
+      MINIO_HOSTNAME: minio
       EUREKA_URL: http://discovery-server:8761/eureka/
       JDBC_DATABASE_URL: jdbc:postgresql://driver-service-db:5432/driver_service_db
       LOKI_URL: http://loki:3100/loki/api/v1/push
@@ -148,6 +149,7 @@ services:
       RABBITMQ_HOSTNAME: rabbitmq
       ZIPKIN_HOSTNAME: zipkin
       KEYCLOAK_HOSTNAME: keycloak
+      MINIO_HOSTNAME: minio
       EUREKA_URL: http://discovery-server:8761/eureka/
       JDBC_DATABASE_URL: jdbc:postgresql://passenger-service-db:5432/passenger_service_db
       LOKI_URL: http://loki:3100/loki/api/v1/push
@@ -393,6 +395,23 @@ services:
         aliases:
           - zipkin
 
+  minio:
+    image: docker.io/bitnami/minio:2022
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    networks:
+      - taxi-provider-network
+    volumes:
+      - 'minio_data:/data'
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=admin123
+
 networks:
   taxi-provider-network:
     driver: bridge
+
+volumes:
+  minio_data:
+    driver: local
