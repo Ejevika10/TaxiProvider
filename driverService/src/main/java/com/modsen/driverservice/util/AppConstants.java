@@ -19,4 +19,8 @@ public final class AppConstants {
 
     public static final String FORBIDDEN = "forbidden";
     public static final String UNAUTHORIZED = "unauthorized";
+
+    public static final String AVATAR_NOT_FOUND = "avatar.notfound";
+    public static final String SERVICE_UNAVAILABLE = "service.unavailable";
+    public static final String INVALID_FILE_TYPE = "invalid.file.type";
 }
