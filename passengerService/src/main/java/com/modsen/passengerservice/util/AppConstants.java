@@ -15,4 +15,8 @@ public final class AppConstants {
 
     public static final String PHONE_REGEXP="^((8|\\+7)[\\- ]?)?(\\(?\\d{3}\\)?[\\- ]?)?[\\d\\- ]{7,10}$";
     public static final String UUID_REGEXP = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+
+    public static final String AVATAR_NOT_FOUND = "avatar.notfound";
+    public static final String SERVICE_UNAVAILABLE = "service.unavailable";
+    public static final String INVALID_FILE_TYPE = "invalid.file.type";
 }
