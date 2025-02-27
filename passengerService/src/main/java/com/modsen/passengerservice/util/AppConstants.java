@@ -19,4 +19,6 @@ public final class AppConstants {
     public static final String AVATAR_NOT_FOUND = "avatar.notfound";
     public static final String SERVICE_UNAVAILABLE = "service.unavailable";
     public static final String INVALID_FILE_TYPE = "invalid.file.type";
+
+    public static final String PASSENGER_CACHE_NAME = "passenger";
 }
