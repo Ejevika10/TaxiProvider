@@ -11,7 +11,7 @@ import com.modsen.driverservice.mapper.PageMapper;
 import com.modsen.driverservice.model.Driver;
 import com.modsen.driverservice.repository.DriverRepository;
 import com.modsen.driverservice.service.RabbitService;
-import com.modsen.driverservice.util.AppConstants;
+import com.modsen.driverservice.util.MessageConstants;
 import com.modsen.exceptionstarter.exception.DuplicateFieldException;
 import com.modsen.exceptionstarter.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -139,7 +139,7 @@ class DriverServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> driverService.getDriverById(DRIVER_ID),
-                AppConstants.DRIVER_NOT_FOUND);
+                MessageConstants.DRIVER_NOT_FOUND);
         verify(driverRepository).findByIdAndDeletedIsFalse(DRIVER_ID);
     }
 
@@ -170,7 +170,7 @@ class DriverServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> driverService.getDriverByEmail(driver.getEmail()),
-                AppConstants.DRIVER_NOT_FOUND);
+                MessageConstants.DRIVER_NOT_FOUND);
         verify(driverRepository).findByEmailAndDeletedIsFalse(driver.getEmail());
     }
 
@@ -206,7 +206,7 @@ class DriverServiceImplTest {
         //Assert
         assertThrows(DuplicateFieldException.class,
                 () -> driverService.createDriver(driverRequestDto),
-                AppConstants.DRIVER_EMAIL_EXIST);
+                MessageConstants.DRIVER_EMAIL_EXIST);
         verify(driverRepository).existsByEmailAndDeletedIsFalse(driverRequestDto.email());
     }
 
@@ -242,7 +242,7 @@ class DriverServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> driverService.updateDriver(DRIVER_ID, driverRequestDto),
-                AppConstants.DRIVER_NOT_FOUND);
+                MessageConstants.DRIVER_NOT_FOUND);
         verify(driverRepository).findByIdAndDeletedIsFalse(DRIVER_ID);
     }
 
@@ -262,7 +262,7 @@ class DriverServiceImplTest {
         //Assert
         assertThrows(DuplicateFieldException.class,
                 () -> driverService.updateDriver(driver.getId(), driverRequestDto),
-                AppConstants.DRIVER_EMAIL_EXIST);
+                MessageConstants.DRIVER_EMAIL_EXIST);
         verify(driverRepository).findByIdAndDeletedIsFalse(driver.getId());
         verify(driverRepository).findByEmailAndDeletedIsFalse(driverRequestDto.email());
     }
@@ -292,7 +292,7 @@ class DriverServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> driverService.deleteDriver(DRIVER_ID),
-                AppConstants.DRIVER_NOT_FOUND);
+                MessageConstants.DRIVER_NOT_FOUND);
         verify(driverRepository).findByIdAndDeletedIsFalse(DRIVER_ID);
     }
 
@@ -328,7 +328,7 @@ class DriverServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> driverService.updateRating(driverRating),
-                AppConstants.DRIVER_NOT_FOUND);
+                MessageConstants.DRIVER_NOT_FOUND);
         verify(driverRepository).findByIdAndDeletedIsFalse(driverRating.id());
     }
 }

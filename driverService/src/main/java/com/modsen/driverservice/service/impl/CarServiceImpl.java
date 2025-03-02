@@ -1,6 +1,6 @@
 package com.modsen.driverservice.service.impl;
 
-import com.modsen.driverservice.util.AppConstants;
+import com.modsen.driverservice.util.MessageConstants;
 import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.dto.CarResponseDto;
 import com.modsen.driverservice.dto.PageDto;
@@ -79,7 +79,7 @@ public class CarServiceImpl implements CarService {
     @Cacheable(value = CAR_CACHE_NAME, key = "#result.id()")
     public CarResponseDto getCarByNumber(String number) {
         Car car = carRepository.findByNumberAndDeletedIsFalse(number)
-                .orElseThrow(() -> new NotFoundException(AppConstants.CAR_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(MessageConstants.CAR_NOT_FOUND));
         return carMapper.toCarResponseDTO(car);
     }
 
@@ -89,7 +89,7 @@ public class CarServiceImpl implements CarService {
     public CarResponseDto addCar(CarRequestDto carRequestDTO) {
         Driver driver = findDriverByIdOrThrow(UUID.fromString(carRequestDTO.driverId()));
         if (carRepository.existsByNumberAndDeletedIsFalse(carRequestDTO.number())) {
-            throw new DuplicateFieldException(AppConstants.CAR_NUMBER_EXIST);
+            throw new DuplicateFieldException(MessageConstants.CAR_NUMBER_EXIST);
         }
         Car carToSave = carMapper.toCar(carRequestDTO);
         carToSave.setDeleted(false);
@@ -106,7 +106,7 @@ public class CarServiceImpl implements CarService {
         Driver driver = findDriverByIdOrThrow(UUID.fromString(carRequestDTO.driverId()));
         Optional<Car> existingCar = carRepository.findByNumberAndDeletedIsFalse(carRequestDTO.number());
         if(existingCar.isPresent() && !existingCar.get().getId().equals(id)) {
-            throw new DuplicateFieldException(AppConstants.CAR_NUMBER_EXIST);
+            throw new DuplicateFieldException(MessageConstants.CAR_NUMBER_EXIST);
         }
         carMapper.updateCar(carToSave, carRequestDTO);
         carToSave.setDriver(driver);
@@ -125,11 +125,11 @@ public class CarServiceImpl implements CarService {
 
     private Car findCarByIdOrThrow(Long id) {
         return carRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(AppConstants.CAR_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(MessageConstants.CAR_NOT_FOUND));
     }
 
     private Driver findDriverByIdOrThrow(UUID id) {
         return driverRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(MessageConstants.DRIVER_NOT_FOUND));
     }
 }

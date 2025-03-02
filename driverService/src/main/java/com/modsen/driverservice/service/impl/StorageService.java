@@ -1,7 +1,7 @@
 package com.modsen.driverservice.service.impl;
 
 import com.modsen.driverservice.dto.AvatarDto;
-import com.modsen.driverservice.util.AppConstants;
+import com.modsen.driverservice.util.MessageConstants;
 import com.modsen.exceptionstarter.exception.NotFoundException;
 import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
 import io.minio.BucketExistsArgs;
@@ -40,7 +40,7 @@ public class StorageService {
             return new AvatarDto(newName);
         } catch(Exception e) {
             log.info(e.getMessage());
-            throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
+            throw new ServiceUnavailableException(MessageConstants.SERVICE_UNAVAILABLE);
         }
     }
 
@@ -67,10 +67,10 @@ public class StorageService {
             return new InputStreamResource(inputStream);
         } catch (ErrorResponseException e) {
             log.info(e.getMessage());
-            throw new NotFoundException(AppConstants.AVATAR_NOT_FOUND);
+            throw new NotFoundException(MessageConstants.AVATAR_NOT_FOUND);
         } catch (Exception e) {
             log.info(e.getMessage());
-            throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
+            throw new ServiceUnavailableException(MessageConstants.SERVICE_UNAVAILABLE);
         }
     }
 
@@ -94,7 +94,7 @@ public class StorageService {
                 createBucket(bucketName);
             }
         } catch (Exception e) {
-            throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
+            throw new ServiceUnavailableException(MessageConstants.SERVICE_UNAVAILABLE);
         }
     }
 

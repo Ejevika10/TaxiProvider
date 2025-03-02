@@ -10,7 +10,7 @@ import com.modsen.driverservice.model.Car;
 import com.modsen.driverservice.model.Driver;
 import com.modsen.driverservice.repository.CarRepository;
 import com.modsen.driverservice.repository.DriverRepository;
-import com.modsen.driverservice.util.AppConstants;
+import com.modsen.driverservice.util.MessageConstants;
 import com.modsen.exceptionstarter.exception.DuplicateFieldException;
 import com.modsen.exceptionstarter.exception.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -158,7 +158,7 @@ class CarServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> carService.getCarById(CAR_ID),
-                AppConstants.CAR_NOT_FOUND);
+                MessageConstants.CAR_NOT_FOUND);
         verify(carRepository).findByIdAndDeletedIsFalse(CAR_ID);
     }
 
@@ -188,7 +188,7 @@ class CarServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> carService.getCarByNumber(car.getNumber()),
-                AppConstants.CAR_NOT_FOUND);
+                MessageConstants.CAR_NOT_FOUND);
         verify(carRepository).findByNumberAndDeletedIsFalse(car.getNumber());
     }
 
@@ -228,7 +228,7 @@ class CarServiceImplTest {
        //Assert
         assertThrows(NotFoundException.class,
                 () -> carService.addCar(carRequestDto),
-                AppConstants.DRIVER_NOT_FOUND);
+                MessageConstants.DRIVER_NOT_FOUND);
         verify(driverRepository).findByIdAndDeletedIsFalse(UUID.fromString(carRequestDto.driverId()));
     }
 
@@ -244,7 +244,7 @@ class CarServiceImplTest {
         //Assert
         assertThrows(DuplicateFieldException.class,
                 () -> carService.addCar(carRequestDto),
-                AppConstants.CAR_NUMBER_EXIST);
+                MessageConstants.CAR_NUMBER_EXIST);
         verify(driverRepository).findByIdAndDeletedIsFalse(UUID.fromString(carRequestDto.driverId()));
         verify(carRepository).existsByNumberAndDeletedIsFalse(carRequestDto.number());
     }
@@ -285,7 +285,7 @@ class CarServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> carService.updateCar(car.getId(), carRequestDto),
-                AppConstants.CAR_NOT_FOUND);
+                MessageConstants.CAR_NOT_FOUND);
         verify(carRepository).findByIdAndDeletedIsFalse(car.getId());
     }
 
@@ -301,7 +301,7 @@ class CarServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> carService.updateCar(car.getId(), carRequestDto),
-                AppConstants.DRIVER_NOT_FOUND);
+                MessageConstants.DRIVER_NOT_FOUND);
         verify(carRepository).findByIdAndDeletedIsFalse(car.getId());
         verify(driverRepository).findByIdAndDeletedIsFalse(UUID.fromString(carRequestDto.driverId()));
     }
@@ -323,7 +323,7 @@ class CarServiceImplTest {
         //Assert
         assertThrows(DuplicateFieldException.class,
                 () -> carService.updateCar(car.getId(), carRequestDto),
-                AppConstants.CAR_NUMBER_EXIST);
+                MessageConstants.CAR_NUMBER_EXIST);
         verify(carRepository).findByIdAndDeletedIsFalse(car.getId());
         verify(driverRepository).findByIdAndDeletedIsFalse(UUID.fromString(carRequestDto.driverId()));
         verify(carRepository).findByNumberAndDeletedIsFalse(carRequestDto.number());
@@ -354,7 +354,7 @@ class CarServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> carService.deleteCar(3L),
-                AppConstants.CAR_NOT_FOUND);
+                MessageConstants.CAR_NOT_FOUND);
         verify(carRepository).findByIdAndDeletedIsFalse(3L);
     }
 }

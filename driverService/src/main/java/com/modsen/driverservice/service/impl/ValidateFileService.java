@@ -1,6 +1,6 @@
 package com.modsen.driverservice.service.impl;
 
-import com.modsen.driverservice.util.AppConstants;
+import com.modsen.driverservice.util.MessageConstants;
 import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class ValidateFileService {
 
     public void validateFile(MultipartFile file) {
         if (!allowedTypesList().contains(file.getContentType())) {
-            throw new InvalidFieldValueException(AppConstants.INVALID_FILE_TYPE);
+            throw new InvalidFieldValueException(MessageConstants.INVALID_FILE_TYPE);
         }
     }
 }

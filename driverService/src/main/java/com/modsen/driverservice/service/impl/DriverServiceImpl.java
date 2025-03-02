@@ -6,7 +6,7 @@ import com.modsen.driverservice.dto.UserDeleteRequestDto;
 import com.modsen.driverservice.dto.UserRatingDto;
 import com.modsen.driverservice.dto.UserUpdateRequestDto;
 import com.modsen.driverservice.service.RabbitService;
-import com.modsen.driverservice.util.AppConstants;
+import com.modsen.driverservice.util.MessageConstants;
 import com.modsen.driverservice.dto.DriverResponseDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.mapper.DriverListMapper;
@@ -70,7 +70,7 @@ public class DriverServiceImpl implements DriverService {
     @Cacheable(value = DRIVER_CACHE_NAME, key = "#result.id()")
     public DriverResponseDto getDriverByEmail(String email) {
         Driver driver = driverRepository.findByEmailAndDeletedIsFalse(email)
-                .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(MessageConstants.DRIVER_NOT_FOUND));
         return driverMapper.toDriverResponseDTO(driver);
     }
 
@@ -79,7 +79,7 @@ public class DriverServiceImpl implements DriverService {
     @CachePut(value = DRIVER_CACHE_NAME, key = "#result.id()")
     public DriverResponseDto createDriver(DriverCreateRequestDto driverRequestDTO) {
         if (driverRepository.existsByEmailAndDeletedIsFalse(driverRequestDTO.email())) {
-            throw new DuplicateFieldException(AppConstants.DRIVER_EMAIL_EXIST);
+            throw new DuplicateFieldException(MessageConstants.DRIVER_EMAIL_EXIST);
         }
         Driver driverToSave = driverMapper.toDriver(driverRequestDTO);
         Driver driver = driverRepository.save(driverToSave);
@@ -93,7 +93,7 @@ public class DriverServiceImpl implements DriverService {
         Driver driverToSave = findByIdOrThrow(id);
         Optional<Driver> existingDriver = driverRepository.findByEmailAndDeletedIsFalse(driverRequestDTO.email());
         if(existingDriver.isPresent() && !existingDriver.get().getId().equals(id)) {
-            throw new DuplicateFieldException(AppConstants.DRIVER_EMAIL_EXIST);
+            throw new DuplicateFieldException(MessageConstants.DRIVER_EMAIL_EXIST);
         }
         driverMapper.updateDriver(driverToSave, driverRequestDTO);
         Driver driver = driverRepository.save(driverToSave);
@@ -131,6 +131,6 @@ public class DriverServiceImpl implements DriverService {
 
     private Driver findByIdOrThrow(UUID id) {
         return driverRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(AppConstants.DRIVER_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(MessageConstants.DRIVER_NOT_FOUND));
     }
 }

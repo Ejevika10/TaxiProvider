@@ -1,6 +1,6 @@
 package com.modsen.driverservice.security;
 
-import com.modsen.driverservice.util.AppConstants;
+import com.modsen.driverservice.util.MessageConstants;
 import com.modsen.exceptionstarter.exception.ForbiddenException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +21,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                        HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
         log.info("ForbiddenException");
-        throw new ForbiddenException(AppConstants.FORBIDDEN);
+        throw new ForbiddenException(MessageConstants.FORBIDDEN);
     }
 }

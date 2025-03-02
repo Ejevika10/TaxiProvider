@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.model.Role;
 import com.modsen.driverservice.service.CarService;
-import com.modsen.driverservice.util.AppConstants;
+import com.modsen.driverservice.util.MessageConstants;
 import com.modsen.exceptionstarter.exception.ForbiddenException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -59,13 +59,13 @@ public class CarAccessFilter extends OncePerRequestFilter {
                 CarRequestDto carRequestDto = getCarRequestDto(request);
                 UUID driverId = UUID.fromString(carRequestDto.driverId());
                 if (!Objects.equals(userId, driverId)) {
-                    throw new ForbiddenException(AppConstants.FORBIDDEN);
+                    throw new ForbiddenException(MessageConstants.FORBIDDEN);
                 }
             }
             else {
                 UUID carOwnerId = getCarOwnerIdFromRequestURI(request.getRequestURI());
                 if (!Objects.equals(userId, carOwnerId)) {
-                    throw new ForbiddenException(AppConstants.FORBIDDEN);
+                    throw new ForbiddenException(MessageConstants.FORBIDDEN);
                 }
             }
         }
