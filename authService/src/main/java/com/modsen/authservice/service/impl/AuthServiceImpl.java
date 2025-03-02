@@ -17,7 +17,7 @@ import com.modsen.authservice.dto.UserUpdateRequestDto;
 import com.modsen.authservice.model.Role;
 import com.modsen.authservice.service.AuthService;
 import com.modsen.authservice.configuration.KeycloakProperties;
-import com.modsen.authservice.util.AppConstants;
+import com.modsen.authservice.util.MessageConstants;
 import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
 import com.modsen.exceptionstarter.exception.KeycloakException;
 import com.modsen.exceptionstarter.exception.NotFoundException;
@@ -50,8 +50,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.List;
-import static com.modsen.authservice.util.AppConstants.ERROR_MESSAGE_FIELD;
-import static com.modsen.authservice.util.AppConstants.UNKNOWN_ERROR;
+import static com.modsen.authservice.util.MessageConstants.ERROR_MESSAGE_FIELD;
+import static com.modsen.authservice.util.MessageConstants.UNKNOWN_ERROR;
 
 @Service
 @Slf4j
@@ -89,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
                     new HttpEntity<>(requestBody, headers), LoginResponseDto.class);
             return response.getBody();
         } catch (HttpClientErrorException e) {
-            throw new NotFoundException(AppConstants.USER_DOESNT_EXIST);
+            throw new NotFoundException(MessageConstants.USER_DOESNT_EXIST);
         }
     }
 
@@ -118,7 +118,7 @@ public class AuthServiceImpl implements AuthService {
                     new HttpEntity<>(requestBody, headers), LoginResponseDto.class);
             return response.getBody();
         } catch (Exception e) {
-            throw new InvalidFieldValueException(AppConstants.INVALID_REFRESH_TOKEN);
+            throw new InvalidFieldValueException(MessageConstants.INVALID_REFRESH_TOKEN);
         }
     }
 

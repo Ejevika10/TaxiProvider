@@ -2,7 +2,7 @@ package com.modsen.authservice.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.modsen.authservice.util.AppConstants;
+import com.modsen.authservice.util.MessageConstants;
 import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
 
 public enum Role {
@@ -29,6 +29,6 @@ public enum Role {
                 return state;
             }
         }
-        throw new InvalidFieldValueException(AppConstants.INVALID_ROLE_VALUE);
+        throw new InvalidFieldValueException(MessageConstants.INVALID_ROLE_VALUE);
     }
 }
