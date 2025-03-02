@@ -1,5 +1,6 @@
 package com.modsen.driverservice.controller;
 
+import com.modsen.driverservice.dto.AvatarDto;
 import com.modsen.driverservice.dto.DriverCreateRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
 import com.modsen.driverservice.dto.DriverUpdateRequestDto;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -104,7 +106,7 @@ public interface DriverEndpoints {
             @ApiResponse(responseCode = "404", description = "Driver with this id doesn't exist"),
             @ApiResponse(responseCode = "503", description = "Minio service unavailable")
     })
-    ResponseEntity<String> addAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id,
+    AvatarDto addAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id,
                         @RequestParam MultipartFile file);
 
     @Operation(
@@ -120,6 +122,6 @@ public interface DriverEndpoints {
             @ApiResponse(responseCode = "404", description = "Driver with this id doesn't exist"),
             @ApiResponse(responseCode = "503", description = "Minio service unavailable")
     })
-    ResponseEntity<?> downloadAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id);
+    ResponseEntity<Resource> downloadAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id);
 
 }
