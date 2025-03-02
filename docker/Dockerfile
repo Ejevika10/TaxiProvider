@@ -1,7 +1,15 @@
-FROM maven:3.9.9-eclipse-temurin-23-alpine AS build
+FROM maven:3.9.9-eclipse-temurin-23-alpine AS exceptionStarter
 WORKDIR /app
-COPY pom.xml .
-COPY src ./src/
+COPY /exceptionStarter/pom.xml /app/
+COPY /exceptionStarter/src /app/src
+RUN mvn clean install -DskipTests
+
+FROM maven:3.9.9-eclipse-temurin-23-alpine AS build
+ARG FILE_PATH
+WORKDIR /app
+COPY --from=exceptionStarter /root/.m2 /root/.m2
+COPY /${FILE_PATH}/pom.xml /app/
+COPY /${FILE_PATH}/src /app/src/
 RUN mvn clean package -DskipTests
 
 FROM openjdk:23-slim as optimize
