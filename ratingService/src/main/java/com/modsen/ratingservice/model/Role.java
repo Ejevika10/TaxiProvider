@@ -3,7 +3,7 @@ package com.modsen.ratingservice.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.ratingservice.util.MessageConstants;
 
 public enum Role {
     DRIVER("DRIVER"),
@@ -29,6 +29,6 @@ public enum Role {
                 return state;
             }
         }
-        throw new InvalidFieldValueException(AppConstants.INVALID_ROLE_VALUE);
+        throw new InvalidFieldValueException(MessageConstants.INVALID_ROLE_VALUE);
     }
 }

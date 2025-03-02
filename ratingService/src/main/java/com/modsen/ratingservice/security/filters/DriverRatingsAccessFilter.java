@@ -6,7 +6,7 @@ import com.modsen.ratingservice.client.ride.RideClientService;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RideResponseDto;
 import com.modsen.ratingservice.model.Role;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.ratingservice.util.MessageConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,7 +57,7 @@ public class DriverRatingsAccessFilter extends OncePerRequestFilter {
             RideResponseDto ride = getRideById(ratingRequestDto.rideId(), jwtAuth.getName());
 
             if(!ride.passengerId().equals(userId)) {
-                throw new ForbiddenException(AppConstants.FORBIDDEN);
+                throw new ForbiddenException(MessageConstants.FORBIDDEN);
             }
         }
         filterChain.doFilter(request, response);

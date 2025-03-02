@@ -8,7 +8,7 @@ import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RideResponseDto;
 import com.modsen.ratingservice.model.RideState;
 import com.modsen.ratingservice.repository.DriverRatingRepository;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.ratingservice.util.MessageConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +37,7 @@ public class DriverValidatorService {
 
     public void ratingDoesntExistsByRideId(long rideId) {
         if (driverRatingRepository.existsByRideIdAndDeletedIsFalse(rideId)) {
-            throw new DuplicateFieldException(AppConstants.RATING_FOR_RIDE_ALREADY_EXIST);
+            throw new DuplicateFieldException(MessageConstants.RATING_FOR_RIDE_ALREADY_EXIST);
         }
     }
 
@@ -47,13 +47,13 @@ public class DriverValidatorService {
 
     private void userIdIsCorrect(RideResponseDto rideResponseDto, UUID userId) {
         if (!rideResponseDto.driverId().equals(userId)) {
-            throw new InvalidFieldValueException(AppConstants.DIFFERENT_DRIVERS_ID);
+            throw new InvalidFieldValueException(MessageConstants.DIFFERENT_DRIVERS_ID);
         }
     }
 
     private void rideStateIsCorrect(RideState rideState) {
         if (rideState != RideState.COMPLETED && rideState != RideState.CANCELLED) {
-            throw new InvalidStateException(AppConstants.INVALID_RIDE_STATE);
+            throw new InvalidStateException(MessageConstants.INVALID_RIDE_STATE);
         }
     }
 }

@@ -6,7 +6,7 @@ import com.modsen.exceptionstarter.exception.InvalidStateException;
 import com.modsen.ratingservice.client.ride.RideClientService;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.repository.DriverRatingRepository;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.ratingservice.util.MessageConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,7 +56,7 @@ class DriverValidatorServiceTest {
         //Assert
         assertThrows(DuplicateFieldException.class,
                 () -> validator.validateForCreate(getRatingRequestDto(), AUTHORIZATION_VALUE),
-                AppConstants.RATING_FOR_RIDE_ALREADY_EXIST);
+                MessageConstants.RATING_FOR_RIDE_ALREADY_EXIST);
     }
 
     @Test
@@ -72,7 +72,7 @@ class DriverValidatorServiceTest {
         //Assert
         assertThrows(InvalidFieldValueException.class,
                 () -> validator.validateForCreate(ratingRequestDto, AUTHORIZATION_VALUE),
-                AppConstants.RATING_FOR_RIDE_ALREADY_EXIST);
+                MessageConstants.RATING_FOR_RIDE_ALREADY_EXIST);
     }
 
     @Test
@@ -86,6 +86,6 @@ class DriverValidatorServiceTest {
         //Assert
         assertThrows(InvalidStateException.class,
                 () -> validator.validateForCreate(ratingRequestDto, AUTHORIZATION_VALUE),
-                AppConstants.INVALID_RIDE_STATE);
+                MessageConstants.INVALID_RIDE_STATE);
     }
 }

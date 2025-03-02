@@ -12,7 +12,7 @@ import com.modsen.ratingservice.model.PassengerRating;
 import com.modsen.ratingservice.repository.PassengerRatingRepository;
 import com.modsen.ratingservice.service.RabbitService;
 import com.modsen.ratingservice.service.RatingService;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.ratingservice.util.MessageConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
@@ -106,7 +106,7 @@ public class PassengerRatingServiceImpl implements RatingService {
 
     private PassengerRating findByIdOrThrow(String id) {
         return passengerRatingRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(AppConstants.RATING_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(MessageConstants.RATING_NOT_FOUND));
     }
 
     private void updateAverageRating(UUID userId){

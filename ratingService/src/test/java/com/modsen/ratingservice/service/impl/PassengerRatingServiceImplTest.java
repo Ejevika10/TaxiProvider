@@ -10,7 +10,7 @@ import com.modsen.ratingservice.mapper.RatingMapper;
 import com.modsen.ratingservice.model.PassengerRating;
 import com.modsen.ratingservice.repository.PassengerRatingRepository;
 import com.modsen.ratingservice.service.RabbitService;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.ratingservice.util.MessageConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -184,7 +184,7 @@ class PassengerRatingServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> passengerRatingService.getRatingById(passengerRating.getId()),
-                AppConstants.RATING_NOT_FOUND);
+                MessageConstants.RATING_NOT_FOUND);
         verify(passengerRatingRepository).findByIdAndDeletedIsFalse(passengerRating.getId());
     }
 
@@ -240,7 +240,7 @@ class PassengerRatingServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> passengerRatingService.updateRating(NON_EXISTING_RATING_ID, passengerRatingRequestDto, AUTHORIZATION_VALUE),
-                AppConstants.RATING_NOT_FOUND);
+                MessageConstants.RATING_NOT_FOUND);
         verify(passengerRatingRepository).findByIdAndDeletedIsFalse(NON_EXISTING_RATING_ID);
     }
 
@@ -269,7 +269,7 @@ class PassengerRatingServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> passengerRatingService.deleteRating(NON_EXISTING_RATING_ID),
-                AppConstants.RATING_NOT_FOUND);
+                MessageConstants.RATING_NOT_FOUND);
         verify(passengerRatingRepository).findByIdAndDeletedIsFalse(NON_EXISTING_RATING_ID);
     }
 }

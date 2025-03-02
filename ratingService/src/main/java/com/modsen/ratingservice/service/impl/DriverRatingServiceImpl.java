@@ -12,7 +12,7 @@ import com.modsen.ratingservice.model.DriverRating;
 import com.modsen.ratingservice.repository.DriverRatingRepository;
 import com.modsen.ratingservice.service.RabbitService;
 import com.modsen.ratingservice.service.RatingService;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.ratingservice.util.MessageConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
@@ -106,7 +106,7 @@ public class DriverRatingServiceImpl implements RatingService {
 
     private DriverRating findByIdOrThrow(String id) {
         return driverRatingRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(AppConstants.RATING_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(MessageConstants.RATING_NOT_FOUND));
     }
 
     private void updateAverageRating(UUID userId){
