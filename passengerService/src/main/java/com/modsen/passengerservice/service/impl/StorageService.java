@@ -3,7 +3,7 @@ package com.modsen.passengerservice.service.impl;
 import com.modsen.exceptionstarter.exception.NotFoundException;
 import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
 import com.modsen.passengerservice.dto.AvatarDto;
-import com.modsen.passengerservice.util.AppConstants;
+import com.modsen.passengerservice.util.MessageConstants;
 import io.minio.BucketExistsArgs;
 import io.minio.GetObjectArgs;
 import io.minio.MakeBucketArgs;
@@ -40,7 +40,7 @@ public class StorageService {
             return new AvatarDto(newName);
         } catch(Exception e) {
             log.info(e.getMessage());
-            throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
+            throw new ServiceUnavailableException(MessageConstants.SERVICE_UNAVAILABLE);
         }
     }
 
@@ -67,10 +67,10 @@ public class StorageService {
             return new InputStreamResource(inputStream);
         } catch (ErrorResponseException e) {
             log.info(e.getMessage());
-            throw new NotFoundException(AppConstants.AVATAR_NOT_FOUND);
+            throw new NotFoundException(MessageConstants.AVATAR_NOT_FOUND);
         } catch (Exception e) {
             log.info(e.getMessage());
-            throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
+            throw new ServiceUnavailableException(MessageConstants.SERVICE_UNAVAILABLE);
         }
     }
 
@@ -94,7 +94,7 @@ public class StorageService {
                 createBucket(bucketName);
             }
         } catch (Exception e) {
-            throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
+            throw new ServiceUnavailableException(MessageConstants.SERVICE_UNAVAILABLE);
         }
     }
 

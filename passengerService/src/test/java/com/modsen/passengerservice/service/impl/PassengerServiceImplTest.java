@@ -13,7 +13,7 @@ import com.modsen.passengerservice.mapper.PassengerMapper;
 import com.modsen.passengerservice.model.Passenger;
 import com.modsen.passengerservice.repository.PassengerRepository;
 import com.modsen.passengerservice.service.RabbitService;
-import com.modsen.passengerservice.util.AppConstants;
+import com.modsen.passengerservice.util.MessageConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -139,7 +139,7 @@ class PassengerServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> passengerService.getPassengerById(PASSENGER_ID),
-                AppConstants.PASSENGER_NOT_FOUND);
+                MessageConstants.PASSENGER_NOT_FOUND);
         verify(passengerRepository).findByIdAndDeletedIsFalse(PASSENGER_ID);
     }
 
@@ -170,7 +170,7 @@ class PassengerServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> passengerService.getPassengerByEmail(passenger.getEmail()),
-                AppConstants.PASSENGER_NOT_FOUND);
+                MessageConstants.PASSENGER_NOT_FOUND);
         verify(passengerRepository).findByEmailAndDeletedIsFalse(passenger.getEmail());
     }
 
@@ -206,7 +206,7 @@ class PassengerServiceImplTest {
         //Assert
         assertThrows(DuplicateFieldException.class,
                 () -> passengerService.addPassenger(passengerRequestDto),
-                AppConstants.PASSENGER_EMAIL_EXISTS);
+                MessageConstants.PASSENGER_EMAIL_EXISTS);
         verify(passengerRepository).existsByEmailAndDeletedIsFalse(passengerRequestDto.email());
     }
 
@@ -242,7 +242,7 @@ class PassengerServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> passengerService.updatePassenger(PASSENGER_ID, passengerRequestDto),
-                AppConstants.PASSENGER_NOT_FOUND);
+                MessageConstants.PASSENGER_NOT_FOUND);
         verify(passengerRepository).findByIdAndDeletedIsFalse(PASSENGER_ID);
     }
 
@@ -262,7 +262,7 @@ class PassengerServiceImplTest {
         //Assert
         assertThrows(DuplicateFieldException.class,
                 () -> passengerService.updatePassenger(PASSENGER_ID, passengerRequestDto),
-                AppConstants.PASSENGER_EMAIL_EXISTS);
+                MessageConstants.PASSENGER_EMAIL_EXISTS);
         verify(passengerRepository).findByIdAndDeletedIsFalse(PASSENGER_ID);
         verify(passengerRepository).findByEmailAndDeletedIsFalse(passengerRequestDto.email());
     }
@@ -292,7 +292,7 @@ class PassengerServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> passengerService.deletePassenger(PASSENGER_ID),
-                AppConstants.PASSENGER_NOT_FOUND);
+                MessageConstants.PASSENGER_NOT_FOUND);
         verify(passengerRepository).findByIdAndDeletedIsFalse(PASSENGER_ID);
     }
 
@@ -328,7 +328,7 @@ class PassengerServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> passengerService.updateRating(passengerRating),
-                AppConstants.PASSENGER_NOT_FOUND);
+                MessageConstants.PASSENGER_NOT_FOUND);
         verify(passengerRepository).findByIdAndDeletedIsFalse(passengerRating.id());
     }
 }

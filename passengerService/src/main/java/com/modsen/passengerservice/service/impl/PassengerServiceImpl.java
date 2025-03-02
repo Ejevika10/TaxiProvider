@@ -8,7 +8,7 @@ import com.modsen.passengerservice.dto.UserDeleteRequestDto;
 import com.modsen.passengerservice.dto.UserRatingDto;
 import com.modsen.passengerservice.dto.UserUpdateRequestDto;
 import com.modsen.passengerservice.service.RabbitService;
-import com.modsen.passengerservice.util.AppConstants;
+import com.modsen.passengerservice.util.MessageConstants;
 import com.modsen.passengerservice.dto.PageDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
 import com.modsen.passengerservice.mapper.PageMapper;
@@ -70,7 +70,7 @@ public class PassengerServiceImpl implements PassengerService {
     @Cacheable(value = PASSENGER_CACHE_NAME, key = "#result.id()")
     public PassengerResponseDto getPassengerByEmail(String email) {
         Passenger passenger = passengerRepository.findByEmailAndDeletedIsFalse(email)
-                .orElseThrow(() -> new NotFoundException(AppConstants.PASSENGER_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(MessageConstants.PASSENGER_NOT_FOUND));
         return passengerMapper.toPassengerResponseDTO(passenger);
     }
 
@@ -79,7 +79,7 @@ public class PassengerServiceImpl implements PassengerService {
     @CachePut(value = PASSENGER_CACHE_NAME, key = "#result.id()")
     public PassengerResponseDto addPassenger(PassengerCreateRequestDto requestDTO) {
         if(passengerRepository.existsByEmailAndDeletedIsFalse(requestDTO.email())) {
-            throw new DuplicateFieldException(AppConstants.PASSENGER_EMAIL_EXISTS);
+            throw new DuplicateFieldException(MessageConstants.PASSENGER_EMAIL_EXISTS);
         }
         Passenger passengerToSave = passengerMapper.toPassenger(requestDTO);
         Passenger passenger = passengerRepository.save(passengerToSave);
@@ -93,7 +93,7 @@ public class PassengerServiceImpl implements PassengerService {
         Passenger passengerToSave = findByIdOrThrow(id);
         Optional<Passenger> existingPassenger = passengerRepository.findByEmailAndDeletedIsFalse(requestDTO.email());
         if(existingPassenger.isPresent() && !existingPassenger.get().getId().equals(id)) {
-            throw new DuplicateFieldException(AppConstants.PASSENGER_EMAIL_EXISTS);
+            throw new DuplicateFieldException(MessageConstants.PASSENGER_EMAIL_EXISTS);
         }
         passengerMapper.updatePassenger(passengerToSave, requestDTO);
         Passenger passenger = passengerRepository.save(passengerToSave);
@@ -131,6 +131,6 @@ public class PassengerServiceImpl implements PassengerService {
 
     private Passenger findByIdOrThrow(UUID id) {
         return passengerRepository.findByIdAndDeletedIsFalse(id)
-                .orElseThrow(() -> new NotFoundException(AppConstants.PASSENGER_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(MessageConstants.PASSENGER_NOT_FOUND));
     }
 }

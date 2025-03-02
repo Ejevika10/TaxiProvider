@@ -1,7 +1,7 @@
 package com.modsen.passengerservice.security;
 
 import com.modsen.exceptionstarter.exception.ForbiddenException;
-import com.modsen.passengerservice.util.AppConstants;
+import com.modsen.passengerservice.util.MessageConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +18,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request,
                        HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        throw new ForbiddenException(AppConstants.FORBIDDEN);
+        throw new ForbiddenException(MessageConstants.FORBIDDEN);
     }
 }
