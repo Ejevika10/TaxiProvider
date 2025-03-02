@@ -34,22 +34,25 @@ import static com.modsen.ratingservice.util.AppConstants.UUID_REGEXP;
 @RequiredArgsConstructor
 @Validated
 @SecurityRequirement(name = "JWT")
-public class PassengerRatingController {
+public class PassengerRatingController implements PassengerRatingEndpoints {
 
     @Qualifier("PassengerRatingServiceImpl")
     private final RatingService passengerRatingService;
 
+    @Override
     @GetMapping("/{id}")
     public RatingResponseDto getRating(@PathVariable String id) {
         return passengerRatingService.getRatingById(id);
     }
 
+    @Override
     @GetMapping
     public PageDto<RatingResponseDto> getPageRatings(@RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                      @RequestParam (defaultValue = "5")  @Min(1) @Max(20) Integer limit) {
         return passengerRatingService.getPageRatings(offset, limit);
     }
 
+    @Override
     @GetMapping("/user/{userId}")
     public PageDto<RatingResponseDto> getPageRatingsByUserId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
                                                                  String userId,
@@ -58,6 +61,7 @@ public class PassengerRatingController {
         return passengerRatingService.getPageRatingsByUserId(UUID.fromString(userId), offset, limit);
     }
 
+    @Override
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RatingResponseDto createRating(@Valid @RequestBody RatingRequestDto rideRequestDto,
@@ -65,6 +69,7 @@ public class PassengerRatingController {
         return passengerRatingService.addRating(rideRequestDto, authorizationToken);
     }
 
+    @Override
     @PutMapping("/{id}")
     public RatingResponseDto updateRating(@PathVariable String id,
                                           @Valid @RequestBody RatingRequestDto ratingRequestDTO,
@@ -72,6 +77,7 @@ public class PassengerRatingController {
         return passengerRatingService.updateRating(id, ratingRequestDTO, authorizationToken);
     }
 
+    @Override
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteRating(@PathVariable String id) {
