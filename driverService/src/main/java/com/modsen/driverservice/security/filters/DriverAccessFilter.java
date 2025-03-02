@@ -1,7 +1,7 @@
 package com.modsen.driverservice.security.filters;
 
 import com.modsen.driverservice.model.Role;
-import com.modsen.driverservice.util.AppConstants;
+import com.modsen.driverservice.util.MessageConstants;
 import com.modsen.exceptionstarter.exception.ForbiddenException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -47,7 +47,7 @@ public class DriverAccessFilter extends OncePerRequestFilter {
             UUID userId = UUID.fromString(userIdParam);
             UUID driverId = getDriverIdFromRequestURI(request.getRequestURI());
             if (!Objects.equals(driverId, userId)) {
-                throw new ForbiddenException(AppConstants.FORBIDDEN);
+                throw new ForbiddenException(MessageConstants.FORBIDDEN);
             }
         }
         filterChain.doFilter(request, response);

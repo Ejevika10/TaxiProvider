@@ -17,7 +17,16 @@ public class CacheBodyHttpServletFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        CachedBodyHttpServletRequest cachedBodyHttpServletRequest = new CachedBodyHttpServletRequest(request);
-        filterChain.doFilter(cachedBodyHttpServletRequest, response);
+        if (isMultipartRequest(request)) {
+            filterChain.doFilter(request, response);
+        } else {
+            CachedBodyHttpServletRequest cachedBodyHttpServletRequest = new CachedBodyHttpServletRequest(request);
+            filterChain.doFilter(cachedBodyHttpServletRequest, response);
+        }
+    }
+
+    private boolean isMultipartRequest(HttpServletRequest request) {
+        String contentType = request.getContentType();
+        return contentType != null && contentType.toLowerCase().startsWith("multipart/");
     }
 }

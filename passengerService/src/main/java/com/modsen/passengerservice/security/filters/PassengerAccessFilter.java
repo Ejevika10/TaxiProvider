@@ -2,7 +2,7 @@ package com.modsen.passengerservice.security.filters;
 
 import com.modsen.exceptionstarter.exception.ForbiddenException;
 import com.modsen.passengerservice.model.Role;
-import com.modsen.passengerservice.util.AppConstants;
+import com.modsen.passengerservice.util.MessageConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,7 +48,7 @@ public class PassengerAccessFilter extends OncePerRequestFilter {
             UUID userId = UUID.fromString(userIdParam);
             UUID passengerId = getPassengerIdFromRequestURI(request.getRequestURI());
             if (!Objects.equals(userId, passengerId)) {
-                throw new ForbiddenException(AppConstants.FORBIDDEN);
+                throw new ForbiddenException(MessageConstants.FORBIDDEN);
             }
         }
         filterChain.doFilter(request, response);

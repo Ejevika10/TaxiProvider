@@ -3,7 +3,7 @@ package com.modsen.ratingservice.service.impl;
 import com.modsen.exceptionstarter.exception.DuplicateFieldException;
 import com.modsen.ratingservice.client.ride.RideClientService;
 import com.modsen.ratingservice.repository.PassengerRatingRepository;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.ratingservice.util.MessageConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,6 +46,6 @@ class PassengerValidatorServiceTest {
         //Assert
         assertThrows(DuplicateFieldException.class,
                 () -> validator.ratingDoesntExistsByRideId(RIDE_ID),
-                AppConstants.RATING_FOR_RIDE_ALREADY_EXIST);
+                MessageConstants.RATING_FOR_RIDE_ALREADY_EXIST);
     }
 }

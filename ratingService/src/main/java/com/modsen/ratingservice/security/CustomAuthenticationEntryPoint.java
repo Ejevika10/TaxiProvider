@@ -1,7 +1,7 @@
 package com.modsen.ratingservice.security;
 
 import com.modsen.exceptionstarter.exception.UnauthorizedException;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.ratingservice.util.MessageConstants;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,6 +18,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        throw new UnauthorizedException(AppConstants.UNAUTHORIZED);
+        throw new UnauthorizedException(MessageConstants.UNAUTHORIZED);
     }
 }

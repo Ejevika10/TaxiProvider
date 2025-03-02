@@ -30,6 +30,7 @@
         <cucumber.version>7.19.0</cucumber.version>
         <loki.version>1.4.1</loki.version>
         <exception-spring-boot-starter.version>0.0.1-SNAPSHOT</exception-spring-boot-starter.version>
+        <minio.version>8.5.17</minio.version>
     </properties>
     <dependencies>
         <dependency>
@@ -188,6 +189,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>${minio.version}</version>
+        </dependency> 
     </dependencies>
     <dependencyManagement>
         <dependencies>

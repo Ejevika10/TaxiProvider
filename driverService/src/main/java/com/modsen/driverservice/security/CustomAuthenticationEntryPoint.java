@@ -1,6 +1,6 @@
 package com.modsen.driverservice.security;
 
-import com.modsen.driverservice.util.AppConstants;
+import com.modsen.driverservice.util.MessageConstants;
 import com.modsen.exceptionstarter.exception.UnauthorizedException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +21,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
         log.info("UnauthorizedException");
-        throw new UnauthorizedException(AppConstants.UNAUTHORIZED);
+        throw new UnauthorizedException(MessageConstants.UNAUTHORIZED);
     }
 }

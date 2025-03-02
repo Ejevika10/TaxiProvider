@@ -1,17 +1,23 @@
 package com.modsen.driverservice.controller;
 
+import com.modsen.driverservice.dto.AvatarDto;
 import com.modsen.driverservice.dto.DriverCreateRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
 import com.modsen.driverservice.dto.DriverUpdateRequestDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.service.DriverService;
+import com.modsen.driverservice.service.impl.StorageService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -35,6 +42,7 @@ import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
 @SecurityRequirement(name = "JWT")
 public class DriverController {
     private final DriverService driverService;
+    private final StorageService storageService;
 
     @GetMapping
     public PageDto<DriverResponseDto> getPageDrivers(@RequestParam (defaultValue = "0") @Min(0) Integer offset,
@@ -68,4 +76,21 @@ public class DriverController {
         driverService.deleteDriver(UUID.fromString(id));
     }
 
+    @PostMapping(path = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public AvatarDto addAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id,
+                               @RequestParam MultipartFile file) {
+        DriverResponseDto driver = driverService.getDriverById(UUID.fromString(id));
+        return storageService.uploadImage(file, id);
+    }
+
+    @GetMapping(path = "/{id}/avatar")
+    public ResponseEntity<Resource> downloadAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id) {
+        DriverResponseDto driver = driverService.getDriverById(UUID.fromString(id));
+        Resource file = storageService.downloadFile(id);
+        String contentType = storageService.getFileContentType(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + id + "\"")
+                .body(file);
+    }
 }

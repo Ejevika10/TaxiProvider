@@ -10,7 +10,7 @@ import com.modsen.ratingservice.mapper.RatingMapper;
 import com.modsen.ratingservice.model.DriverRating;
 import com.modsen.ratingservice.repository.DriverRatingRepository;
 import com.modsen.ratingservice.service.RabbitService;
-import com.modsen.ratingservice.util.AppConstants;
+import com.modsen.ratingservice.util.MessageConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -187,7 +187,7 @@ class DriverRatingServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> driverRatingService.getRatingById(RATING_ID),
-                AppConstants.RATING_NOT_FOUND);
+                MessageConstants.RATING_NOT_FOUND);
         verify(driverRatingRepository).findByIdAndDeletedIsFalse(RATING_ID);
     }
 
@@ -246,7 +246,7 @@ class DriverRatingServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> driverRatingService.updateRating(NON_EXISTING_RATING_ID, driverRatingRequestDto, AUTHORIZATION_VALUE),
-                AppConstants.RATING_NOT_FOUND);
+                MessageConstants.RATING_NOT_FOUND);
         verify(driverRatingRepository).findByIdAndDeletedIsFalse(NON_EXISTING_RATING_ID);
     }
 
@@ -275,7 +275,7 @@ class DriverRatingServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> driverRatingService.deleteRating(NON_EXISTING_RATING_ID),
-                AppConstants.RATING_NOT_FOUND);
+                MessageConstants.RATING_NOT_FOUND);
         verify(driverRatingRepository).findByIdAndDeletedIsFalse(NON_EXISTING_RATING_ID);
     }
 }

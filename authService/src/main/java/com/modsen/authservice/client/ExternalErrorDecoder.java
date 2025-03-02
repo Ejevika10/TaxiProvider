@@ -1,7 +1,7 @@
 package com.modsen.authservice.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.modsen.authservice.util.AppConstants;
+import com.modsen.authservice.util.MessageConstants;
 import com.modsen.exceptionstarter.exception.ClientException;
 import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
 import com.modsen.exceptionstarter.message.ErrorMessage;
@@ -25,7 +25,7 @@ public class ExternalErrorDecoder implements ErrorDecoder {
             return new ClientException(errorMessage);
         } catch (Exception e) {
             log.info("Exception {}", e.getMessage());
-            return new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
+            return new ServiceUnavailableException(MessageConstants.SERVICE_UNAVAILABLE);
         }
     }
 }

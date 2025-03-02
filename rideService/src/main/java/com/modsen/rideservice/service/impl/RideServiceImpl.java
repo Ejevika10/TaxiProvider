@@ -19,7 +19,7 @@ import com.modsen.rideservice.model.Ride;
 import com.modsen.rideservice.model.RideState;
 import com.modsen.rideservice.repository.RideRepository;
 import com.modsen.rideservice.service.RideService;
-import com.modsen.rideservice.util.AppConstants;
+import com.modsen.rideservice.util.MessageConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -151,11 +151,11 @@ public class RideServiceImpl implements RideService {
             Ride ride = rideRepository.save(rideToSave);
             return rideMapper.toRideResponseDto(ride);
         }
-        throw new InvalidStateException(AppConstants.STATE_VALUE_ERROR);
+        throw new InvalidStateException(MessageConstants.STATE_VALUE_ERROR);
     }
 
     private Ride findByIdOrThrow(Long id) {
         return rideRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(AppConstants.RIDE_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(MessageConstants.RIDE_NOT_FOUND));
     }
 }
