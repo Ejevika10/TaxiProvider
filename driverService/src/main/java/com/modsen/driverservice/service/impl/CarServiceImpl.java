@@ -1,4 +1,4 @@
-package com.modsen.driverservice.service.Impl;
+package com.modsen.driverservice.service.impl;
 
 import com.modsen.driverservice.util.AppConstants;
 import com.modsen.driverservice.dto.CarRequestDto;

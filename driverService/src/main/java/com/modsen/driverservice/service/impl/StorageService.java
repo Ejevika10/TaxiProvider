@@ -1,4 +1,4 @@
-package com.modsen.driverservice.service.Impl;
+package com.modsen.driverservice.service.impl;
 
 import com.modsen.driverservice.util.AppConstants;
 import com.modsen.exceptionstarter.exception.NotFoundException;
@@ -34,11 +34,10 @@ public class StorageService {
 
     public String uploadImage(MultipartFile file, String newName) {
         validateFileService.validateFile(file);
-        try{
+        try {
             uploadFile(bucketName, file, newName, file.getContentType());
             return newName;
-        }
-        catch(Exception e){
+        } catch(Exception e) {
             log.info(e.getMessage());
             throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
         }
@@ -65,12 +64,10 @@ public class StorageService {
                             .build()
             );
             return new InputStreamResource(inputStream);
-        }
-        catch (ErrorResponseException e) {
+        } catch (ErrorResponseException e) {
             log.info(e.getMessage());
             throw new NotFoundException(AppConstants.AVATAR_NOT_FOUND);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.info(e.getMessage());
             throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
         }
