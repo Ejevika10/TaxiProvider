@@ -7,7 +7,7 @@ import com.modsen.rideservice.dto.RideAcceptRequestDto;
 import com.modsen.rideservice.dto.RideCreateRequestDto;
 import com.modsen.rideservice.model.Role;
 import com.modsen.rideservice.service.RideService;
-import com.modsen.rideservice.util.AppConstants;
+import com.modsen.rideservice.util.MessageConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,7 +55,7 @@ public class RideAccessFilter extends OncePerRequestFilter {
             if (request.getMethod().equals("GET")) {
                 UUID userIdFromRequestURI = getUserIdFromRequestURI(request.getRequestURI());
                 if (!Objects.equals(userId, userIdFromRequestURI)) {
-                    throw new ForbiddenException(AppConstants.FORBIDDEN);
+                    throw new ForbiddenException(MessageConstants.FORBIDDEN);
                 }
                 filterChain.doFilter(request, response);
                 return;
@@ -65,27 +65,27 @@ public class RideAccessFilter extends OncePerRequestFilter {
                 RideAcceptRequestDto rideAcceptRequestDto = getRideAcceptRequestDto(request);
                 UUID driverId = UUID.fromString(rideAcceptRequestDto.driverId());
                 if (!Objects.equals(userId, driverId)) {
-                    throw new ForbiddenException(AppConstants.FORBIDDEN);
+                    throw new ForbiddenException(MessageConstants.FORBIDDEN);
                 }
             }
             else if(request.getRequestURI().endsWith("cancel")) {
                 if (hasRole(auth, Role.DRIVER.getRole())) {
                     UUID driverId = getDriverIdFromStatusRequestURI(request.getRequestURI());
                     if (!Objects.equals(userId, driverId)) {
-                        throw new ForbiddenException(AppConstants.FORBIDDEN);
+                        throw new ForbiddenException(MessageConstants.FORBIDDEN);
                     }
                 }
                 else if (hasRole(auth, Role.PASSENGER.getRole())) {
                     UUID passengerId = getPassengerIdFromStatusRequestURI(request.getRequestURI());
                     if (!Objects.equals(userId, passengerId)) {
-                        throw new ForbiddenException(AppConstants.FORBIDDEN);
+                        throw new ForbiddenException(MessageConstants.FORBIDDEN);
                     }
                 }
             }
             else if(request.getRequestURI().endsWith("state")) {
                 UUID driverId = getDriverIdFromStatusRequestURI(request.getRequestURI());
                 if (!Objects.equals(userId, driverId)) {
-                    throw new ForbiddenException(AppConstants.FORBIDDEN);
+                    throw new ForbiddenException(MessageConstants.FORBIDDEN);
                 }
             }
             else {
@@ -93,7 +93,7 @@ public class RideAccessFilter extends OncePerRequestFilter {
                 log.info(rideCreateRequestDto.toString());
                 UUID passengerId = UUID.fromString(rideCreateRequestDto.passengerId());
                 if(!Objects.equals(userId, passengerId)) {
-                    throw new ForbiddenException(AppConstants.FORBIDDEN);
+                    throw new ForbiddenException(MessageConstants.FORBIDDEN);
                 }
             }
         }
@@ -111,7 +111,7 @@ public class RideAccessFilter extends OncePerRequestFilter {
             String body = stringBuilder.toString();
             return objectMapper.readValue(body, RideCreateRequestDto.class);
         } catch (IOException e) {
-            throw new RequestBodyReadException(AppConstants.BODY_READ_ERROR);
+            throw new RequestBodyReadException(MessageConstants.BODY_READ_ERROR);
         }
     }
 
@@ -126,7 +126,7 @@ public class RideAccessFilter extends OncePerRequestFilter {
             String body = stringBuilder.toString();
             return objectMapper.readValue(body, RideAcceptRequestDto.class);
         } catch (IOException e) {
-            throw new RequestBodyReadException(AppConstants.BODY_READ_ERROR);
+            throw new RequestBodyReadException(MessageConstants.BODY_READ_ERROR);
         }
     }
 

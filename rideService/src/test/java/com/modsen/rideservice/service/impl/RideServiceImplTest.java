@@ -18,7 +18,7 @@ import com.modsen.rideservice.mapper.RideMapper;
 import com.modsen.rideservice.model.Ride;
 import com.modsen.rideservice.model.RideState;
 import com.modsen.rideservice.repository.RideRepository;
-import com.modsen.rideservice.util.AppConstants;
+import com.modsen.rideservice.util.MessageConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -244,7 +244,7 @@ class RideServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> rideService.getRideById(RIDE_ID),
-                AppConstants.RIDE_NOT_FOUND);
+                MessageConstants.RIDE_NOT_FOUND);
         verify(rideRepository).findById(RIDE_ID);
     }
 
@@ -306,7 +306,7 @@ class RideServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> rideService.acceptRide(RIDE_ID, rideAcceptRequestDto, AUTHORIZATION_VALUE),
-                AppConstants.RIDE_NOT_FOUND);
+                MessageConstants.RIDE_NOT_FOUND);
         verify(rideRepository).findById(RIDE_ID);
     }
 
@@ -340,7 +340,7 @@ class RideServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> rideService.cancelRide(RIDE_ID, AUTHORIZATION_VALUE),
-                AppConstants.RIDE_NOT_FOUND);
+                MessageConstants.RIDE_NOT_FOUND);
         verify(rideRepository).findById(RIDE_ID);
     }
 
@@ -380,7 +380,7 @@ class RideServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> rideService.updateRide(RIDE_ID, rideRequestDto, AUTHORIZATION_VALUE),
-                AppConstants.RIDE_NOT_FOUND);
+                MessageConstants.RIDE_NOT_FOUND);
         verify(rideRepository).findById(RIDE_ID);
     }
 
@@ -418,7 +418,7 @@ class RideServiceImplTest {
         //Assert
         assertThrows(InvalidStateException.class,
                 () -> rideService.setNewState(ride.getId(), rideStateRequestDto),
-                AppConstants.STATE_VALUE_ERROR);
+                MessageConstants.STATE_VALUE_ERROR);
         verify(rideRepository).findById(ride.getId());
     }
 
@@ -432,7 +432,7 @@ class RideServiceImplTest {
         //Assert
         assertThrows(NotFoundException.class,
                 () -> rideService.setNewState(RIDE_ID, rideStateRequestDto),
-                AppConstants.RIDE_NOT_FOUND);
+                MessageConstants.RIDE_NOT_FOUND);
         verify(rideRepository).findById(RIDE_ID);
     }
 }

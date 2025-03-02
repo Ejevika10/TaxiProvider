@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modsen.exceptionstarter.exception.ClientException;
 import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
 import com.modsen.exceptionstarter.message.ErrorMessage;
-import com.modsen.rideservice.util.AppConstants;
+import com.modsen.rideservice.util.MessageConstants;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class ExternalErrorDecoder implements ErrorDecoder {
             return new ClientException(errorMessage);
         } catch (Exception e) {
             log.info("Exception {}", e.getMessage());
-            return new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
+            return new ServiceUnavailableException(MessageConstants.SERVICE_UNAVAILABLE);
         }
     }
 }
