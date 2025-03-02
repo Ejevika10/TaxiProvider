@@ -40,28 +40,32 @@ import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
 @RequestMapping("/api/v1/drivers")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
-public class DriverController {
+public class DriverController implements DriverEndpoints {
     private final DriverService driverService;
     private final StorageService storageService;
 
+    @Override
     @GetMapping
     public PageDto<DriverResponseDto> getPageDrivers(@RequestParam (defaultValue = "0") @Min(0) Integer offset,
                                                      @RequestParam (defaultValue = "5") @Min(1) @Max(20) Integer limit) {
         return driverService.getPageDrivers(offset, limit);
     }
 
+    @Override
     @GetMapping("/{id}")
     public DriverResponseDto getDriverById(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
                                                String id) {
         return driverService.getDriverById(UUID.fromString(id));
     }
 
+    @Override
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DriverResponseDto createDriver(@Valid @RequestBody DriverCreateRequestDto driverRequestDTO) {
         return driverService.createDriver(driverRequestDTO);
     }
 
+    @Override
     @PutMapping("/{id}")
     public DriverResponseDto updateDriver(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
                                               String id,
@@ -69,6 +73,7 @@ public class DriverController {
         return driverService.updateDriver(UUID.fromString(id), driverRequestDTO);
     }
 
+    @Override
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteDriver(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
@@ -76,6 +81,7 @@ public class DriverController {
         driverService.deleteDriver(UUID.fromString(id));
     }
 
+    @Override
     @PostMapping(path = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public AvatarDto addAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id,
                                @RequestParam MultipartFile file) {
@@ -83,6 +89,7 @@ public class DriverController {
         return storageService.uploadImage(file, id);
     }
 
+    @Override
     @GetMapping(path = "/{id}/avatar")
     public ResponseEntity<Resource> downloadAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id) {
         DriverResponseDto driver = driverService.getDriverById(UUID.fromString(id));

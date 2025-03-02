@@ -40,27 +40,31 @@ import static com.modsen.passengerservice.util.AppConstants.UUID_REGEXP;
 @RequestMapping("/api/v1/passengers")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
-public class PassengerController {
+public class PassengerController implements PassengerEndpoints {
     private final PassengerService passengerService;
     private final StorageService storageService;
 
+    @Override
     @GetMapping
     public PageDto<PassengerResponseDto> getPagePassengers(@RequestParam(defaultValue = "0") @Min(0) Integer offset, @RequestParam (defaultValue = "5")  @Min(1) @Max(20) Integer limit) {
         return passengerService.getPagePassengers(offset, limit);
     }
 
+    @Override
     @GetMapping("/{id}")
     public PassengerResponseDto getPassenger(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
                                                  String id) {
         return passengerService.getPassengerById(UUID.fromString(id));
     }
 
+    @Override
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PassengerResponseDto createPassenger(@Valid @RequestBody PassengerCreateRequestDto passengerRequestDTO) {
         return passengerService.addPassenger(passengerRequestDTO);
     }
 
+    @Override
     @PutMapping("/{id}")
     public PassengerResponseDto updatePassenger(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
                                                     String id,
@@ -68,6 +72,7 @@ public class PassengerController {
         return passengerService.updatePassenger(UUID.fromString(id), passengerRequestDTO);
     }
 
+    @Override
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePassenger(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
@@ -75,6 +80,7 @@ public class PassengerController {
         passengerService.deletePassenger(UUID.fromString(id));
     }
 
+    @Override
     @PostMapping(path = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public AvatarDto addAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id,
                                @RequestParam MultipartFile file) {
@@ -82,6 +88,7 @@ public class PassengerController {
         return storageService.uploadImage(file, id);
     }
 
+    @Override
     @GetMapping(path = "/{id}/avatar")
     public ResponseEntity<Resource> downloadAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id) {
         PassengerResponseDto passenger = passengerService.getPassengerById(UUID.fromString(id));

@@ -36,15 +36,17 @@ import static com.modsen.rideservice.util.AppConstants.UUID_REGEXP;
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
 @Slf4j
-public class RideController {
+public class RideController implements RideEndpoints {
     private final RideService rideService;
 
+    @Override
     @GetMapping
     public PageDto<RideResponseDto> getPageRides(@RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                  @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit) {
         return rideService.getPageRides(offset, limit);
     }
 
+    @Override
     @GetMapping("/driver/{driverId}")
     public PageDto<RideResponseDto> getPageRidesByDriverId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
                                                                String driverId,
@@ -53,6 +55,7 @@ public class RideController {
         return rideService.getPageRidesByDriverId(UUID.fromString(driverId), offset, limit);
     }
 
+    @Override
     @GetMapping("/passenger/{passengerId}")
     public PageDto<RideResponseDto> getPageRidesByPassengerId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
                                                                   String passengerId,
@@ -61,11 +64,13 @@ public class RideController {
         return rideService.getPageRidesByPassengerId(UUID.fromString(passengerId), offset, limit);
     }
 
+    @Override
     @GetMapping("/{id}")
     public RideResponseDto getRide(@PathVariable @Min(0) Long id) {
         return rideService.getRideById(id);
     }
 
+    @Override
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RideResponseDto createRide(@Validated @RequestBody RideCreateRequestDto rideRequestDto,
@@ -73,6 +78,7 @@ public class RideController {
         return rideService.createRide(rideRequestDto, authorizationToken);
     }
 
+    @Override
     @PutMapping("/{id}")
     public RideResponseDto updateRide(@PathVariable @Min(0) Long id,
                                       @Validated @RequestBody RideRequestDto rideRequestDto,
@@ -80,6 +86,7 @@ public class RideController {
         return rideService.updateRide(id, rideRequestDto, authorizationToken);
     }
 
+    @Override
     @PutMapping("/{id}/accept")
     public RideResponseDto acceptRide(@PathVariable @Min(0) Long id,
                                       @Validated @RequestBody RideAcceptRequestDto rideRequestDto,
@@ -87,12 +94,14 @@ public class RideController {
         return rideService.acceptRide(id, rideRequestDto, authorizationToken);
     }
 
+    @Override
     @PutMapping("/{id}/cancel")
     public RideResponseDto cancelRide(@PathVariable @Min(0) Long id,
                                       @RequestHeader("Authorization") String authorizationToken) {
         return rideService.cancelRide(id, authorizationToken);
     }
 
+    @Override
     @PutMapping("/{id}/state")
     public RideResponseDto updateRideState(@PathVariable @Min(0) Long id,
                                            @Validated @RequestBody RideStateRequestDto state) {
