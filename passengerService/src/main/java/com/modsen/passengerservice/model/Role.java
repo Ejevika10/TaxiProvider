@@ -3,7 +3,7 @@ package com.modsen.passengerservice.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
-import com.modsen.passengerservice.util.AppConstants;
+import com.modsen.passengerservice.util.MessageConstants;
 
 public enum Role {
     PASSENGER("PASSENGER"),
@@ -28,6 +28,6 @@ public enum Role {
                 return state;
             }
         }
-        throw new InvalidFieldValueException(AppConstants.INVALID_ROLE_VALUE);
+        throw new InvalidFieldValueException(MessageConstants.INVALID_ROLE_VALUE);
     }
 }
