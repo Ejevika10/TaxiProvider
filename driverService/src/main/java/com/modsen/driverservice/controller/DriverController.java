@@ -1,11 +1,12 @@
 package com.modsen.driverservice.controller;
 
+import com.modsen.driverservice.dto.AvatarDto;
 import com.modsen.driverservice.dto.DriverCreateRequestDto;
 import com.modsen.driverservice.dto.DriverResponseDto;
 import com.modsen.driverservice.dto.DriverUpdateRequestDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.service.DriverService;
-import com.modsen.driverservice.service.Impl.StorageService;
+import com.modsen.driverservice.service.impl.StorageService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -76,15 +77,14 @@ public class DriverController {
     }
 
     @PostMapping(path = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> addAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id,
-                                            @RequestParam MultipartFile file) {
+    public AvatarDto addAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id,
+                               @RequestParam MultipartFile file) {
         DriverResponseDto driver = driverService.getDriverById(UUID.fromString(id));
-        String fileName = storageService.uploadImage(file, id);
-        return new ResponseEntity<>("File uploaded successfully: " + fileName, HttpStatus.OK);
+        return storageService.uploadImage(file, id);
     }
 
     @GetMapping(path = "/{id}/avatar")
-    public ResponseEntity<?> downloadAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id) {
+    public ResponseEntity<Resource> downloadAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id) {
         DriverResponseDto driver = driverService.getDriverById(UUID.fromString(id));
         Resource file = storageService.downloadFile(id);
         String contentType = storageService.getFileContentType(id);

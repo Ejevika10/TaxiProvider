@@ -1,5 +1,6 @@
 package com.modsen.passengerservice.controller;
 
+import com.modsen.passengerservice.dto.AvatarDto;
 import com.modsen.passengerservice.dto.PageDto;
 import com.modsen.passengerservice.dto.PassengerCreateRequestDto;
 import com.modsen.passengerservice.dto.PassengerResponseDto;
@@ -75,15 +76,14 @@ public class PassengerController {
     }
 
     @PostMapping(path = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> addAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id,
-                                            @RequestParam MultipartFile file) {
+    public AvatarDto addAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id,
+                               @RequestParam MultipartFile file) {
         PassengerResponseDto passenger = passengerService.getPassengerById(UUID.fromString(id));
-        String fileName = storageService.uploadImage(file, id);
-        return new ResponseEntity<>("File uploaded successfully: " + fileName, HttpStatus.OK);
+        return storageService.uploadImage(file, id);
     }
 
     @GetMapping(path = "/{id}/avatar")
-    public ResponseEntity<?> downloadAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id) {
+    public ResponseEntity<Resource> downloadAvatar(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id) {
         PassengerResponseDto passenger = passengerService.getPassengerById(UUID.fromString(id));
         Resource file = storageService.downloadFile(id);
         String contentType = storageService.getFileContentType(id);

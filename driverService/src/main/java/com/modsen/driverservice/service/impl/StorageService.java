@@ -1,5 +1,6 @@
 package com.modsen.driverservice.service.impl;
 
+import com.modsen.driverservice.dto.AvatarDto;
 import com.modsen.driverservice.util.AppConstants;
 import com.modsen.exceptionstarter.exception.NotFoundException;
 import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
@@ -32,11 +33,11 @@ public class StorageService {
     @Value("${minio.bucket.name}")
     private String bucketName;
 
-    public String uploadImage(MultipartFile file, String newName) {
+    public AvatarDto uploadImage(MultipartFile file, String newName) {
         validateFileService.validateFile(file);
         try {
             uploadFile(bucketName, file, newName, file.getContentType());
-            return newName;
+            return new AvatarDto(newName);
         } catch(Exception e) {
             log.info(e.getMessage());
             throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);

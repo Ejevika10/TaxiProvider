@@ -2,6 +2,7 @@ package com.modsen.passengerservice.service.impl;
 
 import com.modsen.exceptionstarter.exception.NotFoundException;
 import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
+import com.modsen.passengerservice.dto.AvatarDto;
 import com.modsen.passengerservice.util.AppConstants;
 import io.minio.BucketExistsArgs;
 import io.minio.GetObjectArgs;
@@ -32,13 +33,12 @@ public class StorageService {
     @Value("${minio.bucket.name}")
     private String bucketName;
 
-    public String uploadImage(MultipartFile file, String newName) {
+    public AvatarDto uploadImage(MultipartFile file, String newName) {
         validateFileService.validateFile(file);
-        try{
+        try {
             uploadFile(bucketName, file, newName, file.getContentType());
-            return newName;
-        }
-        catch(Exception e){
+            return new AvatarDto(newName);
+        } catch(Exception e) {
             log.info(e.getMessage());
             throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
         }
@@ -65,12 +65,10 @@ public class StorageService {
                             .build()
             );
             return new InputStreamResource(inputStream);
-        }
-        catch (ErrorResponseException e) {
+        } catch (ErrorResponseException e) {
             log.info(e.getMessage());
             throw new NotFoundException(AppConstants.AVATAR_NOT_FOUND);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.info(e.getMessage());
             throw new ServiceUnavailableException(AppConstants.SERVICE_UNAVAILABLE);
         }
