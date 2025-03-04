@@ -4,7 +4,6 @@ import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.dto.CarResponseDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.service.CarService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -31,7 +30,6 @@ import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
 @Validated
 @RequestMapping("/api/v1/cars")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "JWT")
 public class CarController implements CarEndpoints {
     private final CarService carService;
 

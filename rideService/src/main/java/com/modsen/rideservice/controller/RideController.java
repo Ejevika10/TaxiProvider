@@ -7,7 +7,6 @@ import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
 import com.modsen.rideservice.service.RideService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
@@ -34,7 +33,6 @@ import static com.modsen.rideservice.util.AppConstants.UUID_REGEXP;
 @Validated
 @RequestMapping("/api/v1/rides")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "JWT")
 @Slf4j
 public class RideController implements RideEndpoints {
     private final RideService rideService;

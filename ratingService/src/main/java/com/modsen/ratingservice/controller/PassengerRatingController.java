@@ -4,7 +4,6 @@ import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
 import com.modsen.ratingservice.service.RatingService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -33,7 +32,6 @@ import static com.modsen.ratingservice.util.AppConstants.UUID_REGEXP;
 @RequestMapping("/api/v1/passengerratings")
 @RequiredArgsConstructor
 @Validated
-@SecurityRequirement(name = "JWT")
 public class PassengerRatingController implements PassengerRatingEndpoints {
 
     @Qualifier("PassengerRatingServiceImpl")
