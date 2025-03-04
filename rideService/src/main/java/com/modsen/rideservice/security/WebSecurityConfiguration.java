@@ -73,12 +73,6 @@ public class WebSecurityConfiguration {
                 .addFilterAfter(cacheBodyHttpServletFilter(), ExceptionHandlingFilter.class)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/actuator/health",
-                                        "/ride-service/swagger-ui/**",
-                                        "/ride-service/v3/**",
-                                        "/ride-service/swagger-ui.html",
-                                        "/ride-service/webjars/**")
-                                .permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/v1/rides").hasAnyRole(Role.PASSENGER.getRole(), Role.ADMIN.getRole())
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/rides/{id}/accept").hasAnyRole(Role.DRIVER.getRole(), Role.ADMIN.getRole())
                                 .requestMatchers(HttpMethod.PUT, "/api/v1/rides/{id}/cancel").hasAnyRole(Role.DRIVER.getRole(), Role.PASSENGER.getRole(), Role.ADMIN.getRole())
