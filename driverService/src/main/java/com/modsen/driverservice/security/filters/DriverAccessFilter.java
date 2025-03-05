@@ -45,7 +45,13 @@ public class DriverAccessFilter extends OncePerRequestFilter {
             String userIdParam = (String) claims.get("user_id");
             log.info(userIdParam);
             UUID userId = UUID.fromString(userIdParam);
-            UUID driverId = getDriverIdFromRequestURI(request.getRequestURI());
+            UUID driverId;
+            if (request.getMethod().equals("POST")) {
+                driverId = getDriverIdFromAvatarRequestURI(request.getRequestURI());
+            }
+            else{
+                driverId = getDriverIdFromRequestURI(request.getRequestURI());
+            }
             if (!Objects.equals(driverId, userId)) {
                 throw new ForbiddenException(MessageConstants.FORBIDDEN);
             }
@@ -62,6 +68,12 @@ public class DriverAccessFilter extends OncePerRequestFilter {
     private UUID getDriverIdFromRequestURI(String requestURI) {
         String[] pathParts = requestURI.split("/");
         String idParam = pathParts[pathParts.length - 1];
+        return UUID.fromString(idParam);
+    }
+
+    private UUID getDriverIdFromAvatarRequestURI(String requestURI) {
+        String[] pathParts = requestURI.split("/");
+        String idParam = pathParts[pathParts.length - 2];
         return UUID.fromString(idParam);
     }
 }
