@@ -34,7 +34,8 @@ public interface CarEndpoints {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
-            @ApiResponse(responseCode = "400", description = "Your request is invalid")
+            @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register")
     })
     PageDto<CarResponseDto> getPageCars(@RequestParam(defaultValue = "0") @Min(0) Integer offset, @RequestParam (defaultValue = "5") @Min(1) @Max(20) Integer limit);
 
@@ -45,6 +46,7 @@ public interface CarEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
             @ApiResponse(responseCode = "404", description = "Car with this id doesn't exist")
     })
     CarResponseDto getCar(@PathVariable @Min(0) Long id);
@@ -56,6 +58,7 @@ public interface CarEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
             @ApiResponse(responseCode = "404", description = "Driver with this id doesn't exist")
     })
     PageDto<CarResponseDto> getPageCarsByDriverId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
@@ -74,6 +77,8 @@ public interface CarEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Driver with this id doesn't exist"),
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
     })
@@ -90,6 +95,8 @@ public interface CarEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Driver with this id doesn't exist"),
             @ApiResponse(responseCode = "404", description = "Car with this id doesn't exist"),
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
@@ -105,6 +112,8 @@ public interface CarEndpoints {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Request completed"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Car with this id doesn't exist")
     })
     void deleteCar(@PathVariable @Min(0) Long id);

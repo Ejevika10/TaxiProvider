@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -63,7 +64,7 @@ public class PassengerRatingController implements PassengerRatingEndpoints {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RatingResponseDto createRating(@Valid @RequestBody RatingRequestDto rideRequestDto,
-                                          @RequestHeader("Authorization") String authorizationToken) {
+                                          @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken) {
         return passengerRatingService.addRating(rideRequestDto, authorizationToken);
     }
 
@@ -71,7 +72,7 @@ public class PassengerRatingController implements PassengerRatingEndpoints {
     @PutMapping("/{id}")
     public RatingResponseDto updateRating(@PathVariable String id,
                                           @Valid @RequestBody RatingRequestDto ratingRequestDTO,
-                                          @RequestHeader("Authorization") String authorizationToken) {
+                                          @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken) {
         return passengerRatingService.updateRating(id, ratingRequestDTO, authorizationToken);
     }
 

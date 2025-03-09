@@ -41,7 +41,8 @@ public interface PassengerEndpoints {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
-            @ApiResponse(responseCode = "400", description = "Your request is invalid")
+            @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register")
     })
     PageDto<PassengerResponseDto> getPagePassengers(@RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                     @RequestParam (defaultValue = "5")  @Min(1) @Max(20) Integer limit);
@@ -53,6 +54,7 @@ public interface PassengerEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
             @ApiResponse(responseCode = "404", description = "Passenger with this id doesn't exist")
     })
     PassengerResponseDto getPassenger(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String id);
@@ -71,6 +73,8 @@ public interface PassengerEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Passenger with this id doesn't exist"),
             @ApiResponse(responseCode = "409", description = "Your request has conflicts"),
             @ApiResponse(responseCode = "503", description = "Keycloak service unavailable")
@@ -87,6 +91,8 @@ public interface PassengerEndpoints {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Request completed"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Passenger with this id doesn't exist"),
             @ApiResponse(responseCode = "503", description = "Keycloak service unavailable")
     })
@@ -103,6 +109,8 @@ public interface PassengerEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Passenger with this id doesn't exist"),
             @ApiResponse(responseCode = "503", description = "Minio service unavailable")
     })
@@ -119,6 +127,7 @@ public interface PassengerEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
             @ApiResponse(responseCode = "404", description = "Passenger with this id doesn't exist"),
             @ApiResponse(responseCode = "503", description = "Minio service unavailable")
     })

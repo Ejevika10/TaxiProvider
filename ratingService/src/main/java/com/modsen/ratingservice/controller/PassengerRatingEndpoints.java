@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import org.springframework.http.HttpHeaders;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,6 +37,7 @@ public interface PassengerRatingEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
             @ApiResponse(responseCode = "404", description = "Rating with this id doesn't exist")
     })
     RatingResponseDto getRating(@PathVariable String id);
@@ -46,7 +48,8 @@ public interface PassengerRatingEndpoints {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
-            @ApiResponse(responseCode = "400", description = "Your request is invalid")
+            @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register")
     })
     PageDto<RatingResponseDto> getPageRatings(@RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                               @RequestParam (defaultValue = "5")  @Min(1) @Max(20) Integer limit);
@@ -58,6 +61,7 @@ public interface PassengerRatingEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
             @ApiResponse(responseCode = "404", description = "Passenger with this id doesn't exist")
     })
     PageDto<RatingResponseDto> getPageRatingsByUserId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String userId,
@@ -75,11 +79,13 @@ public interface PassengerRatingEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Ride with this id doesn't exist"),
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
     })
     RatingResponseDto createRating(@Valid @RequestBody RatingRequestDto rideRequestDto,
-                                   @RequestHeader("Authorization") String authorizationToken);
+                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @Operation(
             summary = "Update rating by id",
@@ -92,12 +98,14 @@ public interface PassengerRatingEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Rating with this id doesn't exist"),
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
     })
     RatingResponseDto updateRating(@PathVariable String id,
                                    @Valid @RequestBody RatingRequestDto ratingRequestDTO,
-                                   @RequestHeader("Authorization") String authorizationToken);
+                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @Operation(
             summary = "Delete rating by id",
@@ -110,6 +118,8 @@ public interface PassengerRatingEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Rating with this id doesn't exist"),
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
     })

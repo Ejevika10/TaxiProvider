@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,31 +73,31 @@ public class RideController implements RideEndpoints {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RideResponseDto createRide(@Validated @RequestBody RideCreateRequestDto rideRequestDto,
-                                      @RequestHeader("Authorization") String authorizationToken) {
-        return rideService.createRide(rideRequestDto, authorizationToken);
+                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return rideService.createRide(rideRequestDto, bearerToken);
     }
 
     @Override
     @PutMapping("/{id}")
     public RideResponseDto updateRide(@PathVariable @Min(0) Long id,
                                       @Validated @RequestBody RideRequestDto rideRequestDto,
-                                      @RequestHeader("Authorization") String authorizationToken) {
-        return rideService.updateRide(id, rideRequestDto, authorizationToken);
+                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return rideService.updateRide(id, rideRequestDto, bearerToken);
     }
 
     @Override
     @PutMapping("/{id}/accept")
     public RideResponseDto acceptRide(@PathVariable @Min(0) Long id,
                                       @Validated @RequestBody RideAcceptRequestDto rideRequestDto,
-                                      @RequestHeader("Authorization") String authorizationToken) {
-        return rideService.acceptRide(id, rideRequestDto, authorizationToken);
+                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return rideService.acceptRide(id, rideRequestDto, bearerToken);
     }
 
     @Override
     @PutMapping("/{id}/cancel")
     public RideResponseDto cancelRide(@PathVariable @Min(0) Long id,
-                                      @RequestHeader("Authorization") String authorizationToken) {
-        return rideService.cancelRide(id, authorizationToken);
+                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return rideService.cancelRide(id, bearerToken);
     }
 
     @Override

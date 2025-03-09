@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -65,17 +66,17 @@ public class DriverRatingController implements DriverRatingEndpoints {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RatingResponseDto createRating(@Valid @RequestBody RatingRequestDto ratingRequestDto,
-                                          @RequestHeader("Authorization") String authorizationToken) {
-        log.info("add rating controller");
-        return driverRatingService.addRating(ratingRequestDto, authorizationToken);
+                                          @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        log.info("Calling create driver rating function");
+        return driverRatingService.addRating(ratingRequestDto, bearerToken);
     }
 
     @Override
     @PutMapping("/{id}")
     public RatingResponseDto updateRating(@PathVariable String id,
                                           @Valid @RequestBody RatingRequestDto ratingRequestDTO,
-                                          @RequestHeader("Authorization") String authorizationToken) {
-        return driverRatingService.updateRating(id, ratingRequestDTO, authorizationToken);
+                                          @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return driverRatingService.updateRating(id, ratingRequestDTO, bearerToken);
     }
 
     @Override

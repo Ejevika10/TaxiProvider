@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import org.springframework.http.HttpHeaders;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +38,8 @@ public interface RideEndpoints {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
-            @ApiResponse(responseCode = "400", description = "Your request is invalid")
+            @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register")
     })
     PageDto<RideResponseDto> getPageRides(@RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                           @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit);
@@ -49,6 +51,8 @@ public interface RideEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Driver with this id doesn't exist")
     })
     PageDto<RideResponseDto> getPageRidesByDriverId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String driverId,
@@ -62,6 +66,8 @@ public interface RideEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Passenger with this id doesn't exist")
     })
     PageDto<RideResponseDto> getPageRidesByPassengerId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String passengerId,
@@ -75,6 +81,8 @@ public interface RideEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Ride with this id doesn't exist")
     })
     RideResponseDto getRide(@PathVariable @Min(0) Long id);
@@ -90,11 +98,13 @@ public interface RideEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Passenger with this id doesn't exist"),
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
     })
     RideResponseDto createRide(@Validated @RequestBody RideCreateRequestDto rideRequestDto,
-                                      @RequestHeader("Authorization") String authorizationToken);
+                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @Operation(
             summary = "Update ride",
@@ -107,6 +117,8 @@ public interface RideEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Ride with this id doesn't exist"),
             @ApiResponse(responseCode = "404", description = "Passenger with this id doesn't exist"),
             @ApiResponse(responseCode = "404", description = "Driver with this id doesn't exist"),
@@ -114,7 +126,7 @@ public interface RideEndpoints {
     })
     RideResponseDto updateRide(@PathVariable @Min(0) Long id,
                                       @Validated @RequestBody RideRequestDto rideRequestDto,
-                                      @RequestHeader("Authorization") String authorizationToken);
+                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @Operation(
             summary = "Accept ride",
@@ -127,13 +139,15 @@ public interface RideEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Ride with this id doesn't exist"),
             @ApiResponse(responseCode = "404", description = "Driver with this id doesn't exist"),
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
     })
     RideResponseDto acceptRide(@PathVariable @Min(0) Long id,
                                @Validated @RequestBody RideAcceptRequestDto rideRequestDto,
-                               @RequestHeader("Authorization") String authorizationToken);
+                               @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @Operation(
             summary = "Cancel ride",
@@ -146,11 +160,13 @@ public interface RideEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Ride with this id doesn't exist"),
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
     })
     RideResponseDto cancelRide(@PathVariable @Min(0) Long id,
-                               @RequestHeader("Authorization") String authorizationToken);
+                               @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @Operation(
             summary = "Update ride state",
@@ -163,6 +179,8 @@ public interface RideEndpoints {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Request completed"),
             @ApiResponse(responseCode = "400", description = "Your request is invalid"),
+            @ApiResponse(responseCode = "401", description = "You have to log in or register"),
+            @ApiResponse(responseCode = "403", description = "You have no rights to access this resource"),
             @ApiResponse(responseCode = "404", description = "Ride with this id doesn't exist"),
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
     })
