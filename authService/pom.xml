@@ -30,12 +30,18 @@
         <resteasy-client.version>6.2.9.Final</resteasy-client.version>
         <loki.version>1.4.1</loki.version>
         <exception-spring-boot-starter.version>0.0.1-SNAPSHOT</exception-spring-boot-starter.version>
+        <logging-spring-boot-starter.version>0.0.1-SNAPSHOT</logging-spring-boot-starter.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>com.modsen</groupId>
             <artifactId>exception-spring-boot-starter</artifactId>
             <version>${exception-spring-boot-starter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.modsen</groupId>
+            <artifactId>logging-spring-boot-starter</artifactId>
+            <version>${logging-spring-boot-starter.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
