@@ -48,8 +48,7 @@ public class DriverAccessFilter extends OncePerRequestFilter {
             UUID driverId;
             if (request.getMethod().equals("POST")) {
                 driverId = getDriverIdFromAvatarRequestURI(request.getRequestURI());
-            }
-            else{
+            } else {
                 driverId = getDriverIdFromRequestURI(request.getRequestURI());
             }
             if (!Objects.equals(driverId, userId)) {
