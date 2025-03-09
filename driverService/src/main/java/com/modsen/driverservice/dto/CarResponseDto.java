@@ -2,6 +2,8 @@ package com.modsen.driverservice.dto;
 
 import lombok.Builder;
 
+import java.io.Serializable;
+
 @Builder
 public record CarResponseDto(
         Long id,
@@ -14,5 +16,5 @@ public record CarResponseDto(
 
         String number,
 
-        DriverResponseDto driver) {
+        DriverResponseDto driver) implements Serializable {
 }
