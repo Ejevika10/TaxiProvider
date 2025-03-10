@@ -12,10 +12,11 @@ services:
   discovery-server:
     container_name: discovery-server
     build:
-      context: ../discoveryServer
-      dockerfile: ../docker/Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile
       args:
         SERVICE_NAME: discovery-server
+        FILE_PATH: discoveryServer
     environment:
       EUREKA_HOSTNAME: discovery-server
     ports:
@@ -31,10 +32,11 @@ services:
   config-server:
     container_name: config-server
     build:
-      context: ../configServer
-      dockerfile: ../docker/Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile
       args:
         SERVICE_NAME: config-server
+        FILE_PATH: configServer
     environment:
       EUREKA_URL: http://discovery-server:8761/eureka/
     ports:
@@ -53,10 +55,11 @@ services:
   gateway-service:
     container_name: gateway-service
     build:
-      context: ../gatewayService
-      dockerfile: ../docker/Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile
       args:
         SERVICE_NAME: gateway-service
+        FILE_PATH: gatewayService
     environment:
       EUREKA_URL: http://discovery-server:8761/eureka/
     ports:
@@ -90,10 +93,11 @@ services:
   driver-service:
     container_name: driver-service
     build:
-      context: ../driverService
-      dockerfile: ../docker/Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile
       args:
         SERVICE_NAME: driver-service
+        FILE_PATH: driverService
     environment:
       RABBITMQ_HOSTNAME: rabbitmq
       ZIPKIN_HOSTNAME: zipkin
@@ -142,10 +146,11 @@ services:
   passenger-service:
     container_name: passenger-service
     build:
-      context: ../passengerService
-      dockerfile: ../docker/Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile
       args:
         SERVICE_NAME: passenger-service
+        FILE_PATH: passengerService
     environment:
       RABBITMQ_HOSTNAME: rabbitmq
       ZIPKIN_HOSTNAME: zipkin
@@ -194,10 +199,11 @@ services:
   ride-service:
     container_name: ride-service
     build:
-      context: ../rideService
-      dockerfile: ../docker/Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile
       args:
         SERVICE_NAME: ride-service
+        FILE_PATH: rideService
     environment:
       RABBITMQ_HOSTNAME: rabbitmq
       ZIPKIN_HOSTNAME: zipkin
@@ -240,10 +246,11 @@ services:
   rating-service:
     container_name: rating-service
     build:
-      context: ../ratingService
-      dockerfile: ../docker/Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile
       args:
         SERVICE_NAME: rating-service
+        FILE_PATH: ratingService
     environment:
       RABBITMQ_HOSTNAME: rabbitmq
       ZIPKIN_HOSTNAME: zipkin
@@ -314,11 +321,13 @@ services:
   auth-service:
     container_name: auth-service
     build:
-      context: ../authService
-      dockerfile: ../docker/Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile
       args:
         SERVICE_NAME: auth-service
+        FILE_PATH: authService
     environment:
+      RABBITMQ_HOSTNAME: rabbitmq
       ZIPKIN_HOSTNAME: zipkin
       KEYCLOAK_HOSTNAME: keycloak
       EUREKA_URL: http://discovery-server:8761/eureka/
