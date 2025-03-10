@@ -21,16 +21,16 @@ public class DriverValidatorService {
     private final DriverRatingRepository driverRatingRepository;
     private final RideClientService rideClientService;
 
-    public void validateForCreate(RatingRequestDto ratingRequestDto, String authorizationToken){
+    public void validateForCreate(RatingRequestDto ratingRequestDto, String bearerToken){
         Long rideId = ratingRequestDto.rideId();
         ratingDoesntExistsByRideId(rideId);
-        RideResponseDto ride = rideExistsById(rideId, authorizationToken);
+        RideResponseDto ride = rideExistsById(rideId, bearerToken);
         userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
 
-    public void validateForUpdate(RatingRequestDto ratingRequestDto, String authorizationToken){
-        RideResponseDto ride = rideExistsById(ratingRequestDto.rideId(), authorizationToken);
+    public void validateForUpdate(RatingRequestDto ratingRequestDto, String bearerToken){
+        RideResponseDto ride = rideExistsById(ratingRequestDto.rideId(), bearerToken);
         userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
@@ -41,8 +41,8 @@ public class DriverValidatorService {
         }
     }
 
-    private RideResponseDto rideExistsById(long rideId, String authorizationToken) {
-        return rideClientService.getRideById(rideId, authorizationToken);
+    private RideResponseDto rideExistsById(long rideId, String bearerToken) {
+        return rideClientService.getRideById(rideId, bearerToken);
     }
 
     private void userIdIsCorrect(RideResponseDto rideResponseDto, UUID userId) {

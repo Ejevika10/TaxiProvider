@@ -96,8 +96,8 @@ public class RideServiceImpl implements RideService {
     @Override
     @Transactional
     @CachePut(value = RIDE_CACHE_NAME, key = "#result.id()")
-    public RideResponseDto createRide(RideCreateRequestDto rideRequestDto, String authorizationToken) {
-        PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId(), authorizationToken);
+    public RideResponseDto createRide(RideCreateRequestDto rideRequestDto, String bearerToken) {
+        PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId(), bearerToken);
         Ride rideToSave = rideMapper.toRide(rideRequestDto);
         rideToSave.setRideState(RideState.CREATED);
         rideToSave.setRideDateTime(LocalDateTime.now());
@@ -108,9 +108,9 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @CachePut(value = RIDE_CACHE_NAME, key = "#id")
-    public RideResponseDto acceptRide(Long id, RideAcceptRequestDto rideRequestDto, String authorizationToken) {
+    public RideResponseDto acceptRide(Long id, RideAcceptRequestDto rideRequestDto, String bearerToken) {
         Ride rideToSave = findByIdOrThrow(id);
-        DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId(), authorizationToken);
+        DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId(), bearerToken);
         rideToSave.setRideState(RideState.ACCEPTED);
         rideToSave.setDriverId(UUID.fromString(rideRequestDto.driverId()));
         Ride ride = rideRepository.save(rideToSave);
@@ -119,7 +119,7 @@ public class RideServiceImpl implements RideService {
 
     @Override
     @CachePut(value = RIDE_CACHE_NAME, key = "#id")
-    public RideResponseDto cancelRide(Long id, String authorizationToken) {
+    public RideResponseDto cancelRide(Long id, String bearerToken) {
         Ride rideToSave = findByIdOrThrow(id);
         rideToSave.setRideState(RideState.CANCELLED);
         Ride ride = rideRepository.save(rideToSave);
@@ -129,11 +129,11 @@ public class RideServiceImpl implements RideService {
     @Override
     @Transactional
     @CachePut(value = RIDE_CACHE_NAME, key = "#id")
-    public RideResponseDto updateRide(Long id, RideRequestDto rideRequestDto, String authorizationToken) {
+    public RideResponseDto updateRide(Long id, RideRequestDto rideRequestDto, String bearerToken) {
         Ride rideToSave = findByIdOrThrow(id);
-        PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId(), authorizationToken);
+        PassengerResponseDto passengerResponseDto = passengerClientService.getPassengerById(rideRequestDto.passengerId(), bearerToken);
         if(rideRequestDto.driverId() != null) {
-            DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId(), authorizationToken);
+            DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId(), bearerToken);
         }
         rideMapper.updateRide(rideToSave, rideRequestDto);
         Ride ride = rideRepository.save(rideToSave);

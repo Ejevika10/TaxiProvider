@@ -76,8 +76,8 @@ public class PassengerRatingServiceImpl implements RatingService {
 
     @Override
     @CachePut(value = PASSENGER_RATING_CACHE_NAME, key = "#result.id()")
-    public RatingResponseDto addRating(RatingRequestDto ratingRequestDto, String authorizationToken) {
-        validator.validateForCreate(ratingRequestDto, authorizationToken);
+    public RatingResponseDto addRating(RatingRequestDto ratingRequestDto, String bearerToken) {
+        validator.validateForCreate(ratingRequestDto, bearerToken);
         PassengerRating ratingToSave = ratingMapper.toPassengerRating(ratingRequestDto);
         ratingToSave.setDeleted(false);
         PassengerRating rating = passengerRatingRepository.save(ratingToSave);
@@ -87,9 +87,9 @@ public class PassengerRatingServiceImpl implements RatingService {
 
     @Override
     @CachePut(value = PASSENGER_RATING_CACHE_NAME, key = "#id")
-    public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto, String authorizationToken) {
+    public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto, String bearerToken) {
         PassengerRating ratingToSave = findByIdOrThrow(id);
-        validator.validateForUpdate(ratingRequestDto, authorizationToken);
+        validator.validateForUpdate(ratingRequestDto, bearerToken);
         ratingMapper.updatePassengerRating(ratingRequestDto, ratingToSave);
         PassengerRating rating = passengerRatingRepository.save(ratingToSave);
         updateAverageRating(rating.getUserId());

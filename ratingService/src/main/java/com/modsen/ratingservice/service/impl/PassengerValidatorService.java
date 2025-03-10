@@ -21,16 +21,16 @@ public class PassengerValidatorService {
     private final PassengerRatingRepository passengerRatingRepository;
     private final RideClientService rideClientService;
 
-    public void validateForCreate(RatingRequestDto ratingRequestDto, String authorizationToken){
+    public void validateForCreate(RatingRequestDto ratingRequestDto, String bearerToken){
         Long rideId = ratingRequestDto.rideId();
         ratingDoesntExistsByRideId(rideId);
-        RideResponseDto ride = rideExistsByRideId(rideId, authorizationToken);
+        RideResponseDto ride = rideExistsByRideId(rideId, bearerToken);
         userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
 
-    public void validateForUpdate(RatingRequestDto ratingRequestDto, String authorizationToken){
-        RideResponseDto ride = rideExistsByRideId(ratingRequestDto.rideId(), authorizationToken);
+    public void validateForUpdate(RatingRequestDto ratingRequestDto, String bearerToken){
+        RideResponseDto ride = rideExistsByRideId(ratingRequestDto.rideId(), bearerToken);
         userIdIsCorrect(ride, UUID.fromString(ratingRequestDto.userId()));
         rideStateIsCorrect(ride.rideState());
     }
@@ -41,8 +41,8 @@ public class PassengerValidatorService {
         }
     }
 
-    private RideResponseDto rideExistsByRideId(long rideId, String authorizationToken) {
-        return rideClientService.getRideById(rideId, authorizationToken);
+    private RideResponseDto rideExistsByRideId(long rideId, String bearerToken) {
+        return rideClientService.getRideById(rideId, bearerToken);
     }
 
     private void userIdIsCorrect(RideResponseDto rideResponseDto, UUID userId) {

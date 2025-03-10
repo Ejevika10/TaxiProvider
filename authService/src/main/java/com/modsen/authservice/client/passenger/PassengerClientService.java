@@ -17,8 +17,8 @@ public class PassengerClientService {
 
     @Retry(name = ClientConstants.PASSENGER_CLIENT_RETRY)
     @CircuitBreaker(name = ClientConstants.PASSENGER_CLIENT_CIRCUIT)
-    public PassengerResponseDto createPassenger(PassengerCreateRequestDto passengerRequestDto, String authorization) {
+    public PassengerResponseDto createPassenger(PassengerCreateRequestDto passengerRequestDto, String bearerToken) {
         log.info("createPassenger");
-        return passengerClient.createPassenger(passengerRequestDto, authorization);
+        return passengerClient.createPassenger(passengerRequestDto, bearerToken);
     }
 }

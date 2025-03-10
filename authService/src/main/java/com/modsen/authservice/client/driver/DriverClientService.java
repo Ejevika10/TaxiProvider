@@ -17,8 +17,8 @@ public class DriverClientService {
 
     @CircuitBreaker(name = ClientConstants.DRIVER_CLIENT_CIRCUIT)
     @Retry(name = ClientConstants.DRIVER_CLIENT_RETRY)
-    public DriverResponseDto createDriver(DriverCreateRequestDto driverRequestDto, String authorization) {
+    public DriverResponseDto createDriver(DriverCreateRequestDto driverRequestDto, String bearerToken) {
         log.info("createDriver");
-        return driverClient.createDriver(driverRequestDto, authorization);
+        return driverClient.createDriver(driverRequestDto, bearerToken);
     }
 }
