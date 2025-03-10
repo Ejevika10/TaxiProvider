@@ -104,7 +104,7 @@ public interface RideEndpoints {
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
     })
     RideResponseDto createRide(@Validated @RequestBody RideCreateRequestDto rideRequestDto,
-                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
 
     @Operation(
             summary = "Update ride",
@@ -126,7 +126,7 @@ public interface RideEndpoints {
     })
     RideResponseDto updateRide(@PathVariable @Min(0) Long id,
                                       @Validated @RequestBody RideRequestDto rideRequestDto,
-                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
 
     @Operation(
             summary = "Accept ride",
@@ -147,7 +147,7 @@ public interface RideEndpoints {
     })
     RideResponseDto acceptRide(@PathVariable @Min(0) Long id,
                                @Validated @RequestBody RideAcceptRequestDto rideRequestDto,
-                               @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+                               @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
 
     @Operation(
             summary = "Cancel ride",
@@ -166,7 +166,7 @@ public interface RideEndpoints {
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
     })
     RideResponseDto cancelRide(@PathVariable @Min(0) Long id,
-                               @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+                               @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
 
     @Operation(
             summary = "Update ride state",

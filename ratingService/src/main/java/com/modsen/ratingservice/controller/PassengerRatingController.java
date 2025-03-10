@@ -64,16 +64,16 @@ public class PassengerRatingController implements PassengerRatingEndpoints {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RatingResponseDto createRating(@Valid @RequestBody RatingRequestDto rideRequestDto,
-                                          @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken) {
-        return passengerRatingService.addRating(rideRequestDto, authorizationToken);
+                                          @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return passengerRatingService.addRating(rideRequestDto, bearerToken);
     }
 
     @Override
     @PutMapping("/{id}")
     public RatingResponseDto updateRating(@PathVariable String id,
                                           @Valid @RequestBody RatingRequestDto ratingRequestDTO,
-                                          @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken) {
-        return passengerRatingService.updateRating(id, ratingRequestDTO, authorizationToken);
+                                          @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return passengerRatingService.updateRating(id, ratingRequestDTO, bearerToken);
     }
 
     @Override

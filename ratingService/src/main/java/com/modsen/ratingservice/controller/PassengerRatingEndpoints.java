@@ -85,7 +85,7 @@ public interface PassengerRatingEndpoints {
             @ApiResponse(responseCode = "409", description = "Your request has conflicts")
     })
     RatingResponseDto createRating(@Valid @RequestBody RatingRequestDto rideRequestDto,
-                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
 
     @Operation(
             summary = "Update rating by id",
@@ -105,7 +105,7 @@ public interface PassengerRatingEndpoints {
     })
     RatingResponseDto updateRating(@PathVariable String id,
                                    @Valid @RequestBody RatingRequestDto ratingRequestDTO,
-                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
 
     @Operation(
             summary = "Delete rating by id",
