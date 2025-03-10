@@ -27,6 +27,7 @@
         <cucumber.version>7.19.0</cucumber.version>
         <loki.version>1.4.1</loki.version>
         <exception-spring-boot-starter.version>0.0.1-SNAPSHOT</exception-spring-boot-starter.version>
+        <logging-spring-boot-starter.version>0.0.1-SNAPSHOT</logging-spring-boot-starter.version>
         <minio.version>8.5.17</minio.version>
     </properties>
     <dependencies>
@@ -34,6 +35,11 @@
             <groupId>com.modsen</groupId>
             <artifactId>exception-spring-boot-starter</artifactId>
             <version>${exception-spring-boot-starter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.modsen</groupId>
+            <artifactId>logging-spring-boot-starter</artifactId>
+            <version>${logging-spring-boot-starter.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
