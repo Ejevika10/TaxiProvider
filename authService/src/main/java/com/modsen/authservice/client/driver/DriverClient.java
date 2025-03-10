@@ -4,6 +4,7 @@ import com.modsen.authservice.dto.DriverCreateRequestDto;
 import com.modsen.authservice.dto.DriverResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,5 +17,5 @@ public interface DriverClient {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     DriverResponseDto createDriver(@Valid @RequestBody DriverCreateRequestDto driverRequestDTO,
-                                   @RequestHeader("Authorization") String authorization);
+                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
 }

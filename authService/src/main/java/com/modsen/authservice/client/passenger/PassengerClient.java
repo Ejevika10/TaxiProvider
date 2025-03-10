@@ -4,6 +4,7 @@ import com.modsen.authservice.dto.PassengerCreateRequestDto;
 import com.modsen.authservice.dto.PassengerResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,6 @@ public interface PassengerClient {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     PassengerResponseDto createPassenger(@Valid @RequestBody PassengerCreateRequestDto passengerRequestDTO,
-                                   @RequestHeader("Authorization") String authorization);
+                                   @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
 }
 

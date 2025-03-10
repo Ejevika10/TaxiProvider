@@ -4,7 +4,6 @@ import com.modsen.driverservice.dto.CarRequestDto;
 import com.modsen.driverservice.dto.CarResponseDto;
 import com.modsen.driverservice.dto.PageDto;
 import com.modsen.driverservice.service.CarService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -31,20 +30,22 @@ import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
 @Validated
 @RequestMapping("/api/v1/cars")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "JWT")
-public class CarController {
+public class CarController implements CarEndpoints {
     private final CarService carService;
 
+    @Override
     @GetMapping
     public PageDto<CarResponseDto> getPageCars(@RequestParam (defaultValue = "0") @Min(0) Integer offset, @RequestParam (defaultValue = "5") @Min(1) @Max(20) Integer limit) {
         return carService.getPageCars(offset, limit);
     }
 
+    @Override
     @GetMapping("/{id}")
     public CarResponseDto getCar(@PathVariable @Min(0) Long id) {
         return carService.getCarById(id);
     }
 
+    @Override
     @GetMapping("/driver/{driverId}")
     public PageDto<CarResponseDto> getPageCarsByDriverId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
                                                              String driverId,
@@ -53,6 +54,7 @@ public class CarController {
         return carService.getPageCarsByDriverId(UUID.fromString(driverId), offset, limit);
     }
 
+    @Override
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CarResponseDto createCar(@Valid @RequestBody CarRequestDto carRequestDTO) {
@@ -64,6 +66,7 @@ public class CarController {
         return carService.updateCar(id, carRequestDTO);
     }
 
+    @Override
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCar(@PathVariable @Min(0) Long id) {

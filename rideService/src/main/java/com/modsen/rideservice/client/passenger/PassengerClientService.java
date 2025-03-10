@@ -16,9 +16,9 @@ public class PassengerClientService {
 
     @Retry(name = ClientConstants.PASSENGER_CLIENT_RETRY)
     @CircuitBreaker(name = ClientConstants.PASSENGER_CLIENT_CIRCUIT)
-    public PassengerResponseDto getPassengerById(String passengerId, String authorizationToken) {
+    public PassengerResponseDto getPassengerById(String passengerId, String bearerToken) {
         log.info("getPassengerById");
-        PassengerResponseDto passengerResponse = passengerClient.getPassengerById(passengerId, authorizationToken);
+        PassengerResponseDto passengerResponse = passengerClient.getPassengerById(passengerId, bearerToken);
         log.info(passengerResponse.email());
         return passengerResponse;
     }

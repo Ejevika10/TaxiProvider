@@ -2,6 +2,7 @@ package com.modsen.rideservice.client.passenger;
 
 import com.modsen.rideservice.dto.PassengerResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -10,5 +11,5 @@ import org.springframework.web.bind.annotation.RequestHeader;
 public interface PassengerClient {
     @GetMapping("/{id}")
     PassengerResponseDto getPassengerById(@PathVariable("id") String id,
-                                          @RequestHeader("Authorization") String authorization);
+                                          @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
 }

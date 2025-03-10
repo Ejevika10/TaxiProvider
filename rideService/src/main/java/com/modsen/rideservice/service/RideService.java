@@ -25,13 +25,13 @@ public interface RideService {
 
     RideResponseDto getRideById(Long id);
 
-    RideResponseDto createRide(RideCreateRequestDto ride, String authorizationToken);
+    RideResponseDto createRide(RideCreateRequestDto ride, String bearerToken);
 
-    RideResponseDto acceptRide(Long id, RideAcceptRequestDto ride, String authorizationToken);
+    RideResponseDto acceptRide(Long id, RideAcceptRequestDto ride, String bearerToken);
 
-    RideResponseDto cancelRide(Long id, String authorizationToken);
+    RideResponseDto cancelRide(Long id, String bearerToken);
 
-    RideResponseDto updateRide(Long id, RideRequestDto ride, String authorizationToken);
+    RideResponseDto updateRide(Long id, RideRequestDto ride, String bearerToken);
 
     RideResponseDto setNewState(Long id, RideStateRequestDto newState);
 }

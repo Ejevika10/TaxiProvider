@@ -22,9 +22,9 @@ public interface RatingService {
 
     RatingResponseDto getRatingById(String id);
 
-    RatingResponseDto addRating(RatingRequestDto ratingRequestDto, String authorizationToken);
+    RatingResponseDto addRating(RatingRequestDto ratingRequestDto, String bearerToken);
 
-    RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto, String authorizationToken);
+    RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto, String bearerToken);
 
     void deleteRating(String id);
 }

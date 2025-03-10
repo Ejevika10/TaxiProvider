@@ -76,8 +76,8 @@ public class DriverRatingServiceImpl implements RatingService {
 
     @Override
     @CachePut(value = DRIVER_RATING_CACHE_NAME, key = "#result.id()")
-    public RatingResponseDto addRating(RatingRequestDto ratingRequestDto, String authorizationToken) {
-        validator.validateForCreate(ratingRequestDto, authorizationToken);
+    public RatingResponseDto addRating(RatingRequestDto ratingRequestDto, String bearerToken) {
+        validator.validateForCreate(ratingRequestDto, bearerToken);
         DriverRating ratingToSave = ratingMapper.toDriverRating(ratingRequestDto);
         ratingToSave.setDeleted(false);
         DriverRating rating = driverRatingRepository.save(ratingToSave);
@@ -87,9 +87,9 @@ public class DriverRatingServiceImpl implements RatingService {
 
     @Override
     @CachePut(value = DRIVER_RATING_CACHE_NAME, key = "#id")
-    public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto, String authorizationToken) {
+    public RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto, String bearerToken) {
         DriverRating ratingToSave = findByIdOrThrow(id);
-        validator.validateForUpdate(ratingRequestDto, authorizationToken);
+        validator.validateForUpdate(ratingRequestDto, bearerToken);
         ratingMapper.updateDriverRating(ratingRequestDto, ratingToSave);
         DriverRating rating = driverRatingRepository.save(ratingToSave);
         updateAverageRating(rating.getUserId());
