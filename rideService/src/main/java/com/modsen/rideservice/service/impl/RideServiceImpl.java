@@ -87,6 +87,12 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
+    public List<RideResponseDto> getRidesByDriverIdAndRideDateTime(UUID driverId, LocalDateTime rideDateTime) {
+        List<Ride> rides = rideRepository.findAllByDriverIdAndRideDateTimeIsAfter(driverId, rideDateTime);
+        return rideListMapper.toRideResponseDtoList(rides);
+    }
+
+    @Override
     @Cacheable(value = RIDE_CACHE_NAME, key = "#id")
     public RideResponseDto getRideById(Long id) {
         Ride ride = findByIdOrThrow(id);
