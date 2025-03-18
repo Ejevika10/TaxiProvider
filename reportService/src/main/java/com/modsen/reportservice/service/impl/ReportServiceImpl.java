@@ -1,4 +1,4 @@
-package com.modsen.reportservice.service;
+package com.modsen.reportservice.service.impl;
 
 import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
 import com.modsen.reportservice.client.driver.DriverClientService;
@@ -11,6 +11,7 @@ import com.modsen.reportservice.mapper.DriverMapper;
 import com.modsen.reportservice.mapper.RideMapper;
 import com.modsen.reportservice.model.DriverForReport;
 import com.modsen.reportservice.model.RideForReport;
+import com.modsen.reportservice.service.ReportService;
 import com.modsen.reportservice.util.MessageConstants;
 import lombok.RequiredArgsConstructor;
 import net.sf.jasperreports.engine.JRException;
@@ -31,8 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.modsen.reportservice.util.AppConstants.REPORT_NAME;
-import static com.modsen.reportservice.util.AppConstants.SUBREPORT_NAME;
+import static com.modsen.reportservice.util.AppConstants.REPORT_TEMPLATE_NAME;
+import static com.modsen.reportservice.util.AppConstants.SUBREPORT_TEMPLATE_NAME;
 
 @Service
 @RequiredArgsConstructor
@@ -44,10 +45,10 @@ public class ReportServiceImpl implements ReportService {
     private final RideMapper rideMapper;
     private final DriverMapper driverMapper;
 
-    @Value(REPORT_NAME)
+    @Value(REPORT_TEMPLATE_NAME)
     private String reportName;
 
-    @Value(SUBREPORT_NAME)
+    @Value(SUBREPORT_TEMPLATE_NAME)
     private String subReportName;
 
     @Override
