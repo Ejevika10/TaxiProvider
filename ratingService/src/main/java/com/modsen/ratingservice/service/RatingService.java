@@ -27,4 +27,6 @@ public interface RatingService {
     RatingResponseDto updateRating(String id, RatingRequestDto ratingRequestDto, String bearerToken);
 
     void deleteRating(String id);
+
+    List<RatingResponseDto> getAllRatingsByRideIdIn(List<Long> rideIds);
 }

@@ -104,6 +104,11 @@ public class PassengerRatingServiceImpl implements RatingService {
         passengerRatingRepository.save(rating);
     }
 
+    @Override
+    public List<RatingResponseDto> getAllRatingsByRideIdIn(List<Long> rideIds) {
+        return List.of();
+    }
+
     private PassengerRating findByIdOrThrow(String id) {
         return passengerRatingRepository.findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new NotFoundException(MessageConstants.RATING_NOT_FOUND));
