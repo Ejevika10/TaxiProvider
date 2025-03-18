@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+  http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="ride-list-report" pageWidth="595" pageHeight="600" columnWidth="555" leftMargin="20" rightMargin="20"
+              topMargin="20" bottomMargin="20">
+
+    <parameter name="title" class="java.lang.String" isForPrompting="false"/>
+    <field name="id" class="java.lang.Long"/>
+    <field name="sourceAddress" class="java.lang.String"/>
+    <field name="destinationAddress" class="java.lang.String"/>
+    <field name="rideState" class="java.lang.String"/>
+    <field name="rideDateTime" class="java.util.Date"/>
+    <field name="rideCost" class="java.lang.Double"/>
+    <field name="rating" class="java.lang.Integer"/>
+    <field name="comment" class="java.lang.String"/>
+    <variable name="rideCount" class="java.lang.Integer" calculation="Count">
+        <variableExpression><![CDATA[$F{id}]]></variableExpression>
+    </variable>
+
+    <variable name="totalCost" class="java.lang.Double" calculation="Sum">
+        <variableExpression><![CDATA[$F{rideCost}]]></variableExpression>
+    </variable>
+    <title>
+        <band height="30" splitType="Stretch">
+            <textField>
+                <reportElement x="150" y="0" width="250" height="30"/>
+                <textElement  textAlignment="Center">
+                    <font size="14" isBold="true"/>
+                </textElement>
+                <textFieldExpression class="java.lang.String"><![CDATA[$P{title}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="24" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="0" width="20" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[ID]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="20" y="0" width="120" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Source address]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="140" y="0" width="120" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Destination address]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="260" y="0" width="75" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Ride state]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="335" y="0" width="100" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Ride date]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="435" y="0" width="50" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Cost]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="485" y="0" width="50" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Rating]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+    <detail>
+        <band height="20" splitType="Stretch">
+            <textField isBlankWhenNull="true">
+                <reportElement x="0" y="0" width="20" height="20" />
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression class="java.lang.Long"><![CDATA[$F{id}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="20" y="0" width="120" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement/>
+                <textFieldExpression class="java.lang.String"><![CDATA[$F{sourceAddress}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="140" y="0" width="120" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement/>
+                <textFieldExpression class="java.lang.String"><![CDATA[$F{destinationAddress}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="260" y="0" width="75" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression class="java.lang.String"><![CDATA[$F{rideState}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="335" y="0" width="100" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression class="java.lang.String"><![CDATA[$F{rideDateTime}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="435" y="0" width="50" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression class="java.lang.String"><![CDATA[$F{rideCost}]]></textFieldExpression>
+            </textField>
+            <textField isBlankWhenNull="true">
+                <reportElement x="485" y="0" width="50" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression class="java.lang.String"><![CDATA[$F{rating}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+    <summary>
+        <band height="65">
+            <staticText>
+                <reportElement x="30" y="15" width="100" height="30"/>
+                <textElement>
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Summary]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="140" y="15" width="111" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Total rides]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="340" y="15" width="108" height="20"/>
+                <box>
+                    <pen lineWidth="0.25" lineColor="#000"/>
+                </box>
+                <textElement textAlignment="Center">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Total cost]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="139" y="35" width="111" height="30" forecolor="#082E66"/>
+                <textElement textAlignment="Center" verticalAlignment="Top"/>
+                <textFieldExpression><![CDATA[$V{rideCount}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="313" y="35" width="167" height="30" forecolor="#082E66"/>
+                <textElement textAlignment="Center" verticalAlignment="Top"/>
+                <textFieldExpression><![CDATA[$V{totalCost}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>
