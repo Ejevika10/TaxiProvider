@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -19,5 +21,12 @@ public class DriverClientService {
     public DriverResponseDto getDriverById(String driverId, String bearerToken) {
         log.info("getDriverById");
         return driverClient.getDriverById(driverId, bearerToken);
+    }
+
+    @CircuitBreaker(name = ClientConstants.DRIVER_LIST_CLIENT_CIRCUIT)
+    @Retry(name = ClientConstants.DRIVER_LIST_CLIENT_RETRY)
+    public List<DriverResponseDto> getAllDrivers(String bearerToken) {
+        log.info("getAllDrivers");
+        return driverClient.getAllDrivers(bearerToken);
     }
 }

@@ -1,7 +1,6 @@
 package com.modsen.reportservice.service.impl;
 
 import com.modsen.exceptionstarter.exception.ServiceUnavailableException;
-import com.modsen.reportservice.client.driver.DriverClientService;
 import com.modsen.reportservice.client.rating.RatingClientService;
 import com.modsen.reportservice.client.ride.RideClientService;
 import com.modsen.reportservice.dto.DriverResponseDto;
@@ -39,7 +38,6 @@ import static com.modsen.reportservice.util.AppConstants.SUBREPORT_TEMPLATE_NAME
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
 
-    private final DriverClientService driverClientService;
     private final RideClientService rideClientService;
     private final RatingClientService ratingClientService;
     private final RideMapper rideMapper;
@@ -52,12 +50,11 @@ public class ReportServiceImpl implements ReportService {
     private String subReportName;
 
     @Override
-    public byte[] createReport(String driverId, String bearerToken) {
-        DriverForReport driverForReport = driverMapper.toDriverForReport(
-                getDriverById(driverId, bearerToken));
+    public byte[] createReport(DriverResponseDto driverResponseDto, String bearerToken) {
+        DriverForReport driverForReport = driverMapper.toDriverForReport(driverResponseDto);
 
         LocalDateTime rideDateTime = LocalDateTime.now().minusMonths(1);
-        List<RideResponseDto> rides = getRidesByDriverIdAndLocalDateTime(driverId, rideDateTime, bearerToken);
+        List<RideResponseDto> rides = getRidesByDriverIdAndLocalDateTime(String.valueOf(driverResponseDto.id()), rideDateTime, bearerToken);
         List<Long> rideIds = rides.stream()
                 .map(RideResponseDto::id)
                 .toList();
@@ -75,10 +72,6 @@ public class ReportServiceImpl implements ReportService {
         JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(rides);
 
         return fillReport(report, parameters, dataSource);
-    }
-
-    private DriverResponseDto getDriverById(String driverId, String bearerToken) {
-        return driverClientService.getDriverById(driverId, bearerToken);
     }
 
     private List<RideResponseDto> getRidesByDriverIdAndLocalDateTime(String driverId, LocalDateTime localDateTime, String bearerToken) {

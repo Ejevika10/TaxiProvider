@@ -1,6 +1,8 @@
 package com.modsen.reportservice.service;
 
+import com.modsen.reportservice.dto.DriverResponseDto;
+
 public interface ReportService {
 
-    byte[] createReport(String driverId, String bearerToken);
+    byte[] createReport(DriverResponseDto driverResponseDto, String bearerToken);
 }

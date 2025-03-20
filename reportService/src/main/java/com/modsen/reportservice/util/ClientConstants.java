@@ -9,6 +9,10 @@ public final class ClientConstants {
 
     public static final String DRIVER_CLIENT_RETRY = "driver-client-retry";
 
+    public static final String DRIVER_LIST_CLIENT_CIRCUIT = "driver-list-client-circuit";
+
+    public static final String DRIVER_LIST_CLIENT_RETRY = "driver-list-client-retry";
+
     public static final String RIDE_CLIENT_CIRCUIT = "ride-client-circuit";
 
     public static final String RIDE_CLIENT_RETRY = "ride-client-retry";
