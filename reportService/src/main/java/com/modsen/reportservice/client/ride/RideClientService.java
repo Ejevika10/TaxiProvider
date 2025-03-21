@@ -20,7 +20,7 @@ public class RideClientService {
     @Retry(name = ClientConstants.RIDE_CLIENT_RETRY)
     @CircuitBreaker(name = ClientConstants.RIDE_CLIENT_CIRCUIT)
     public List<RideResponseDto> getRidesByDriverIdAndLocalDateTime(String driverId, LocalDateTime rideDateTime, String bearerToken) {
-        log.info("getRidesByDriverIdAndLocalDateTime");
+        log.debug("Getting rides by driverId {} and after date {}", driverId, rideDateTime);
         return rideClient.getRidesByDriverIdAndLocalDateTime(driverId, rideDateTime, bearerToken);
     }
 }

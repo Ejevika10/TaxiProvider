@@ -26,7 +26,6 @@ public class KeycloakJwtRolesConverter implements Converter<Jwt, Collection<Gran
 
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {
-        log.info(jwt.toString());
         Map<String, Collection<String>> realmAccess = jwt.getClaim(CLAIM_REALM_ACCESS);
         Map<String, Map<String, Collection<String>>> resourceAccess = jwt.getClaim(CLAIM_RESOURCE_ACCESS);
 
@@ -35,16 +34,15 @@ public class KeycloakJwtRolesConverter implements Converter<Jwt, Collection<Gran
         if (realmAccess != null && !realmAccess.isEmpty()) {
             realmAccess.get(CLAIM_ROLES).forEach(r -> {
                 String role = r.toUpperCase(Locale.ROOT);
-                log.info(role);
+                log.info("User realm role {}", role);
                 grantedAuthorities.add(new SimpleGrantedAuthority(role));
-
             });
         }
 
         if (resourceAccess != null && !resourceAccess.isEmpty() && resourceAccess.containsKey(kcClientId)) {
             resourceAccess.get(kcClientId).get(CLAIM_ROLES).forEach(r -> {
                 String role = r.toUpperCase(Locale.ROOT);
-                log.info(role);
+                log.info("User client role {}", role);
                 grantedAuthorities.add(new SimpleGrantedAuthority(role));
             });
         }

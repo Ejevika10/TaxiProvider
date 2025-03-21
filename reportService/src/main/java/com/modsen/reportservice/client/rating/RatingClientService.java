@@ -19,7 +19,7 @@ public class RatingClientService {
     @CircuitBreaker(name = ClientConstants.RATING_CLIENT_CIRCUIT)
     @Retry(name = ClientConstants.RATING_CLIENT_RETRY)
     public List<RatingResponseDto> getAllRatingsByRideIdIn(List<Long> rideIds, String bearerToken) {
-        log.info("getAllRatingsByRideIdIn");
+        log.debug("Getting all rating by rideId in {}", rideIds);
         return ratingClient.getAllRatingsByRideIdIn(rideIds, bearerToken);
     }
 }

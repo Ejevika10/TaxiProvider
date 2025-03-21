@@ -8,7 +8,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -20,14 +19,13 @@ import java.util.Objects;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-@Slf4j
 public class ReportAccessFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        if(request.getRequestURI().startsWith("/api/v1/drivers")) {
+        if (request.getRequestURI().startsWith("/api/v1/drivers")) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
             if (hasRole(auth, Role.ADMIN.getRole())) {
@@ -39,7 +37,6 @@ public class ReportAccessFilter extends OncePerRequestFilter {
             Map<String, Object> claims = jwtAuth.getToken().getClaims();
 
             String userIdParam = (String) claims.get("user_id");
-            log.info(userIdParam);
             UUID userId = UUID.fromString(userIdParam);
             UUID driverId = getDriverIdFromReportRequestURI(request.getRequestURI());
             if (!Objects.equals(driverId, userId)) {
