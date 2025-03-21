@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ClientException.class)
     public ResponseEntity<ErrorMessage> clientException(ClientException exception) {
-        log.info(exception.getErrorMessage().errorMessage());
+        log.error("Client exception: {}",exception.getErrorMessage().errorMessage());
         return ResponseEntity.status(exception.getErrorMessage().errorCode())
                 .body(exception.getErrorMessage());
     }
@@ -127,7 +127,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorMessage forbiddenException(ForbiddenException exception) {
-        log.info("ForbiddenException handling");
         return new ErrorMessage(HttpStatus.FORBIDDEN.value(),
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
@@ -135,7 +134,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorMessage unauthorizedException(UnauthorizedException exception) {
-        log.info("UnauthorizedException handling");
         return new ErrorMessage(HttpStatus.UNAUTHORIZED.value(),
                 messageSource.getMessage(exception.getMessage(), new Object[]{}, LocaleContextHolder.getLocale()));
     }
@@ -161,7 +159,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorMessage defException(Exception exception) {
-        log.info(exception.getMessage());
+        log.error(exception.getMessage());
         return new ErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR.value(), AppConstants.INTERNAL_SERVER_ERROR);
     }
 }

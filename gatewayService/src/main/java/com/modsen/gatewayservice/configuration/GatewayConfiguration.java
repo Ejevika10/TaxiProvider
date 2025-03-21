@@ -32,6 +32,10 @@ public class GatewayConfiguration {
                         .and()
                         .method(HttpMethod.GET)
                         .uri("lb://rating-service"))
+                .route(r -> r.path("/report-service/v3/api-docs")
+                        .and()
+                        .method(HttpMethod.GET)
+                        .uri("lb://report-service"))
                 .build();
     }
 }

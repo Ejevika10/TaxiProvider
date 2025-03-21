@@ -6,6 +6,7 @@ import com.modsen.rideservice.dto.RideCreateRequestDto;
 import com.modsen.rideservice.dto.RideRequestDto;
 import com.modsen.rideservice.dto.RideResponseDto;
 import com.modsen.rideservice.dto.RideStateRequestDto;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -19,6 +20,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.modsen.rideservice.util.AppConstants.UUID_REGEXP;
 
@@ -58,6 +62,10 @@ public interface RideEndpoints {
     PageDto<RideResponseDto> getPageRidesByDriverId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String driverId,
                                                     @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                     @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit);
+
+    @Hidden
+    List<RideResponseDto> getRidesByDriverIdAndRideDateTime(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String driverId,
+                                                            @PathVariable LocalDateTime rideDatetime);
 
     @Operation(
             summary = "Get rides by passenger id",

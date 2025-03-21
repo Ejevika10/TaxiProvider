@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static com.modsen.rideservice.util.AppConstants.UUID_REGEXP;
@@ -52,6 +54,14 @@ public class RideController implements RideEndpoints {
                                                            @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                            @RequestParam(defaultValue = "5") @Min(1) @Max(20) Integer limit) {
         return rideService.getPageRidesByDriverId(UUID.fromString(driverId), offset, limit);
+    }
+
+    @Override
+    @GetMapping("/driver/{driverId}/{rideDateTime}")
+    public List<RideResponseDto> getRidesByDriverIdAndRideDateTime(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
+                                                                       String driverId,
+                                                                   @PathVariable LocalDateTime rideDateTime) {
+        return rideService.getRidesByDriverIdAndRideDateTime(UUID.fromString(driverId), rideDateTime);
     }
 
     @Override

@@ -116,4 +116,9 @@ public class DriverRatingServiceImpl implements RatingService {
         UserRatingDto userRatingDto = new UserRatingDto(userId, averageRating);
         rabbitService.sendMessage(EXCHANGE_NAME,DRIVER_ROUTING_KEY, userRatingDto);
     }
+
+    public List<RatingResponseDto> getAllRatingsByRideIdIn(List<Long> rideIds) {
+        List<DriverRating> ratings = driverRatingRepository.findAllByRideIdIsInAndDeletedIsFalse(rideIds);
+        return ratingListMapper.toDriverRatingResponseDtoList(ratings);
+    }
 }

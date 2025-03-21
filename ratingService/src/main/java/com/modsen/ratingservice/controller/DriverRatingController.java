@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.modsen.ratingservice.util.AppConstants.UUID_REGEXP;
@@ -60,6 +61,14 @@ public class DriverRatingController implements DriverRatingEndpoints {
                                                              @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                              @RequestParam (defaultValue = "5")  @Min(1) @Max(20) Integer limit) {
         return driverRatingService.getPageRatingsByUserId(UUID.fromString(userId), offset, limit);
+    }
+
+    @Override
+    @GetMapping("/rides")
+    @ResponseStatus(HttpStatus.OK)
+    public List<RatingResponseDto> getAllRatingsByRideIdIn(@RequestParam List<Long> rideIds,
+                                                           @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return driverRatingService.getAllRatingsByRideIdIn(rideIds);
     }
 
     @Override

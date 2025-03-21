@@ -3,6 +3,7 @@ package com.modsen.ratingservice.controller;
 import com.modsen.ratingservice.dto.PageDto;
 import com.modsen.ratingservice.dto.RatingRequestDto;
 import com.modsen.ratingservice.dto.RatingResponseDto;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 import static com.modsen.ratingservice.util.AppConstants.UUID_REGEXP;
 
@@ -68,6 +71,10 @@ public interface DriverRatingEndpoints {
     PageDto<RatingResponseDto> getPageRatingsByUserId(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String userId,
                                                       @RequestParam(defaultValue = "0") @Min(0) Integer offset,
                                                       @RequestParam (defaultValue = "5")  @Min(1) @Max(20) Integer limit);
+
+    @Hidden
+    List<RatingResponseDto> getAllRatingsByRideIdIn(@RequestParam List<Long> rideIds,
+                                                    @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
 
     @Operation(
             summary = "Add rating",

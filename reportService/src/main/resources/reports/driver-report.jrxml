@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport whenNoDataType="AllSectionsNoDetail"
+        xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+  http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="driver-report" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20"
+              topMargin="20" bottomMargin="20">
+
+    <parameter name="driverName" class="java.lang.String"/>
+    <parameter name="driverEmail" class="java.lang.String"/>
+    <parameter name="driverPhone" class="java.lang.String"/>
+    <parameter name="driverRating" class="java.lang.Double"/>
+
+    <parameter name="subReport" class="net.sf.jasperreports.engine.JasperReport"/>
+    <parameter name="subParameters" class="java.util.Map"/>
+    <parameter name="subDataSource" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+
+    <title>
+        <band height="30" splitType="Stretch">
+            <staticText>
+                <reportElement x="150" y="0" width="250" height="30"/>
+                <textElement  textAlignment="Center">
+                    <font size="16" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Driver info]]></text>
+            </staticText>
+        </band>
+    </title>
+    <pageHeader>
+        <band height="110">
+            <staticText>
+                <reportElement x="30" y="15" width="100" height="20"/>
+                <textElement textAlignment="Left">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Name: ]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="130" y="15" width="200" height="20" forecolor="#082E66"/>
+                <textElement textAlignment="Left"/>
+                <textFieldExpression><![CDATA[$P{driverName}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="30" y="40" width="100" height="20"/>
+                <textElement textAlignment="Left">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Email: ]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="130" y="40" width="200" height="20" forecolor="#082E66"/>
+                <textElement textAlignment="Left"/>
+                <textFieldExpression><![CDATA[$P{driverEmail}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="30" y="65" width="100" height="20"/>
+                <textElement textAlignment="Left">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Phone: ]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="130" y="65" width="200" height="20" forecolor="#082E66"/>
+                <textElement textAlignment="Left"/>
+                <textFieldExpression><![CDATA[$P{driverPhone}]]></textFieldExpression>
+            </textField>
+
+            <staticText>
+                <reportElement x="30" y="90" width="100" height="20"/>
+                <textElement textAlignment="Left">
+                    <font size="11" isBold="true" isItalic="false"/>
+                </textElement>
+                <text><![CDATA[Rating: ]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="130" y="90" width="200" height="20"/>
+                <textElement textAlignment="Left"/>
+                <textFieldExpression><![CDATA[$P{driverRating}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageHeader>
+    <detail>
+        <band height="100">
+            <subreport>
+                <reportElement x="0" y="0" width="600" height="100"/>
+                <parametersMapExpression><![CDATA[$P{subParameters}]]></parametersMapExpression>
+                <dataSourceExpression><![CDATA[$P{subDataSource}]]></dataSourceExpression>
+                <subreportExpression><![CDATA[$P{subReport}]]></subreportExpression>
+            </subreport>
+        </band>
+    </detail>
+</jasperReport>

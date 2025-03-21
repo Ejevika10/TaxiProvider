@@ -35,6 +35,7 @@ import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
                 """
 )
 public interface DriverEndpoints {
+
     @Operation(
             summary = "Get drivers",
             description = "Allows users to obtain a collection of drivers with pagination."
