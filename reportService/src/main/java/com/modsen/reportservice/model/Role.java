@@ -4,17 +4,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.modsen.exceptionstarter.exception.InvalidFieldValueException;
 import com.modsen.reportservice.util.MessageConstants;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public enum Role {
     DRIVER("DRIVER"),
     PASSENGER("PASSENGER"),
     ADMIN("ADMIN");
 
     private final String role;
-
-    Role(String role) {
-        this.role = role;
-    }
 
     @JsonValue
     public String getRole() {

@@ -29,9 +29,8 @@ public interface RideMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     RideForReport toRideForReport(RideResponseDto ride, RatingResponseDto rating);
 
-    @Mapping(target = ".", ignore = true)
-    default List<RideForReport> toRideForReportList(List<RideResponseDto> rideList, List<RatingResponseDto> ratingList){
-        if(rideList == null || rideList.isEmpty())
+    default List<RideForReport> toRideForReportList(List<RideResponseDto> rideList, List<RatingResponseDto> ratingList) {
+        if (rideList == null || rideList.isEmpty())
             return List.of();
 
         Map<Long, RatingResponseDto> ratingMap = ratingList.stream()
@@ -41,8 +40,6 @@ public interface RideMapper {
                 .map(ride -> toRideForReport(ride, ratingMap.get(ride.id())))
                 .collect(Collectors.toList());
     }
-
-
 
     @Named("mapRideStateToString")
     default String mapRideStateToString(RideState rideState) {

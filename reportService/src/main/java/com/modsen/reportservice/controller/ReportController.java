@@ -25,7 +25,7 @@ import static com.modsen.reportservice.util.AppConstants.UUID_REGEXP;
 @Validated
 @RequestMapping("/api/v1/report")
 @RequiredArgsConstructor
-public class ReportController implements ReportEndpoints{
+public class ReportController implements ReportEndpoints {
 
     private final ReportManager reportManager;
 
