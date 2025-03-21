@@ -2,10 +2,12 @@ package com.modsen.reportservice.service.impl;
 
 import com.modsen.reportservice.client.driver.DriverClientService;
 import com.modsen.reportservice.dto.DriverResponseDto;
+import com.modsen.reportservice.dto.PageDto;
 import com.modsen.reportservice.service.ReportManager;
 import com.modsen.reportservice.service.ReportService;
 import com.modsen.reportservice.service.SenderService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import static com.modsen.reportservice.util.AppConstants.REPORT_SUBJECT;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReportManagerImpl implements ReportManager {
 
     private final DriverClientService driverClientService;
@@ -28,10 +31,17 @@ public class ReportManagerImpl implements ReportManager {
     @Scheduled(fixedDelayString = "${interval}")
     public void sendReportForAllDrivers() {
         String bearerToken = getCurrentToken();
-        List<DriverResponseDto> drivers = driverClientService.getAllDrivers(bearerToken);
-        for (DriverResponseDto driver : drivers) {
-            sendReportForDriver(driver, driver.email(), bearerToken);
-        }
+        int numOfPages = 0;
+        PageDto<DriverResponseDto> driversPage;
+        do {
+            driversPage = driverClientService.getPageDrivers(numOfPages, 5, bearerToken);
+            numOfPages++;
+
+            List<DriverResponseDto> drivers = driversPage.content();
+            for (DriverResponseDto driver : drivers) {
+                sendReportForDriver(driver, driver.email(), bearerToken);
+            }
+        } while (numOfPages < driversPage.totalPages());
     }
 
     @Override

@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
 
 @Validated
@@ -37,9 +35,6 @@ import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
                 """
 )
 public interface DriverEndpoints {
-
-    @Hidden
-    List<DriverResponseDto> getAllDrivers();
 
     @Operation(
             summary = "Get drivers",

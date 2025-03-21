@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.UUID;
 
 import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
@@ -42,12 +41,6 @@ import static com.modsen.driverservice.util.AppConstants.UUID_REGEXP;
 public class DriverController implements DriverEndpoints {
     private final DriverService driverService;
     private final StorageService storageService;
-
-    @Override
-    @GetMapping("/all")
-    public List<DriverResponseDto> getAllDrivers() {
-        return driverService.getAllDrivers();
-    }
 
     @Override
     @GetMapping

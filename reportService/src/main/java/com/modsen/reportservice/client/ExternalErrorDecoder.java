@@ -21,10 +21,9 @@ public class ExternalErrorDecoder implements ErrorDecoder {
         try (InputStream bodyIs = response.body().asInputStream()) {
             ObjectMapper mapper = new ObjectMapper();
             ErrorMessage errorMessage = mapper.readValue(bodyIs, ErrorMessage.class);
-            log.info("ClientException");
             return new ClientException(errorMessage);
         } catch (Exception e) {
-            log.info("Exception {}", e.getMessage());
+            log.error("Exception {}", e.getMessage());
             return new ServiceUnavailableException(MessageConstants.SERVICE_UNAVAILABLE);
         }
     }
