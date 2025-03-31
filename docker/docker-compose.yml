@@ -355,6 +355,47 @@ services:
         keycloak:
           condition: service_started
 
+  report-service:
+    container_name: report-service
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+      args:
+        SERVICE_NAME: report-service
+        FILE_PATH: reportService
+    environment:
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      ZIPKIN_HOSTNAME: zipkin
+      KEYCLOAK_HOSTNAME: keycloak
+      EUREKA_URL: http://discovery-server:8761/eureka/
+      LOKI_URL: http://loki:3100/loki/api/v1/push
+    ports:
+      - "8086:8086"
+    networks:
+      - taxi-provider-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://report-service:8086/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    depends_on:
+      keycloak:
+        condition: service_started
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      gateway-service:
+        condition: service_healthy
+      driver-service:
+        condition: service_healthy
+      ride-service:
+        condition: service_healthy
+      rating-service:
+        condition: service_healthy
+
+
   grafana:
     container_name: grafana
     image: grafana/grafana:9.5.2

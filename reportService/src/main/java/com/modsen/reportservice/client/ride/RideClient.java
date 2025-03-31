@@ -3,6 +3,7 @@ package com.modsen.reportservice.client.ride;
 import com.modsen.reportservice.dto.RideResponseDto;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,7 @@ import static com.modsen.reportservice.util.AppConstants.UUID_REGEXP;
 public interface RideClient {
     @GetMapping("/driver/{driverId}/{rideDateTime}")
     List<RideResponseDto> getRidesByDriverIdAndLocalDateTime(@PathVariable @Pattern(regexp = UUID_REGEXP) String driverId,
+                                                             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                                              @PathVariable LocalDateTime rideDateTime,
                                                              @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken);
 }
