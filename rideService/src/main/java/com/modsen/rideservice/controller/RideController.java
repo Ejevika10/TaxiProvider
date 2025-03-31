@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -60,6 +61,7 @@ public class RideController implements RideEndpoints {
     @GetMapping("/driver/{driverId}/{rideDateTime}")
     public List<RideResponseDto> getRidesByDriverIdAndRideDateTime(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}")
                                                                        String driverId,
+                                                                   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                                                    @PathVariable LocalDateTime rideDateTime) {
         return rideService.getRidesByDriverIdAndRideDateTime(UUID.fromString(driverId), rideDateTime);
     }

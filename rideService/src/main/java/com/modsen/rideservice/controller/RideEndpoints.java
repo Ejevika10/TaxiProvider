@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,6 +66,7 @@ public interface RideEndpoints {
 
     @Hidden
     List<RideResponseDto> getRidesByDriverIdAndRideDateTime(@PathVariable @Pattern(regexp = UUID_REGEXP, message = "{uuid.invalid}") String driverId,
+                                                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                                             @PathVariable LocalDateTime rideDatetime);
 
     @Operation(
