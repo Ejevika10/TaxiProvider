@@ -53,9 +53,11 @@ public class RideAccessFilter extends OncePerRequestFilter {
             UUID userId = UUID.fromString(userIdParam);
 
             if (request.getMethod().equals("GET")) {
-                UUID userIdFromRequestURI = getUserIdFromRequestURI(request.getRequestURI());
-                if (!Objects.equals(userId, userIdFromRequestURI)) {
-                    throw new ForbiddenException(MessageConstants.FORBIDDEN);
+                if (isUserRequest(request.getRequestURI())) {
+                    UUID userIdFromRequestURI = getUserIdFromRequestURI(request.getRequestURI());
+                    if (!Objects.equals(userId, userIdFromRequestURI)) {
+                        throw new ForbiddenException(MessageConstants.FORBIDDEN);
+                    }
                 }
                 filterChain.doFilter(request, response);
                 return;
@@ -154,5 +156,11 @@ public class RideAccessFilter extends OncePerRequestFilter {
         String[] pathParts = requestURI.split("/");
         String idParam = pathParts[pathParts.length - 1];
         return UUID.fromString(idParam);
+    }
+
+    private boolean isUserRequest(String requestURI) {
+        String[] pathParts = requestURI.split("/");
+        return pathParts[pathParts.length - 2].equals("passenger")
+                || pathParts[pathParts.length - 2].equals("driver");
     }
 }

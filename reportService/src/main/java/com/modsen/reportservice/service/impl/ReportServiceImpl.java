@@ -10,6 +10,7 @@ import com.modsen.reportservice.mapper.DriverMapper;
 import com.modsen.reportservice.mapper.RideMapper;
 import com.modsen.reportservice.model.DriverForReport;
 import com.modsen.reportservice.model.RideForReport;
+import com.modsen.reportservice.model.RideState;
 import com.modsen.reportservice.service.ReportService;
 import com.modsen.reportservice.util.MessageConstants;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.modsen.reportservice.util.AppConstants.REPORT_TEMPLATE_NAME;
 import static com.modsen.reportservice.util.AppConstants.SUBREPORT_TEMPLATE_NAME;
@@ -105,6 +107,7 @@ public class ReportServiceImpl implements ReportService {
 
         Map<String, Object> subParameters = new HashMap<>();
         subParameters.put("title", "Rides for last month");
+        subParameters.put("totalCost", countTotalCost(rides));
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("driverName", driver.getName());
@@ -116,5 +119,12 @@ public class ReportServiceImpl implements ReportService {
         parameters.put("subReport", getReport(subReportName));
 
         return parameters;
+    }
+
+    private Double countTotalCost(List<RideForReport> rides) {
+        return rides.stream()
+                .filter(ride -> Objects.equals(ride.getRideState(), RideState.COMPLETED.getState()))
+                .mapToDouble(RideForReport::getRideCost)
+                .sum();
     }
 }

@@ -310,13 +310,15 @@ services:
       KC_DB_URL: jdbc:postgresql://auth-service-db:5432/auth_service_db
       KC_DB_USERNAME: user
       KC_DB_PASSWORD: pass
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
     depends_on:
       - auth-service-db
     ports:
       - "8484:8484"
     networks:
       - taxi-provider-network
-    command: start-dev --http-port 8484
+    command: start-dev --http-port 8484 --import-realm
 
   auth-service:
     container_name: auth-service

@@ -7,6 +7,7 @@
               topMargin="20" bottomMargin="20">
 
     <parameter name="title" class="java.lang.String" isForPrompting="false"/>
+    <parameter name="totalCost" class="java.lang.Double"/>
     <field name="id" class="java.lang.Long"/>
     <field name="sourceAddress" class="java.lang.String"/>
     <field name="destinationAddress" class="java.lang.String"/>
@@ -15,12 +16,9 @@
     <field name="rideCost" class="java.lang.Double"/>
     <field name="rating" class="java.lang.Integer"/>
     <field name="comment" class="java.lang.String"/>
+
     <variable name="rideCount" class="java.lang.Integer" calculation="Count">
         <variableExpression><![CDATA[$F{id}]]></variableExpression>
-    </variable>
-
-    <variable name="totalCost" class="java.lang.Double" calculation="Sum">
-        <variableExpression><![CDATA[$F{rideCost}]]></variableExpression>
     </variable>
     <title>
         <band height="30" splitType="Stretch">
@@ -198,15 +196,15 @@
                 <text><![CDATA[Total cost]]></text>
             </staticText>
             <textField>
-                <reportElement x="139" y="35" width="111" height="30" forecolor="#082E66"/>
+                <reportElement x="139" y="35" width="111" height="30"/>
                 <textElement textAlignment="Center" verticalAlignment="Top"/>
                 <textFieldExpression><![CDATA[$V{rideCount}]]></textFieldExpression>
             </textField>
 
             <textField>
-                <reportElement x="313" y="35" width="167" height="30" forecolor="#082E66"/>
+                <reportElement x="313" y="35" width="167" height="30"/>
                 <textElement textAlignment="Center" verticalAlignment="Top"/>
-                <textFieldExpression><![CDATA[$V{totalCost}]]></textFieldExpression>
+                <textFieldExpression><![CDATA[String.format("%.2f", $P{totalCost})]]></textFieldExpression>
             </textField>
         </band>
     </summary>
