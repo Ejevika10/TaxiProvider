@@ -117,19 +117,25 @@ public class RideServiceImpl implements RideService {
     public RideResponseDto acceptRide(Long id, RideAcceptRequestDto rideRequestDto, String bearerToken) {
         Ride rideToSave = findByIdOrThrow(id);
         DriverResponseDto driverResponseDto = driverClientService.getDriverById(rideRequestDto.driverId(), bearerToken);
-        rideToSave.setRideState(RideState.ACCEPTED);
-        rideToSave.setDriverId(UUID.fromString(rideRequestDto.driverId()));
-        Ride ride = rideRepository.save(rideToSave);
-        return rideMapper.toRideResponseDto(ride);
+        if (validateStateService.validateState(rideToSave.getRideState(), RideState.ACCEPTED)) {
+            rideToSave.setRideState(RideState.ACCEPTED);
+            rideToSave.setDriverId(UUID.fromString(rideRequestDto.driverId()));
+            Ride ride = rideRepository.save(rideToSave);
+            return rideMapper.toRideResponseDto(ride);
+        }
+        throw new InvalidStateException(MessageConstants.STATE_VALUE_ERROR);
     }
 
     @Override
     @CachePut(value = RIDE_CACHE_NAME, key = "#id")
     public RideResponseDto cancelRide(Long id, String bearerToken) {
         Ride rideToSave = findByIdOrThrow(id);
-        rideToSave.setRideState(RideState.CANCELLED);
-        Ride ride = rideRepository.save(rideToSave);
-        return rideMapper.toRideResponseDto(ride);
+        if (validateStateService.validateState(rideToSave.getRideState(), RideState.CANCELLED)) {
+            rideToSave.setRideState(RideState.CANCELLED);
+            Ride ride = rideRepository.save(rideToSave);
+            return rideMapper.toRideResponseDto(ride);
+        }
+        throw new InvalidStateException(MessageConstants.STATE_VALUE_ERROR);
     }
 
     @Override

@@ -54,7 +54,7 @@ public class DriverRatingsAccessFilter extends OncePerRequestFilter {
             UUID userId = UUID.fromString(id);
 
             RatingRequestDto ratingRequestDto = getRatingRequestDto(request);
-            RideResponseDto ride = getRideById(ratingRequestDto.rideId(), jwtAuth.getName());
+            RideResponseDto ride = getRideById(ratingRequestDto.rideId(), jwtAuth.getToken().getTokenValue());
 
             if(!ride.passengerId().equals(userId)) {
                 throw new ForbiddenException(MessageConstants.FORBIDDEN);
@@ -84,6 +84,6 @@ public class DriverRatingsAccessFilter extends OncePerRequestFilter {
     }
 
     private RideResponseDto getRideById(Long rideId, String accessToken) {
-        return rideClientService.getRideById(rideId, accessToken);
+        return rideClientService.getRideById(rideId, "Bearer " + accessToken);
     }
 }

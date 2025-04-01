@@ -93,7 +93,8 @@ public class WebSecurityConfiguration {
                                         jwtToken -> new JwtAuthenticationToken(jwtToken, authoritiesConverter.convert(jwtToken))
                                 )
                         )
-                ).csrf(AbstractHttpConfigurer::disable)
+                )
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource));
 
         return http.build();

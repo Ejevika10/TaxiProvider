@@ -46,7 +46,12 @@ public class PassengerAccessFilter extends OncePerRequestFilter {
             String userIdParam = (String) claims.get("user_id");
             log.info(userIdParam);
             UUID userId = UUID.fromString(userIdParam);
-            UUID passengerId = getPassengerIdFromRequestURI(request.getRequestURI());
+            UUID passengerId;
+            if (request.getMethod().equals("POST")) {
+                passengerId = getPassengerIdFromAvatarRequestURI(request.getRequestURI());
+            } else {
+                passengerId = getPassengerIdFromRequestURI(request.getRequestURI());
+            }
             if (!Objects.equals(userId, passengerId)) {
                 throw new ForbiddenException(MessageConstants.FORBIDDEN);
             }
@@ -63,6 +68,12 @@ public class PassengerAccessFilter extends OncePerRequestFilter {
     private UUID getPassengerIdFromRequestURI(String requestURI) {
         String[] pathParts = requestURI.split("/");
         String idParam = pathParts[pathParts.length - 1];
+        return UUID.fromString(idParam);
+    }
+
+    private UUID getPassengerIdFromAvatarRequestURI(String requestURI) {
+        String[] pathParts = requestURI.split("/");
+        String idParam = pathParts[pathParts.length - 2];
         return UUID.fromString(idParam);
     }
 }
